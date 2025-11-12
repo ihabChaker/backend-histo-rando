@@ -1,7 +1,7 @@
-import { HistoricalModule } from "./historical.module";
+import { HistoricalModule } from './historical.module';
 
-describe("HistoricalModule", () => {
-  it("should be defined", () => {
+describe('HistoricalModule', () => {
+  it('should be defined', () => {
     expect(HistoricalModule).toBeDefined();
   });
 });

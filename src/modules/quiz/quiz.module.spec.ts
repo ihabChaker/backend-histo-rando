@@ -1,7 +1,7 @@
-import { QuizModule } from "./quiz.module";
+import { QuizModule } from './quiz.module';
 
-describe("QuizModule", () => {
-  it("should be defined", () => {
+describe('QuizModule', () => {
+  it('should be defined', () => {
     expect(QuizModule).toBeDefined();
   });
 });

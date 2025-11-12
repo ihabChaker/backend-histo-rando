@@ -7,18 +7,18 @@ import {
   BelongsToMany,
   CreatedAt,
   UpdatedAt,
-} from "sequelize-typescript";
-import { PointOfInterest } from "@/modules/poi/entities/point-of-interest.entity";
-import { UserActivity } from "@/modules/activity/entities/user-activity.entity";
-import { TreasureHunt } from "@/modules/treasure-hunt/entities/treasure-hunt.entity";
-import { Podcast } from "@/modules/media/entities/podcast.entity";
-import { Quiz } from "@/modules/quiz/entities/quiz.entity";
-import { ParcoursPodcast } from "./parcours-podcast.entity";
-import { ParcoursQuiz } from "./parcours-quiz.entity";
-import { BattalionRoute } from "@/modules/historical/entities/battalion-route.entity";
+} from 'sequelize-typescript';
+import { PointOfInterest } from '@/modules/poi/entities/point-of-interest.entity';
+import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
+import { TreasureHunt } from '@/modules/treasure-hunt/entities/treasure-hunt.entity';
+import { Podcast } from '@/modules/media/entities/podcast.entity';
+import { Quiz } from '@/modules/quiz/entities/quiz.entity';
+import { ParcoursPodcast } from './parcours-podcast.entity';
+import { ParcoursQuiz } from './parcours-quiz.entity';
+import { BattalionRoute } from '@/modules/historical/entities/battalion-route.entity';
 
 @Table({
-  tableName: "parcours",
+  tableName: 'parcours',
   timestamps: true,
 })
 export class Parcours extends Model {
@@ -42,7 +42,7 @@ export class Parcours extends Model {
   description: string;
 
   @Column({
-    type: DataType.ENUM("easy", "medium", "hard"),
+    type: DataType.ENUM('easy', 'medium', 'hard'),
     allowNull: false,
   })
   difficultyLevel: string;
@@ -51,7 +51,7 @@ export class Parcours extends Model {
     type: DataType.DECIMAL(10, 2),
     allowNull: false,
     get() {
-      const value = this.getDataValue("distanceKm");
+      const value = this.getDataValue('distanceKm');
       return value ? parseFloat(value.toString()) : 0;
     },
   })
@@ -60,7 +60,7 @@ export class Parcours extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
-    comment: "Duration in minutes",
+    comment: 'Duration in minutes',
   })
   estimatedDuration: number;
 
@@ -81,7 +81,7 @@ export class Parcours extends Model {
     type: DataType.DECIMAL(10, 8),
     allowNull: false,
     get() {
-      const value = this.getDataValue("startingPointLat");
+      const value = this.getDataValue('startingPointLat');
       return value ? parseFloat(value.toString()) : 0;
     },
   })
@@ -91,7 +91,7 @@ export class Parcours extends Model {
     type: DataType.DECIMAL(11, 8),
     allowNull: false,
     get() {
-      const value = this.getDataValue("startingPointLon");
+      const value = this.getDataValue('startingPointLon');
       return value ? parseFloat(value.toString()) : 0;
     },
   })

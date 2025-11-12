@@ -1,17 +1,17 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
-import { ZodValidationPipe } from "nestjs-zod";
-import request from "supertest";
-import { AppModule } from "../src/app.module";
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { ZodValidationPipe } from 'nestjs-zod';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
 import {
   setupTestDatabase,
   syncDatabase,
   cleanDatabase,
   closeDatabase,
-} from "./helpers/database.helper";
-import { createRegisterData, createParcoursData } from "./factories";
+} from './helpers/database.helper';
+import { createRegisterData, createParcoursData } from './factories';
 
-describe("Treasure Hunt E2E Tests", () => {
+describe('Treasure Hunt E2E Tests', () => {
   let app: INestApplication;
   let authToken: string;
   let parcoursId: number;
@@ -25,7 +25,7 @@ describe("Treasure Hunt E2E Tests", () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix("api/v1");
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ZodValidationPipe());
     await app.init();
   });
@@ -40,50 +40,50 @@ describe("Treasure Hunt E2E Tests", () => {
 
     const registerData = createRegisterData();
     const registerResponse = await request(app.getHttpServer())
-      .post("/api/v1/auth/register")
+      .post('/api/v1/auth/register')
       .send(registerData);
     authToken = registerResponse.body.access_token;
 
     const parcoursData = createParcoursData();
     const parcoursResponse = await request(app.getHttpServer())
-      .post("/api/v1/parcours")
-      .set("Authorization", `Bearer ${authToken}`)
+      .post('/api/v1/parcours')
+      .set('Authorization', `Bearer ${authToken}`)
       .send(parcoursData);
     parcoursId = parcoursResponse.body.id;
   });
 
-  describe("POST /treasure-hunts", () => {
-    it("should create a new treasure hunt", () => {
+  describe('POST /treasure-hunts', () => {
+    it('should create a new treasure hunt', () => {
       return request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "Hidden Bunker",
-          description: "Find the hidden bunker entrance",
-          targetObject: "Bunker door",
+          name: 'Hidden Bunker',
+          description: 'Find the hidden bunker entrance',
+          targetObject: 'Bunker door',
           latitude: 49.182863,
           longitude: -0.370679,
           scanRadiusMeters: 20,
           pointsReward: 75,
-          qrCode: "BUNKER001",
+          qrCode: 'BUNKER001',
         })
         .expect(201)
         .expect((res) => {
-          expect(res.body).toHaveProperty("id");
-          expect(res.body.name).toBe("Hidden Bunker");
+          expect(res.body).toHaveProperty('id');
+          expect(res.body.name).toBe('Hidden Bunker');
           expect(res.body.scanRadiusMeters).toBe(20);
         });
     });
 
-    it("should fail with invalid coordinates", () => {
+    it('should fail with invalid coordinates', () => {
       return request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "Invalid Treasure",
-          targetObject: "Test Object",
+          name: 'Invalid Treasure',
+          targetObject: 'Test Object',
           latitude: 200,
           longitude: -200,
           scanRadiusMeters: 10,
@@ -93,15 +93,15 @@ describe("Treasure Hunt E2E Tests", () => {
     });
   });
 
-  describe("GET /treasure-hunts", () => {
-    it("should list all treasure hunts (public)", async () => {
+  describe('GET /treasure-hunts', () => {
+    it('should list all treasure hunts (public)', async () => {
       await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "Treasure 1",
-          targetObject: "Hidden cache",
+          name: 'Treasure 1',
+          targetObject: 'Hidden cache',
           latitude: 49.182863,
           longitude: -0.370679,
           scanRadiusMeters: 15,
@@ -109,12 +109,12 @@ describe("Treasure Hunt E2E Tests", () => {
         });
 
       await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "Treasure 2",
-          targetObject: "Memorial plaque",
+          name: 'Treasure 2',
+          targetObject: 'Memorial plaque',
           latitude: 49.183,
           longitude: -0.371,
           scanRadiusMeters: 25,
@@ -122,7 +122,7 @@ describe("Treasure Hunt E2E Tests", () => {
         });
 
       return request(app.getHttpServer())
-        .get("/api/v1/treasure-hunts")
+        .get('/api/v1/treasure-hunts')
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -131,15 +131,15 @@ describe("Treasure Hunt E2E Tests", () => {
     });
   });
 
-  describe("POST /treasure-hunts/found", () => {
-    it("should record treasure found within radius", async () => {
+  describe('POST /treasure-hunts/found', () => {
+    it('should record treasure found within radius', async () => {
       const treasureRes = await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "Test Treasure",
-          targetObject: "Ammunition box",
+          name: 'Test Treasure',
+          targetObject: 'Ammunition box',
           latitude: 49.182863,
           longitude: -0.370679,
           scanRadiusMeters: 50,
@@ -147,8 +147,8 @@ describe("Treasure Hunt E2E Tests", () => {
         });
 
       return request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts/found")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts/found')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           treasureId: treasureRes.body.id,
           latitude: 49.18287,
@@ -157,19 +157,19 @@ describe("Treasure Hunt E2E Tests", () => {
         .expect(201)
         .expect((res) => {
           expect(res.body.found.treasureId).toBe(treasureRes.body.id);
-          expect(res.body).toHaveProperty("pointsEarned");
+          expect(res.body).toHaveProperty('pointsEarned');
           expect(res.body.pointsEarned).toBe(100);
         });
     });
 
-    it("should fail if user is too far from treasure", async () => {
+    it('should fail if user is too far from treasure', async () => {
       const treasureRes = await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "Distant Treasure",
-          targetObject: "Far bunker",
+          name: 'Distant Treasure',
+          targetObject: 'Far bunker',
           latitude: 49.182863,
           longitude: -0.370679,
           scanRadiusMeters: 10,
@@ -177,8 +177,8 @@ describe("Treasure Hunt E2E Tests", () => {
         });
 
       return request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts/found")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts/found')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           treasureId: treasureRes.body.id,
           latitude: 49.19,
@@ -187,14 +187,14 @@ describe("Treasure Hunt E2E Tests", () => {
         .expect(400);
     });
 
-    it("should prevent duplicate treasure finds", async () => {
+    it('should prevent duplicate treasure finds', async () => {
       const treasureRes = await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "Unique Treasure",
-          targetObject: "Unique artifact",
+          name: 'Unique Treasure',
+          targetObject: 'Unique artifact',
           latitude: 49.182863,
           longitude: -0.370679,
           scanRadiusMeters: 30,
@@ -202,8 +202,8 @@ describe("Treasure Hunt E2E Tests", () => {
         });
 
       await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts/found")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts/found')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           treasureId: treasureRes.body.id,
           latitude: 49.18287,
@@ -211,8 +211,8 @@ describe("Treasure Hunt E2E Tests", () => {
         });
 
       return request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts/found")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts/found')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           treasureId: treasureRes.body.id,
           latitude: 49.18287,
@@ -222,15 +222,15 @@ describe("Treasure Hunt E2E Tests", () => {
     });
   });
 
-  describe("GET /treasure-hunts/found/me", () => {
-    it("should list user found treasures", async () => {
+  describe('GET /treasure-hunts/found/me', () => {
+    it('should list user found treasures', async () => {
       const treasureRes = await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "Found Treasure",
-          targetObject: "Found artifact",
+          name: 'Found Treasure',
+          targetObject: 'Found artifact',
           latitude: 49.182863,
           longitude: -0.370679,
           scanRadiusMeters: 50,
@@ -238,8 +238,8 @@ describe("Treasure Hunt E2E Tests", () => {
         });
 
       await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts/found")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts/found')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           treasureId: treasureRes.body.id,
           latitude: 49.18287,
@@ -247,8 +247,8 @@ describe("Treasure Hunt E2E Tests", () => {
         });
 
       return request(app.getHttpServer())
-        .get("/api/v1/treasure-hunts/found/me")
-        .set("Authorization", `Bearer ${authToken}`)
+        .get('/api/v1/treasure-hunts/found/me')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -257,15 +257,15 @@ describe("Treasure Hunt E2E Tests", () => {
     });
   });
 
-  describe("GET /treasure-hunts/:id", () => {
-    it("should get treasure hunt by id (public)", async () => {
+  describe('GET /treasure-hunts/:id', () => {
+    it('should get treasure hunt by id (public)', async () => {
       const treasureRes = await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "Test Treasure",
-          targetObject: "Test artifact",
+          name: 'Test Treasure',
+          targetObject: 'Test artifact',
           latitude: 49.182863,
           longitude: -0.370679,
           scanRadiusMeters: 20,
@@ -277,20 +277,20 @@ describe("Treasure Hunt E2E Tests", () => {
         .expect(200)
         .expect((res) => {
           expect(res.body.id).toBe(treasureRes.body.id);
-          expect(res.body.name).toBe("Test Treasure");
+          expect(res.body.name).toBe('Test Treasure');
         });
     });
   });
 
-  describe("DELETE /treasure-hunts/:id", () => {
-    it("should delete a treasure hunt", async () => {
+  describe('DELETE /treasure-hunts/:id', () => {
+    it('should delete a treasure hunt', async () => {
       const treasureRes = await request(app.getHttpServer())
-        .post("/api/v1/treasure-hunts")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/treasure-hunts')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          name: "To Delete",
-          targetObject: "Delete target",
+          name: 'To Delete',
+          targetObject: 'Delete target',
           latitude: 49.182863,
           longitude: -0.370679,
           scanRadiusMeters: 15,
@@ -299,7 +299,7 @@ describe("Treasure Hunt E2E Tests", () => {
 
       return request(app.getHttpServer())
         .delete(`/api/v1/treasure-hunts/${treasureRes.body.id}`)
-        .set("Authorization", `Bearer ${authToken}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
     });
   });

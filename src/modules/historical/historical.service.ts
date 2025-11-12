@@ -1,14 +1,14 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { HistoricalBattalion } from "./entities/historical-battalion.entity";
-import { BattalionRoute } from "./entities/battalion-route.entity";
-import { Parcours } from "@/modules/parcours/entities/parcours.entity";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { HistoricalBattalion } from './entities/historical-battalion.entity';
+import { BattalionRoute } from './entities/battalion-route.entity';
+import { Parcours } from '@/modules/parcours/entities/parcours.entity';
 import {
   CreateBattalionDto,
   UpdateBattalionDto,
   CreateBattalionRouteDto,
   UpdateBattalionRouteDto,
-} from "./dto/historical.dto";
+} from './dto/historical.dto';
 
 @Injectable()
 export class HistoricalService {
@@ -17,12 +17,12 @@ export class HistoricalService {
     private battalionModel: typeof HistoricalBattalion,
     @InjectModel(BattalionRoute)
     private battalionRouteModel: typeof BattalionRoute,
-    @InjectModel(Parcours) private parcoursModel: typeof Parcours
+    @InjectModel(Parcours) private parcoursModel: typeof Parcours,
   ) {}
 
   // Battalion CRUD
   async createBattalion(
-    createDto: CreateBattalionDto
+    createDto: CreateBattalionDto,
   ): Promise<HistoricalBattalion> {
     return this.battalionModel.create(createDto as any);
   }
@@ -30,7 +30,7 @@ export class HistoricalService {
   async findAllBattalions(): Promise<HistoricalBattalion[]> {
     return this.battalionModel.findAll({
       include: [{ model: BattalionRoute, include: [Parcours] }],
-      order: [["name", "ASC"]],
+      order: [['name', 'ASC']],
     });
   }
 
@@ -46,7 +46,7 @@ export class HistoricalService {
 
   async updateBattalion(
     id: number,
-    updateDto: UpdateBattalionDto
+    updateDto: UpdateBattalionDto,
   ): Promise<HistoricalBattalion> {
     const battalion = await this.findOneBattalion(id);
     await battalion.update(updateDto);
@@ -60,14 +60,14 @@ export class HistoricalService {
 
   // Battalion Route CRUD
   async createBattalionRoute(
-    createDto: CreateBattalionRouteDto
+    createDto: CreateBattalionRouteDto,
   ): Promise<BattalionRoute> {
     // Verify battalion and parcours exist
     await this.findOneBattalion(createDto.battalionId);
     const parcours = await this.parcoursModel.findByPk(createDto.parcoursId);
     if (!parcours) {
       throw new NotFoundException(
-        `Parcours with ID ${createDto.parcoursId} not found`
+        `Parcours with ID ${createDto.parcoursId} not found`,
       );
     }
 
@@ -78,7 +78,7 @@ export class HistoricalService {
     return this.battalionRouteModel.findAll({
       where: { battalionId },
       include: [Parcours],
-      order: [["routeDate", "ASC"]],
+      order: [['routeDate', 'ASC']],
     });
   }
 
@@ -86,13 +86,13 @@ export class HistoricalService {
     return this.battalionRouteModel.findAll({
       where: { parcoursId },
       include: [HistoricalBattalion],
-      order: [["routeDate", "ASC"]],
+      order: [['routeDate', 'ASC']],
     });
   }
 
   async updateBattalionRoute(
     id: number,
-    updateDto: UpdateBattalionRouteDto
+    updateDto: UpdateBattalionRouteDto,
   ): Promise<BattalionRoute> {
     const route = await this.battalionRouteModel.findByPk(id);
     if (!route) {

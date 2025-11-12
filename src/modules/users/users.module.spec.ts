@@ -1,7 +1,7 @@
-import { UsersModule } from "./users.module";
+import { UsersModule } from './users.module';
 
-describe("UsersModule", () => {
-  it("should be defined", () => {
+describe('UsersModule', () => {
+  it('should be defined', () => {
     expect(UsersModule).toBeDefined();
   });
 });

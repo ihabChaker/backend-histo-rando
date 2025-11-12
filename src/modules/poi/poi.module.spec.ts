@@ -1,7 +1,7 @@
-import { PoiModule } from "./poi.module";
+import { PoiModule } from './poi.module';
 
-describe("PoiModule", () => {
-  it("should be defined", () => {
+describe('PoiModule', () => {
+  it('should be defined', () => {
     expect(PoiModule).toBeDefined();
   });
 });

@@ -1,11 +1,11 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { getModelToken } from "@nestjs/sequelize";
-import { NotFoundException } from "@nestjs/common";
-import { UsersService } from "./users.service";
-import { User } from "./entities/user.entity";
-import { UpdateUserProfileDto } from "./dto/user.dto";
+import { Test, TestingModule } from '@nestjs/testing';
+import { getModelToken } from '@nestjs/sequelize';
+import { NotFoundException } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { User } from './entities/user.entity';
+import { UpdateUserProfileDto } from './dto/user.dto';
 
-describe("UsersService", () => {
+describe('UsersService', () => {
   let service: UsersService;
   let userModel: any;
 
@@ -32,9 +32,9 @@ describe("UsersService", () => {
     jest.clearAllMocks();
   });
 
-  describe("findById", () => {
-    it("should return a user when found", async () => {
-      const mockUser = { id: 1, username: "test", email: "test@test.com" };
+  describe('findById', () => {
+    it('should return a user when found', async () => {
+      const mockUser = { id: 1, username: 'test', email: 'test@test.com' };
       userModel.findByPk.mockResolvedValue(mockUser);
 
       const result = await service.findById(1);
@@ -43,48 +43,48 @@ describe("UsersService", () => {
       expect(result).toEqual(mockUser);
     });
 
-    it("should throw NotFoundException when user not found", async () => {
+    it('should throw NotFoundException when user not found', async () => {
       userModel.findByPk.mockResolvedValue(null);
 
       await expect(service.findById(999)).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe("findByEmail", () => {
-    it("should return a user when found", async () => {
-      const mockUser = { id: 1, email: "test@test.com" };
+  describe('findByEmail', () => {
+    it('should return a user when found', async () => {
+      const mockUser = { id: 1, email: 'test@test.com' };
       userModel.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.findByEmail("test@test.com");
+      const result = await service.findByEmail('test@test.com');
 
       expect(userModel.findOne).toHaveBeenCalledWith({
-        where: { email: "test@test.com" },
+        where: { email: 'test@test.com' },
       });
       expect(result).toEqual(mockUser);
     });
   });
 
-  describe("updateProfile", () => {
-    it("should update user profile", async () => {
+  describe('updateProfile', () => {
+    it('should update user profile', async () => {
       const mockUser = {
         id: 1,
         update: jest.fn().mockResolvedValue(undefined),
       };
       userModel.findByPk.mockResolvedValue(mockUser);
 
-      const updateDto: UpdateUserProfileDto = { firstName: "Updated" };
+      const updateDto: UpdateUserProfileDto = { firstName: 'Updated' };
       await service.updateProfile(1, updateDto);
 
       expect(mockUser.update).toHaveBeenCalledWith(updateDto);
     });
   });
 
-  describe("getUserStats", () => {
-    it("should return user statistics", async () => {
+  describe('getUserStats', () => {
+    it('should return user statistics', async () => {
       const mockUser = {
         totalPoints: 100,
         totalKm: 10.5,
-        username: "test",
+        username: 'test',
         isPmr: false,
       };
       userModel.findByPk.mockResolvedValue(mockUser);
@@ -94,14 +94,14 @@ describe("UsersService", () => {
       expect(result).toEqual({
         totalPoints: 100,
         totalKm: 10.5,
-        username: "test",
+        username: 'test',
         isPmr: false,
       });
     });
   });
 
-  describe("addPoints", () => {
-    it("should add points to user", async () => {
+  describe('addPoints', () => {
+    it('should add points to user', async () => {
       const mockUser = {
         totalPoints: 100,
         save: jest.fn().mockResolvedValue(undefined),
@@ -115,8 +115,8 @@ describe("UsersService", () => {
     });
   });
 
-  describe("addKilometers", () => {
-    it("should add kilometers to user", async () => {
+  describe('addKilometers', () => {
+    it('should add kilometers to user', async () => {
       const mockUser = {
         totalKm: 10.5,
         save: jest.fn().mockResolvedValue(undefined),

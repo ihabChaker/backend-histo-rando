@@ -1,4 +1,5 @@
 // Mock Sequelize model factory
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const createMockModel = <T = any>() => {
   const mockInstance = {
     save: jest.fn().mockResolvedValue(undefined),

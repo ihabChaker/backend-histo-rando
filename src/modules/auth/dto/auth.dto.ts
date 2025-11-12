@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { createZodDto } from "nestjs-zod";
-import { ApiProperty } from "@nestjs/swagger";
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
+import { ApiProperty } from '@nestjs/swagger';
 
 export const RegisterSchema = z.object({
   username: z.string().min(3).max(100),
@@ -14,7 +14,7 @@ export const RegisterSchema = z.object({
 
 export class RegisterDto extends createZodDto(RegisterSchema) {
   @ApiProperty({
-    example: "johndoe",
+    example: 'johndoe',
     description: "Nom d'utilisateur unique",
     minLength: 3,
     maxLength: 100,
@@ -22,42 +22,42 @@ export class RegisterDto extends createZodDto(RegisterSchema) {
   username: string;
 
   @ApiProperty({
-    example: "john.doe@example.com",
-    description: "Adresse email",
-    format: "email",
+    example: 'john.doe@example.com',
+    description: 'Adresse email',
+    format: 'email',
   })
   email: string;
 
   @ApiProperty({
-    example: "SecurePass123!",
-    description: "Mot de passe",
+    example: 'SecurePass123!',
+    description: 'Mot de passe',
     minLength: 8,
     maxLength: 100,
-    format: "password",
+    format: 'password',
   })
   password: string;
 
-  @ApiProperty({ example: "John", description: "Prénom", required: false })
+  @ApiProperty({ example: 'John', description: 'Prénom', required: false })
   firstName?: string;
 
   @ApiProperty({
-    example: "Doe",
-    description: "Nom de famille",
+    example: 'Doe',
+    description: 'Nom de famille',
     required: false,
   })
   lastName?: string;
 
   @ApiProperty({
     example: false,
-    description: "Personne à mobilité réduite",
+    description: 'Personne à mobilité réduite',
     required: false,
     default: false,
   })
   isPmr?: boolean;
 
   @ApiProperty({
-    example: "+33612345678",
-    description: "Numéro de téléphone",
+    example: '+33612345678',
+    description: 'Numéro de téléphone',
     required: false,
   })
   phoneNumber?: string;
@@ -70,16 +70,16 @@ export const LoginSchema = z.object({
 
 export class LoginDto extends createZodDto(LoginSchema) {
   @ApiProperty({
-    example: "john.doe@example.com",
-    description: "Adresse email",
-    format: "email",
+    example: 'john.doe@example.com',
+    description: 'Adresse email',
+    format: 'email',
   })
   email: string;
 
   @ApiProperty({
-    example: "SecurePass123!",
-    description: "Mot de passe",
-    format: "password",
+    example: 'SecurePass123!',
+    description: 'Mot de passe',
+    format: 'password',
   })
   password: string;
 }

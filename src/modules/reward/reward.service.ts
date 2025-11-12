@@ -2,16 +2,16 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-} from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { Reward } from "./entities/reward.entity";
-import { UserRewardRedeemed } from "./entities/user-reward-redeemed.entity";
-import { User } from "@/modules/users/entities/user.entity";
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Reward } from './entities/reward.entity';
+import { UserRewardRedeemed } from './entities/user-reward-redeemed.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import {
   CreateRewardDto,
   UpdateRewardDto,
   RedeemRewardDto,
-} from "./dto/reward.dto";
+} from './dto/reward.dto';
 
 @Injectable()
 export class RewardService {
@@ -19,7 +19,7 @@ export class RewardService {
     @InjectModel(Reward) private rewardModel: typeof Reward,
     @InjectModel(UserRewardRedeemed)
     private redeemedModel: typeof UserRewardRedeemed,
-    @InjectModel(User) private userModel: typeof User
+    @InjectModel(User) private userModel: typeof User,
   ) {}
 
   private generateRedemptionCode(): string {
@@ -33,7 +33,7 @@ export class RewardService {
   async findAllRewards(): Promise<Reward[]> {
     return this.rewardModel.findAll({
       where: { isAvailable: true },
-      order: [["pointsCost", "ASC"]],
+      order: [['pointsCost', 'ASC']],
     });
   }
 
@@ -61,23 +61,23 @@ export class RewardService {
     const user = await this.userModel.findByPk(userId);
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException('User not found');
     }
 
     // Check if reward is available
     if (!reward.isAvailable) {
-      throw new BadRequestException("Reward is not available");
+      throw new BadRequestException('Reward is not available');
     }
 
     // Check stock
     if (reward.stockQuantity <= 0) {
-      throw new BadRequestException("Reward is out of stock");
+      throw new BadRequestException('Reward is out of stock');
     }
 
     // Check if user has enough points
     if (user.totalPoints < reward.pointsCost) {
       throw new BadRequestException(
-        `Insufficient points. You have ${user.totalPoints} points, need ${reward.pointsCost}`
+        `Insufficient points. You have ${user.totalPoints} points, need ${reward.pointsCost}`,
       );
     }
 
@@ -87,7 +87,7 @@ export class RewardService {
       rewardId: dto.rewardId,
       redemptionDatetime: new Date(),
       pointsSpent: reward.pointsCost,
-      status: "pending",
+      status: 'pending',
       redemptionCode: this.generateRedemptionCode(),
     } as any);
 
@@ -105,7 +105,7 @@ export class RewardService {
       redemptionCode: redemption.redemptionCode,
       status: redemption.status,
       redemption,
-      message: "Reward redeemed successfully",
+      message: 'Reward redeemed successfully',
     };
   }
 
@@ -113,17 +113,17 @@ export class RewardService {
     return this.redeemedModel.findAll({
       where: { userId },
       include: [Reward],
-      order: [["redemptionDatetime", "DESC"]],
+      order: [['redemptionDatetime', 'DESC']],
     });
   }
 
   async updateRedemptionStatus(
     redemptionId: number,
-    status: "pending" | "redeemed" | "used"
+    status: 'pending' | 'redeemed' | 'used',
   ): Promise<UserRewardRedeemed> {
     const redemption = await this.redeemedModel.findByPk(redemptionId);
     if (!redemption) {
-      throw new NotFoundException("Redemption not found");
+      throw new NotFoundException('Redemption not found');
     }
 
     await redemption.update({ status });

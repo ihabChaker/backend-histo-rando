@@ -1,16 +1,12 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { Quiz } from "./entities/quiz.entity";
-import { Question } from "./entities/question.entity";
-import { Answer } from "./entities/answer.entity";
-import { UserQuizAttempt } from "./entities/user-quiz-attempt.entity";
-import { ParcoursQuiz } from "@/modules/parcours/entities/parcours-quiz.entity";
-import { Parcours } from "@/modules/parcours/entities/parcours.entity";
-import { User } from "@/modules/users/entities/user.entity";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Quiz } from './entities/quiz.entity';
+import { Question } from './entities/question.entity';
+import { Answer } from './entities/answer.entity';
+import { UserQuizAttempt } from './entities/user-quiz-attempt.entity';
+import { ParcoursQuiz } from '@/modules/parcours/entities/parcours-quiz.entity';
+import { Parcours } from '@/modules/parcours/entities/parcours.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import {
   CreateQuizDto,
   UpdateQuizDto,
@@ -20,7 +16,7 @@ import {
   UpdateAnswerDto,
   SubmitQuizAttemptDto,
   AssociateQuizToParcoursDto,
-} from "./dto/quiz.dto";
+} from './dto/quiz.dto';
 
 @Injectable()
 export class QuizService {
@@ -32,7 +28,7 @@ export class QuizService {
     private quizAttemptModel: typeof UserQuizAttempt,
     @InjectModel(ParcoursQuiz) private parcoursQuizModel: typeof ParcoursQuiz,
     @InjectModel(Parcours) private parcoursModel: typeof Parcours,
-    @InjectModel(User) private userModel: typeof User
+    @InjectModel(User) private userModel: typeof User,
   ) {}
 
   // Quiz CRUD
@@ -48,7 +44,7 @@ export class QuizService {
           include: [Answer],
         },
       ],
-      order: [["creationDate", "DESC"]],
+      order: [['creationDate', 'DESC']],
     });
   }
 
@@ -86,7 +82,7 @@ export class QuizService {
 
   async updateQuestion(
     id: number,
-    updateDto: UpdateQuestionDto
+    updateDto: UpdateQuestionDto,
   ): Promise<Question> {
     const question = await this.questionModel.findByPk(id);
     if (!question) {
@@ -109,7 +105,7 @@ export class QuizService {
     const question = await this.questionModel.findByPk(createDto.questionId);
     if (!question) {
       throw new NotFoundException(
-        `Question with ID ${createDto.questionId} not found`
+        `Question with ID ${createDto.questionId} not found`,
       );
     }
     return this.answerModel.create(createDto as any);
@@ -135,7 +131,7 @@ export class QuizService {
   // Quiz Attempts
   async submitQuizAttempt(
     userId: number,
-    dto: SubmitQuizAttemptDto
+    dto: SubmitQuizAttemptDto,
   ): Promise<any> {
     const quiz = await this.findOneQuiz(dto.quizId);
 
@@ -152,12 +148,12 @@ export class QuizService {
         userAnswer.questionId,
         {
           include: [Answer],
-        }
+        },
       );
       if (!question) continue;
 
       const selectedAnswer = await this.answerModel.findByPk(
-        userAnswer.answerId
+        userAnswer.answerId,
       );
       if (!selectedAnswer) continue;
 
@@ -213,20 +209,20 @@ export class QuizService {
     return this.quizAttemptModel.findAll({
       where: { userId },
       include: [Quiz],
-      order: [["attemptDatetime", "DESC"]],
+      order: [['attemptDatetime', 'DESC']],
     });
   }
 
   // Parcours associations
   async associateQuizToParcours(
     quizId: number,
-    dto: AssociateQuizToParcoursDto
+    dto: AssociateQuizToParcoursDto,
   ): Promise<ParcoursQuiz> {
     await this.findOneQuiz(quizId);
     const parcours = await this.parcoursModel.findByPk(dto.parcoursId);
     if (!parcours) {
       throw new NotFoundException(
-        `Parcours with ID ${dto.parcoursId} not found`
+        `Parcours with ID ${dto.parcoursId} not found`,
       );
     }
 
@@ -243,7 +239,7 @@ export class QuizService {
         {
           model: Parcours,
           where: { id: parcoursId },
-          through: { attributes: ["unlockAtKm"] },
+          through: { attributes: ['unlockAtKm'] },
         },
         {
           model: Question,

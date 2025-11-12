@@ -5,11 +5,11 @@ import {
   DataType,
   HasMany,
   CreatedAt,
-} from "sequelize-typescript";
-import { BattalionRoute } from "./battalion-route.entity";
+} from 'sequelize-typescript';
+import { BattalionRoute } from './battalion-route.entity';
 
 @Table({
-  tableName: "historical_battalions",
+  tableName: 'historical_battalions',
   timestamps: true,
   updatedAt: false,
 })

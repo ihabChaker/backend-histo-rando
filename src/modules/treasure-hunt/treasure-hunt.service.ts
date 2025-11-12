@@ -3,17 +3,17 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
-} from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { TreasureHunt } from "./entities/treasure-hunt.entity";
-import { UserTreasureFound } from "./entities/user-treasure-found.entity";
-import { Parcours } from "@/modules/parcours/entities/parcours.entity";
-import { User } from "@/modules/users/entities/user.entity";
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { TreasureHunt } from './entities/treasure-hunt.entity';
+import { UserTreasureFound } from './entities/user-treasure-found.entity';
+import { Parcours } from '@/modules/parcours/entities/parcours.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import {
   CreateTreasureHuntDto,
   UpdateTreasureHuntDto,
   RecordTreasureFoundDto,
-} from "./dto/treasure-hunt.dto";
+} from './dto/treasure-hunt.dto';
 
 @Injectable()
 export class TreasureHuntService {
@@ -22,14 +22,14 @@ export class TreasureHuntService {
     @InjectModel(UserTreasureFound)
     private treasureFoundModel: typeof UserTreasureFound,
     @InjectModel(Parcours) private parcoursModel: typeof Parcours,
-    @InjectModel(User) private userModel: typeof User
+    @InjectModel(User) private userModel: typeof User,
   ) {}
 
   private calculateDistance(
     lat1: number,
     lon1: number,
     lat2: number,
-    lon2: number
+    lon2: number,
   ): number {
     const R = 6371e3; // Earth radius in meters
     const φ1 = (lat1 * Math.PI) / 180;
@@ -46,12 +46,12 @@ export class TreasureHuntService {
   }
 
   async createTreasureHunt(
-    createDto: CreateTreasureHuntDto
+    createDto: CreateTreasureHuntDto,
   ): Promise<TreasureHunt> {
     const parcours = await this.parcoursModel.findByPk(createDto.parcoursId);
     if (!parcours) {
       throw new NotFoundException(
-        `Parcours with ID ${createDto.parcoursId} not found`
+        `Parcours with ID ${createDto.parcoursId} not found`,
       );
     }
     return this.treasureHuntModel.create(createDto as any);
@@ -61,12 +61,12 @@ export class TreasureHuntService {
     return this.treasureHuntModel.findAll({
       where: { isActive: true },
       include: [Parcours],
-      order: [["pointsReward", "DESC"]],
+      order: [['pointsReward', 'DESC']],
     });
   }
 
   async findTreasureHuntsByParcours(
-    parcoursId: number
+    parcoursId: number,
   ): Promise<TreasureHunt[]> {
     return this.treasureHuntModel.findAll({
       where: { parcoursId, isActive: true },
@@ -86,7 +86,7 @@ export class TreasureHuntService {
 
   async updateTreasureHunt(
     id: number,
-    updateDto: UpdateTreasureHuntDto
+    updateDto: UpdateTreasureHuntDto,
   ): Promise<TreasureHunt> {
     const treasure = await this.findOneTreasureHunt(id);
     await treasure.update(updateDto);
@@ -100,7 +100,7 @@ export class TreasureHuntService {
 
   async recordTreasureFound(
     userId: number,
-    dto: RecordTreasureFoundDto
+    dto: RecordTreasureFoundDto,
   ): Promise<any> {
     const treasure = await this.findOneTreasureHunt(dto.treasureId);
 
@@ -110,7 +110,7 @@ export class TreasureHuntService {
     });
 
     if (existing) {
-      throw new ConflictException("You have already found this treasure");
+      throw new ConflictException('You have already found this treasure');
     }
 
     // Verify user is within scan radius
@@ -118,12 +118,12 @@ export class TreasureHuntService {
       dto.latitude,
       dto.longitude,
       treasure.latitude,
-      treasure.longitude
+      treasure.longitude,
     );
 
     if (distance > treasure.scanRadiusMeters) {
       throw new BadRequestException(
-        `You are too far from the treasure (${Math.round(distance)}m away, need to be within ${treasure.scanRadiusMeters}m)`
+        `You are too far from the treasure (${Math.round(distance)}m away, need to be within ${treasure.scanRadiusMeters}m)`,
       );
     }
 
@@ -145,7 +145,7 @@ export class TreasureHuntService {
 
     return {
       found,
-      message: "Félicitations ! Vous avez trouvé le trésor !",
+      message: 'Félicitations ! Vous avez trouvé le trésor !',
       pointsEarned: treasure.pointsReward,
     };
   }
@@ -154,7 +154,7 @@ export class TreasureHuntService {
     return this.treasureFoundModel.findAll({
       where: { userId },
       include: [TreasureHunt],
-      order: [["foundDatetime", "DESC"]],
+      order: [['foundDatetime', 'DESC']],
     });
   }
 }

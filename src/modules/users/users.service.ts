@@ -1,22 +1,22 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { User } from "./entities/user.entity";
-import { UpdateUserProfileDto } from "./dto/user.dto";
-import { UserActivity } from "@/modules/activity/entities/user-activity.entity";
-import { UserPOIVisit } from "@/modules/activity/entities/user-poi-visit.entity";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { User } from './entities/user.entity';
+import { UpdateUserProfileDto } from './dto/user.dto';
+import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
+import { UserPOIVisit } from '@/modules/activity/entities/user-poi-visit.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User)
-    private userModel: typeof User
+    private userModel: typeof User,
   ) {}
 
   async findById(id: number): Promise<User> {
     const user = await this.userModel.findByPk(id);
 
     if (!user) {
-      throw new NotFoundException("Utilisateur non trouvé");
+      throw new NotFoundException('Utilisateur non trouvé');
     }
 
     return user;
@@ -28,7 +28,7 @@ export class UsersService {
 
   async updateProfile(
     userId: number,
-    updateDto: UpdateUserProfileDto
+    updateDto: UpdateUserProfileDto,
   ): Promise<User> {
     const user = await this.findById(userId);
 
@@ -44,13 +44,13 @@ export class UsersService {
     const totalParcours = await UserActivity.count({
       where: { userId },
       distinct: true,
-      col: "parcoursId",
+      col: 'parcoursId',
     });
 
     const totalPOIsVisited = await UserPOIVisit.count({
       where: { userId },
       distinct: true,
-      col: "poiId",
+      col: 'poiId',
     });
 
     return {

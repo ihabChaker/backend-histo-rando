@@ -1,86 +1,86 @@
 import {
-    Table,
-    Column,
-    Model,
-    DataType,
-    ForeignKey,
-    BelongsTo,
-    CreatedAt,
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+  CreatedAt,
 } from 'sequelize-typescript';
 import { User } from '@/modules/users/entities/user.entity';
 import { PointOfInterest } from '@/modules/poi/entities/point-of-interest.entity';
 import { UserActivity } from './user-activity.entity';
 
 @Table({
-    tableName: 'user_poi_visits',
-    timestamps: true,
-    updatedAt: false,
+  tableName: 'user_poi_visits',
+  timestamps: true,
+  updatedAt: false,
 })
 export class UserPOIVisit extends Model {
-    @Column({
-        type: DataType.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    })
-    id: number;
+  @Column({
+    type: DataType.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  })
+  id: number;
 
-    @ForeignKey(() => User)
-    @Column({
-        type: DataType.INTEGER,
-        allowNull: false,
-    })
-    userId: number;
+  @ForeignKey(() => User)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  userId: number;
 
-    @ForeignKey(() => PointOfInterest)
-    @Column({
-        type: DataType.INTEGER,
-        allowNull: false,
-    })
-    poiId: number;
+  @ForeignKey(() => PointOfInterest)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  poiId: number;
 
-    @ForeignKey(() => UserActivity)
-    @Column({
-        type: DataType.INTEGER,
-        allowNull: true,
-    })
-    activityId: number;
+  @ForeignKey(() => UserActivity)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  activityId: number;
 
-    @Column({
-        type: DataType.DATE,
-        allowNull: false,
-    })
-    visitDatetime: Date;
+  @Column({
+    type: DataType.DATE,
+    allowNull: false,
+  })
+  visitDatetime: Date;
 
-    @Column({
-        type: DataType.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-    })
-    scannedQr: boolean;
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  })
+  scannedQr: boolean;
 
-    @Column({
-        type: DataType.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-    })
-    listenedAudio: boolean;
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  })
+  listenedAudio: boolean;
 
-    @Column({
-        type: DataType.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-    })
-    pointsEarned: number;
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  })
+  pointsEarned: number;
 
-    @CreatedAt
-    createdAt: Date;
+  @CreatedAt
+  createdAt: Date;
 
-    @BelongsTo(() => User)
-    user: User;
+  @BelongsTo(() => User)
+  user: User;
 
-    @BelongsTo(() => PointOfInterest)
-    poi: PointOfInterest;
+  @BelongsTo(() => PointOfInterest)
+  poi: PointOfInterest;
 
-    @BelongsTo(() => UserActivity)
-    activity: UserActivity;
+  @BelongsTo(() => UserActivity)
+  activity: UserActivity;
 }

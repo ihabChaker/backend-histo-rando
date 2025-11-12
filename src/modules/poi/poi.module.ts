@@ -5,9 +5,9 @@ import { PoiController } from './poi.controller';
 import { PointOfInterest } from './entities/point-of-interest.entity';
 
 @Module({
-    imports: [SequelizeModule.forFeature([PointOfInterest])],
-    controllers: [PoiController],
-    providers: [PoiService],
-    exports: [PoiService],
+  imports: [SequelizeModule.forFeature([PointOfInterest])],
+  controllers: [PoiController],
+  providers: [PoiService],
+  exports: [PoiService],
 })
-export class PoiModule { }
+export class PoiModule {}

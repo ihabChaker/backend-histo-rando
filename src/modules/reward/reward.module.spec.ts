@@ -1,7 +1,7 @@
-import { RewardModule } from "./reward.module";
+import { RewardModule } from './reward.module';
 
-describe("RewardModule", () => {
-  it("should be defined", () => {
+describe('RewardModule', () => {
+  it('should be defined', () => {
     expect(RewardModule).toBeDefined();
   });
 });

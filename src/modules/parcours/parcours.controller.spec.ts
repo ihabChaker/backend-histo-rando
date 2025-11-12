@@ -1,17 +1,17 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { ParcoursController } from "./parcours.controller";
-import { ParcoursService } from "./parcours.service";
+import { Test, TestingModule } from '@nestjs/testing';
+import { ParcoursController } from './parcours.controller';
+import { ParcoursService } from './parcours.service';
 import {
   CreateParcoursDto,
   UpdateParcoursDto,
   ParcoursQueryDto,
-} from "./dto/parcours.dto";
+} from './dto/parcours.dto';
 import {
   mockParcours,
   mockParcours2,
-} from "@/test-utils/fixtures/parcours.fixture";
+} from '@/test-utils/fixtures/parcours.fixture';
 
-describe("ParcoursController", () => {
+describe('ParcoursController', () => {
   let controller: ParcoursController;
   let parcoursService: ParcoursService;
 
@@ -43,16 +43,16 @@ describe("ParcoursController", () => {
     jest.clearAllMocks();
   });
 
-  describe("create", () => {
-    it("should create a new parcours", async () => {
+  describe('create', () => {
+    it('should create a new parcours', async () => {
       const createDto: CreateParcoursDto = {
-        name: "Test Parcours",
-        description: "Test description",
-        difficultyLevel: "medium",
+        name: 'Test Parcours',
+        description: 'Test description',
+        difficultyLevel: 'medium',
         distanceKm: 10,
         estimatedDuration: 120,
         isPmrAccessible: true,
-        historicalTheme: "D-Day",
+        historicalTheme: 'D-Day',
         startingPointLat: 49.3394,
         startingPointLon: -0.8566,
       };
@@ -66,8 +66,8 @@ describe("ParcoursController", () => {
     });
   });
 
-  describe("findAll", () => {
-    it("should return all parcours", async () => {
+  describe('findAll', () => {
+    it('should return all parcours', async () => {
       const query: ParcoursQueryDto = {};
       mockParcoursService.findAll.mockResolvedValue([
         mockParcours,
@@ -80,9 +80,9 @@ describe("ParcoursController", () => {
       expect(result).toEqual([mockParcours, mockParcours2]);
     });
 
-    it("should return filtered parcours", async () => {
+    it('should return filtered parcours', async () => {
       const query: ParcoursQueryDto = {
-        difficultyLevel: "medium",
+        difficultyLevel: 'medium',
         isPmrAccessible: true,
       };
       mockParcoursService.findAll.mockResolvedValue([mockParcours]);
@@ -94,8 +94,8 @@ describe("ParcoursController", () => {
     });
   });
 
-  describe("findNearby", () => {
-    it("should find nearby parcours with default radius", async () => {
+  describe('findNearby', () => {
+    it('should find nearby parcours with default radius', async () => {
       const lat = 49.3394;
       const lon = -0.8566;
 
@@ -107,7 +107,7 @@ describe("ParcoursController", () => {
       expect(result).toEqual([mockParcours]);
     });
 
-    it("should find nearby parcours with custom radius", async () => {
+    it('should find nearby parcours with custom radius', async () => {
       const lat = 49.3394;
       const lon = -0.8566;
       const radius = 20;
@@ -124,8 +124,8 @@ describe("ParcoursController", () => {
     });
   });
 
-  describe("findOne", () => {
-    it("should return a parcours by id", async () => {
+  describe('findOne', () => {
+    it('should return a parcours by id', async () => {
       mockParcoursService.findOne.mockResolvedValue(mockParcours);
 
       const result = await controller.findOne(1);
@@ -135,10 +135,10 @@ describe("ParcoursController", () => {
     });
   });
 
-  describe("update", () => {
-    it("should update a parcours", async () => {
+  describe('update', () => {
+    it('should update a parcours', async () => {
       const updateDto: UpdateParcoursDto = {
-        name: "Updated Name",
+        name: 'Updated Name',
       };
 
       const updatedParcours = { ...mockParcours, ...updateDto };
@@ -151,14 +151,14 @@ describe("ParcoursController", () => {
     });
   });
 
-  describe("remove", () => {
-    it("should remove a parcours", async () => {
+  describe('remove', () => {
+    it('should remove a parcours', async () => {
       mockParcoursService.remove.mockResolvedValue(undefined);
 
       const result = await controller.remove(1);
 
       expect(parcoursService.remove).toHaveBeenCalledWith(1);
-      expect(result).toEqual({ message: "Parcours supprimé avec succès" });
+      expect(result).toEqual({ message: 'Parcours supprimé avec succès' });
     });
   });
 });

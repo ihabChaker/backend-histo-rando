@@ -1,7 +1,7 @@
-import { ParcoursModule } from "./parcours.module";
+import { ParcoursModule } from './parcours.module';
 
-describe("ParcoursModule", () => {
-  it("should be defined", () => {
+describe('ParcoursModule', () => {
+  it('should be defined', () => {
     expect(ParcoursModule).toBeDefined();
   });
 });

@@ -1,21 +1,21 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
-import { ZodValidationPipe } from "nestjs-zod";
-import request from "supertest";
-import { AppModule } from "../src/app.module";
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { ZodValidationPipe } from 'nestjs-zod';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
 import {
   setupTestDatabase,
   syncDatabase,
   cleanDatabase,
   closeDatabase,
-} from "./helpers/database.helper";
+} from './helpers/database.helper';
 import {
   createRegisterData,
   createParcoursData,
   createPOIData,
-} from "./factories";
+} from './factories';
 
-describe("Activity E2E Tests", () => {
+describe('Activity E2E Tests', () => {
   let app: INestApplication;
   let authToken: string;
   let parcoursId: number;
@@ -30,7 +30,7 @@ describe("Activity E2E Tests", () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix("api/v1");
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ZodValidationPipe());
     await app.init();
   });
@@ -46,135 +46,135 @@ describe("Activity E2E Tests", () => {
     // Register user
     const registerData = createRegisterData();
     const registerResponse = await request(app.getHttpServer())
-      .post("/api/v1/auth/register")
+      .post('/api/v1/auth/register')
       .send(registerData);
     authToken = registerResponse.body.access_token;
 
     // Create parcours
     const parcoursData = createParcoursData();
     const parcoursResponse = await request(app.getHttpServer())
-      .post("/api/v1/parcours")
-      .set("Authorization", `Bearer ${authToken}`)
+      .post('/api/v1/parcours')
+      .set('Authorization', `Bearer ${authToken}`)
       .send(parcoursData);
     parcoursId = parcoursResponse.body.id;
 
     // Create POI
     const poiData = createPOIData(parcoursId);
     const poiResponse = await request(app.getHttpServer())
-      .post("/api/v1/poi")
-      .set("Authorization", `Bearer ${authToken}`)
+      .post('/api/v1/poi')
+      .set('Authorization', `Bearer ${authToken}`)
       .send(poiData);
     poiId = poiResponse.body.id;
   });
-  describe("POST /activities", () => {
-    it("should start a new activity", () => {
+  describe('POST /activities', () => {
+    it('should start a new activity', () => {
       return request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "walking",
+          activityType: 'walking',
         })
         .expect(201)
         .expect((res) => {
-          expect(res.body).toHaveProperty("id");
+          expect(res.body).toHaveProperty('id');
           expect(res.body.parcoursId).toBe(parcoursId);
-          expect(res.body.activityType).toBe("walking");
-          expect(res.body.status).toBe("in_progress");
+          expect(res.body.activityType).toBe('walking');
+          expect(res.body.status).toBe('in_progress');
         });
     });
 
-    it("should fail without authentication", () => {
+    it('should fail without authentication', () => {
       return request(app.getHttpServer())
-        .post("/api/v1/activities")
+        .post('/api/v1/activities')
         .send({
           parcoursId: parcoursId,
-          activityType: "walking",
+          activityType: 'walking',
         })
         .expect(401);
     });
 
-    it("should fail with invalid activity type", () => {
+    it('should fail with invalid activity type', () => {
       return request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "invalid",
+          activityType: 'invalid',
         })
         .expect(400);
     });
   });
 
-  describe("PUT /activities/:id", () => {
-    it("should complete activity and update user stats", async () => {
+  describe('PUT /activities/:id', () => {
+    it('should complete activity and update user stats', async () => {
       const activityRes = await request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "running",
+          activityType: 'running',
         });
 
       const activityId = activityRes.body.id;
 
       return request(app.getHttpServer())
         .put(`/api/v1/activities/${activityId}`)
-        .set("Authorization", `Bearer ${authToken}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: "completed",
+          status: 'completed',
           distanceCoveredKm: 5.2,
           pointsEarned: 100,
           averageSpeed: 10.5,
         })
         .expect(200)
         .expect((res) => {
-          expect(res.body.status).toBe("completed");
+          expect(res.body.status).toBe('completed');
           expect(res.body.distanceCoveredKm).toBe(5.2);
           expect(res.body.pointsEarned).toBe(100);
         });
     });
 
-    it("should update activity with GPX trace", async () => {
+    it('should update activity with GPX trace', async () => {
       const activityRes = await request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "cycling",
+          activityType: 'cycling',
         });
 
       return request(app.getHttpServer())
         .put(`/api/v1/activities/${activityRes.body.id}`)
-        .set("Authorization", `Bearer ${authToken}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
-          gpxTraceUrl: "https://example.com/traces/ride1.gpx",
+          gpxTraceUrl: 'https://example.com/traces/ride1.gpx',
         })
         .expect(200);
     });
   });
 
-  describe("GET /activities", () => {
-    it("should list user activities", async () => {
+  describe('GET /activities', () => {
+    it('should list user activities', async () => {
       await request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "walking",
+          activityType: 'walking',
         });
 
       await request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "running",
+          activityType: 'running',
         });
 
       return request(app.getHttpServer())
-        .get("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .get('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -183,51 +183,51 @@ describe("Activity E2E Tests", () => {
     });
   });
 
-  describe("GET /activities/stats", () => {
-    it("should return user activity statistics", async () => {
+  describe('GET /activities/stats', () => {
+    it('should return user activity statistics', async () => {
       const activity1 = await request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "walking",
+          activityType: 'walking',
         });
 
       await request(app.getHttpServer())
         .put(`/api/v1/activities/${activity1.body.id}`)
-        .set("Authorization", `Bearer ${authToken}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
-          status: "completed",
+          status: 'completed',
           distanceCoveredKm: 3.5,
           pointsEarned: 50,
         });
 
       return request(app.getHttpServer())
-        .get("/api/v1/activities/stats")
-        .set("Authorization", `Bearer ${authToken}`)
+        .get('/api/v1/activities/stats')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty("totalActivities");
-          expect(res.body).toHaveProperty("completedActivities");
-          expect(res.body).toHaveProperty("totalDistance");
-          expect(res.body).toHaveProperty("totalPoints");
+          expect(res.body).toHaveProperty('totalActivities');
+          expect(res.body).toHaveProperty('completedActivities');
+          expect(res.body).toHaveProperty('totalDistance');
+          expect(res.body).toHaveProperty('totalPoints');
         });
     });
   });
 
-  describe("POST /activities/poi-visits", () => {
-    it("should record POI visit", async () => {
+  describe('POST /activities/poi-visits', () => {
+    it('should record POI visit', async () => {
       const activityRes = await request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "walking",
+          activityType: 'walking',
         });
 
       const response = await request(app.getHttpServer())
-        .post("/api/v1/activities/poi-visits")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities/poi-visits')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           poiId: poiId,
           activityId: activityRes.body.id,
@@ -242,18 +242,18 @@ describe("Activity E2E Tests", () => {
       expect(response.body.scannedQr).toBe(true);
     });
 
-    it("should prevent duplicate POI visits", async () => {
+    it('should prevent duplicate POI visits', async () => {
       const activityRes = await request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "walking",
+          activityType: 'walking',
         });
 
       await request(app.getHttpServer())
-        .post("/api/v1/activities/poi-visits")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities/poi-visits')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           poiId: poiId,
           activityId: activityRes.body.id,
@@ -262,8 +262,8 @@ describe("Activity E2E Tests", () => {
         });
 
       return request(app.getHttpServer())
-        .post("/api/v1/activities/poi-visits")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities/poi-visits')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           poiId: poiId,
           activityId: activityRes.body.id,
@@ -274,19 +274,19 @@ describe("Activity E2E Tests", () => {
     });
   });
 
-  describe("GET /activities/poi-visits/me", () => {
-    it("should list user POI visits", async () => {
+  describe('GET /activities/poi-visits/me', () => {
+    it('should list user POI visits', async () => {
       const activityRes = await request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "walking",
+          activityType: 'walking',
         });
 
       await request(app.getHttpServer())
-        .post("/api/v1/activities/poi-visits")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities/poi-visits')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           poiId: poiId,
           activityId: activityRes.body.id,
@@ -295,8 +295,8 @@ describe("Activity E2E Tests", () => {
         });
 
       return request(app.getHttpServer())
-        .get("/api/v1/activities/poi-visits/me")
-        .set("Authorization", `Bearer ${authToken}`)
+        .get('/api/v1/activities/poi-visits/me')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -305,19 +305,19 @@ describe("Activity E2E Tests", () => {
     });
   });
 
-  describe("DELETE /activities/:id", () => {
-    it("should delete an activity", async () => {
+  describe('DELETE /activities/:id', () => {
+    it('should delete an activity', async () => {
       const activityRes = await request(app.getHttpServer())
-        .post("/api/v1/activities")
-        .set("Authorization", `Bearer ${authToken}`)
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           parcoursId: parcoursId,
-          activityType: "walking",
+          activityType: 'walking',
         });
 
       return request(app.getHttpServer())
         .delete(`/api/v1/activities/${activityRes.body.id}`)
-        .set("Authorization", `Bearer ${authToken}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
     });
   });

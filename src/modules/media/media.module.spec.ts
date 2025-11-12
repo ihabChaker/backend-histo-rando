@@ -1,7 +1,7 @@
-import { MediaModule } from "./media.module";
+import { MediaModule } from './media.module';
 
-describe("MediaModule", () => {
-  it("should be defined", () => {
+describe('MediaModule', () => {
+  it('should be defined', () => {
     expect(MediaModule).toBeDefined();
   });
 });

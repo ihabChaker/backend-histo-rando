@@ -6,16 +6,16 @@ import {
   HasMany,
   CreatedAt,
   UpdatedAt,
-} from "sequelize-typescript";
-import { UserActivity } from "@/modules/activity/entities/user-activity.entity";
-import { UserPOIVisit } from "@/modules/activity/entities/user-poi-visit.entity";
-import { UserQuizAttempt } from "@/modules/quiz/entities/user-quiz-attempt.entity";
-import { UserChallengeProgress } from "@/modules/challenge/entities/user-challenge-progress.entity";
-import { UserTreasureFound } from "@/modules/treasure-hunt/entities/user-treasure-found.entity";
-import { UserRewardRedeemed } from "@/modules/reward/entities/user-reward-redeemed.entity";
+} from 'sequelize-typescript';
+import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
+import { UserPOIVisit } from '@/modules/activity/entities/user-poi-visit.entity';
+import { UserQuizAttempt } from '@/modules/quiz/entities/user-quiz-attempt.entity';
+import { UserChallengeProgress } from '@/modules/challenge/entities/user-challenge-progress.entity';
+import { UserTreasureFound } from '@/modules/treasure-hunt/entities/user-treasure-found.entity';
+import { UserRewardRedeemed } from '@/modules/reward/entities/user-reward-redeemed.entity';
 
 @Table({
-  tableName: "users",
+  tableName: 'users',
   timestamps: true,
 })
 export class User extends Model {
@@ -77,7 +77,7 @@ export class User extends Model {
     allowNull: false,
     defaultValue: 0,
     get() {
-      const value = this.getDataValue("totalKm");
+      const value = this.getDataValue('totalKm');
       return value ? parseFloat(value.toString()) : 0;
     },
   })

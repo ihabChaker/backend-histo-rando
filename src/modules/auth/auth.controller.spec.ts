@@ -1,9 +1,9 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { AuthController } from "./auth.controller";
-import { AuthService } from "./auth.service";
-import { RegisterDto, LoginDto } from "./dto/auth.dto";
+import { Test, TestingModule } from '@nestjs/testing';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { RegisterDto, LoginDto } from './dto/auth.dto';
 
-describe("AuthController", () => {
+describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;
 
@@ -32,19 +32,19 @@ describe("AuthController", () => {
     jest.clearAllMocks();
   });
 
-  describe("register", () => {
-    it("should call authService.register and return the result", async () => {
+  describe('register', () => {
+    it('should call authService.register and return the result', async () => {
       const registerDto: RegisterDto = {
-        email: "test@example.com",
-        username: "testuser",
-        password: "password123",
-        firstName: "Test",
-        lastName: "User",
+        email: 'test@example.com',
+        username: 'testuser',
+        password: 'password123',
+        firstName: 'Test',
+        lastName: 'User',
         isPmr: false,
       };
 
       const expectedResult = {
-        access_token: "mock-token",
+        access_token: 'mock-token',
         user: {
           id: 1,
           email: registerDto.email,
@@ -63,21 +63,21 @@ describe("AuthController", () => {
     });
   });
 
-  describe("login", () => {
-    it("should call authService.login and return the result", async () => {
+  describe('login', () => {
+    it('should call authService.login and return the result', async () => {
       const loginDto: LoginDto = {
-        email: "test@example.com",
-        password: "password123",
+        email: 'test@example.com',
+        password: 'password123',
       };
 
       const expectedResult = {
-        access_token: "mock-token",
+        access_token: 'mock-token',
         user: {
           id: 1,
           email: loginDto.email,
-          username: "testuser",
-          firstName: "Test",
-          lastName: "User",
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
         },
       };
 

@@ -1,7 +1,7 @@
-import { ActivityModule } from "./activity.module";
+import { ActivityModule } from './activity.module';
 
-describe("ActivityModule", () => {
-  it("should be defined", () => {
+describe('ActivityModule', () => {
+  it('should be defined', () => {
     expect(ActivityModule).toBeDefined();
   });
 });

@@ -7,11 +7,11 @@ import { ParcoursPodcast } from './entities/parcours-podcast.entity';
 import { ParcoursQuiz } from './entities/parcours-quiz.entity';
 
 @Module({
-    imports: [
-        SequelizeModule.forFeature([Parcours, ParcoursPodcast, ParcoursQuiz]),
-    ],
-    controllers: [ParcoursController],
-    providers: [ParcoursService],
-    exports: [ParcoursService],
+  imports: [
+    SequelizeModule.forFeature([Parcours, ParcoursPodcast, ParcoursQuiz]),
+  ],
+  controllers: [ParcoursController],
+  providers: [ParcoursService],
+  exports: [ParcoursService],
 })
-export class ParcoursModule { }
+export class ParcoursModule {}

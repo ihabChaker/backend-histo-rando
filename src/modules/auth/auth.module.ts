@@ -9,27 +9,27 @@ import { User } from '../users/entities/user.entity';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 
 @Module({
-    imports: [
-        SequelizeModule.forFeature([User]),
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            useFactory: (configService: ConfigService) => ({
-                secret: configService.get('jwt.secret'),
-                signOptions: {
-                    expiresIn: configService.get('jwt.expiresIn'),
-                },
-            }),
-            inject: [ConfigService],
-        }),
-    ],
-    controllers: [AuthController],
-    providers: [
-        AuthService,
-        {
-            provide: APP_GUARD,
-            useClass: JwtAuthGuard,
+  imports: [
+    SequelizeModule.forFeature([User]),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('jwt.secret'),
+        signOptions: {
+          expiresIn: configService.get('jwt.expiresIn'),
         },
-    ],
-    exports: [AuthService],
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
+  exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}

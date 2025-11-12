@@ -1,9 +1,9 @@
-import { RegisterDto } from "../../src/modules/auth/dto/auth.dto";
+import { RegisterDto } from '../../src/modules/auth/dto/auth.dto';
 
 let userCounter = 0;
 
 export const createRegisterData = (
-  overrides: Partial<RegisterDto> = {}
+  overrides: Partial<RegisterDto> = {},
 ): RegisterDto => {
   const timestamp = Date.now();
   const counter = ++userCounter;
@@ -11,15 +11,15 @@ export const createRegisterData = (
   return {
     email: `user${timestamp}${counter}@example.com`,
     username: `user${timestamp}${counter}`,
-    password: "SecurePassword123!",
-    firstName: "John",
-    lastName: "Doe",
+    password: 'SecurePassword123!',
+    firstName: 'John',
+    lastName: 'Doe',
     isPmr: false,
     ...overrides,
   };
 };
 export const createPmrUser = (
-  overrides: Partial<RegisterDto> = {}
+  overrides: Partial<RegisterDto> = {},
 ): RegisterDto => {
   return createRegisterData({
     isPmr: true,
@@ -29,7 +29,7 @@ export const createPmrUser = (
 
 export const createUsersArray = (
   count: number,
-  overrides: Partial<RegisterDto> = {}
+  overrides: Partial<RegisterDto> = {},
 ): RegisterDto[] => {
   return Array.from({ length: count }, () => createRegisterData(overrides));
 };

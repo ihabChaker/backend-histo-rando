@@ -1,11 +1,11 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { UsersController } from "./users.controller";
-import { UsersService } from "./users.service";
-import { UpdateUserProfileDto } from "./dto/user.dto";
-import { JwtPayload } from "@/common/types/auth.types";
-import { mockUser } from "@/test-utils/fixtures/user.fixture";
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+import { UpdateUserProfileDto } from './dto/user.dto';
+import { JwtPayload } from '@/common/types/auth.types';
+import { mockUser } from '@/test-utils/fixtures/user.fixture';
 
-describe("UsersController", () => {
+describe('UsersController', () => {
   let controller: UsersController;
   let usersService: UsersService;
 
@@ -20,8 +20,8 @@ describe("UsersController", () => {
 
   const mockJwtPayload: JwtPayload = {
     sub: 1,
-    email: "test@example.com",
-    username: "testuser",
+    email: 'test@example.com',
+    username: 'testuser',
   };
 
   beforeEach(async () => {
@@ -43,8 +43,8 @@ describe("UsersController", () => {
     jest.clearAllMocks();
   });
 
-  describe("getCurrentUser", () => {
-    it("should return current user profile", async () => {
+  describe('getCurrentUser', () => {
+    it('should return current user profile', async () => {
       mockUsersService.findById.mockResolvedValue(mockUser);
 
       const result = await controller.getCurrentUser(mockJwtPayload);
@@ -54,12 +54,12 @@ describe("UsersController", () => {
     });
   });
 
-  describe("getUserStats", () => {
-    it("should return user statistics", async () => {
+  describe('getUserStats', () => {
+    it('should return user statistics', async () => {
       const stats = {
         totalPoints: 100,
         totalKm: 10.5,
-        username: "testuser",
+        username: 'testuser',
         isPmr: false,
       };
 
@@ -68,17 +68,17 @@ describe("UsersController", () => {
       const result = await controller.getUserStats(mockJwtPayload);
 
       expect(usersService.getUserStats).toHaveBeenCalledWith(
-        mockJwtPayload.sub
+        mockJwtPayload.sub,
       );
       expect(result).toEqual(stats);
     });
   });
 
-  describe("updateProfile", () => {
-    it("should update user profile", async () => {
+  describe('updateProfile', () => {
+    it('should update user profile', async () => {
       const updateDto: UpdateUserProfileDto = {
-        firstName: "Updated",
-        lastName: "Name",
+        firstName: 'Updated',
+        lastName: 'Name',
       };
 
       const updatedUser = { ...mockUser, ...updateDto };
@@ -88,14 +88,14 @@ describe("UsersController", () => {
 
       expect(usersService.updateProfile).toHaveBeenCalledWith(
         mockJwtPayload.sub,
-        updateDto
+        updateDto,
       );
       expect(result).toEqual(updatedUser);
     });
   });
 
-  describe("getUserById", () => {
-    it("should return user by id", async () => {
+  describe('getUserById', () => {
+    it('should return user by id', async () => {
       mockUsersService.findById.mockResolvedValue(mockUser);
 
       const result = await controller.getUserById(1);

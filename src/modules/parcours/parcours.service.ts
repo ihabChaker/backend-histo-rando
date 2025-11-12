@@ -2,80 +2,89 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { Parcours } from './entities/parcours.entity';
-import { CreateParcoursDto, UpdateParcoursDto, ParcoursQueryDto } from './dto/parcours.dto';
+import {
+  CreateParcoursDto,
+  UpdateParcoursDto,
+  ParcoursQueryDto,
+} from './dto/parcours.dto';
 import { PointOfInterest } from '@/modules/poi/entities/point-of-interest.entity';
 
 @Injectable()
 export class ParcoursService {
-    constructor(
-        @InjectModel(Parcours)
-        private parcoursModel: typeof Parcours,
-    ) { }
+  constructor(
+    @InjectModel(Parcours)
+    private parcoursModel: typeof Parcours,
+  ) {}
 
-    async create(createDto: CreateParcoursDto): Promise<Parcours> {
-        return this.parcoursModel.create(createDto as any);
+  async create(createDto: CreateParcoursDto): Promise<Parcours> {
+    return this.parcoursModel.create(createDto as any);
+  }
+
+  async findAll(query?: ParcoursQueryDto): Promise<Parcours[]> {
+    const where: any = {};
+
+    if (query) {
+      if (query.difficultyLevel) where.difficultyLevel = query.difficultyLevel;
+      if (query.isPmrAccessible !== undefined)
+        where.isPmrAccessible = query.isPmrAccessible;
+      if (query.isActive !== undefined) where.isActive = query.isActive;
+
+      if (query.minDistance || query.maxDistance) {
+        where.distanceKm = {};
+        if (query.minDistance) where.distanceKm[Op.gte] = query.minDistance;
+        if (query.maxDistance) where.distanceKm[Op.lte] = query.maxDistance;
+      }
     }
 
-    async findAll(query?: ParcoursQueryDto): Promise<Parcours[]> {
-        const where: any = {};
+    return this.parcoursModel.findAll({
+      where,
+      include: [PointOfInterest],
+      order: [['creationDate', 'DESC']],
+    });
+  }
 
-        if (query) {
-            if (query.difficultyLevel) where.difficultyLevel = query.difficultyLevel;
-            if (query.isPmrAccessible !== undefined) where.isPmrAccessible = query.isPmrAccessible;
-            if (query.isActive !== undefined) where.isActive = query.isActive;
+  async findOne(id: number): Promise<Parcours> {
+    const parcours = await this.parcoursModel.findByPk(id, {
+      include: [PointOfInterest],
+    });
 
-            if (query.minDistance || query.maxDistance) {
-                where.distanceKm = {};
-                if (query.minDistance) where.distanceKm[Op.gte] = query.minDistance;
-                if (query.maxDistance) where.distanceKm[Op.lte] = query.maxDistance;
-            }
-        }
-
-        return this.parcoursModel.findAll({
-            where,
-            include: [PointOfInterest],
-            order: [['creationDate', 'DESC']],
-        });
+    if (!parcours) {
+      throw new NotFoundException(`Parcours avec l'ID ${id} non trouvé`);
     }
 
-    async findOne(id: number): Promise<Parcours> {
-        const parcours = await this.parcoursModel.findByPk(id, {
-            include: [PointOfInterest],
-        });
+    return parcours;
+  }
 
-        if (!parcours) {
-            throw new NotFoundException(`Parcours avec l'ID ${id} non trouvé`);
-        }
+  async update(id: number, updateDto: UpdateParcoursDto): Promise<Parcours> {
+    const parcours = await this.findOne(id);
+    await parcours.update(updateDto as any);
+    return parcours;
+  }
 
-        return parcours;
-    }
+  async remove(id: number): Promise<void> {
+    const parcours = await this.findOne(id);
+    await parcours.destroy();
+  }
 
-    async update(id: number, updateDto: UpdateParcoursDto): Promise<Parcours> {
-        const parcours = await this.findOne(id);
-        await parcours.update(updateDto as any);
-        return parcours;
-    }
+  async findNearby(
+    lat: number,
+    lon: number,
+    radiusKm: number = 50,
+  ): Promise<Parcours[]> {
+    // Simple distance calculation (for production, use PostGIS)
+    const latRange = radiusKm / 111.0; // rough conversion km to degrees
+    const lonRange = radiusKm / (111.0 * Math.cos((lat * Math.PI) / 180));
 
-    async remove(id: number): Promise<void> {
-        const parcours = await this.findOne(id);
-        await parcours.destroy();
-    }
-
-    async findNearby(lat: number, lon: number, radiusKm: number = 50): Promise<Parcours[]> {
-        // Simple distance calculation (for production, use PostGIS)
-        const latRange = radiusKm / 111.0; // rough conversion km to degrees
-        const lonRange = radiusKm / (111.0 * Math.cos(lat * Math.PI / 180));
-
-        return this.parcoursModel.findAll({
-            where: {
-                startingPointLat: {
-                    [Op.between]: [lat - latRange, lat + latRange],
-                },
-                startingPointLon: {
-                    [Op.between]: [lon - lonRange, lon + lonRange],
-                },
-                isActive: true,
-            },
-        });
-    }
+    return this.parcoursModel.findAll({
+      where: {
+        startingPointLat: {
+          [Op.between]: [lat - latRange, lat + latRange],
+        },
+        startingPointLon: {
+          [Op.between]: [lon - lonRange, lon + lonRange],
+        },
+        isActive: true,
+      },
+    });
+  }
 }

@@ -2,18 +2,18 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-} from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { Challenge } from "./entities/challenge.entity";
-import { UserChallengeProgress } from "./entities/user-challenge-progress.entity";
-import { UserActivity } from "@/modules/activity/entities/user-activity.entity";
-import { User } from "@/modules/users/entities/user.entity";
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Challenge } from './entities/challenge.entity';
+import { UserChallengeProgress } from './entities/user-challenge-progress.entity';
+import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import {
   CreateChallengeDto,
   UpdateChallengeDto,
   StartChallengeDto,
   CompleteChallengeDto,
-} from "./dto/challenge.dto";
+} from './dto/challenge.dto';
 
 @Injectable()
 export class ChallengeService {
@@ -22,7 +22,7 @@ export class ChallengeService {
     @InjectModel(UserChallengeProgress)
     private progressModel: typeof UserChallengeProgress,
     @InjectModel(UserActivity) private activityModel: typeof UserActivity,
-    @InjectModel(User) private userModel: typeof User
+    @InjectModel(User) private userModel: typeof User,
   ) {}
 
   async createChallenge(createDto: CreateChallengeDto): Promise<Challenge> {
@@ -32,7 +32,7 @@ export class ChallengeService {
   async findAllChallenges(): Promise<Challenge[]> {
     return this.challengeModel.findAll({
       where: { isActive: true },
-      order: [["pointsReward", "DESC"]],
+      order: [['pointsReward', 'DESC']],
     });
   }
 
@@ -46,7 +46,7 @@ export class ChallengeService {
 
   async updateChallenge(
     id: number,
-    updateDto: UpdateChallengeDto
+    updateDto: UpdateChallengeDto,
   ): Promise<Challenge> {
     const challenge = await this.findOneChallenge(id);
     await challenge.update(updateDto);
@@ -60,19 +60,20 @@ export class ChallengeService {
 
   async startChallenge(
     userId: number,
-    dto: StartChallengeDto
+    dto: StartChallengeDto,
   ): Promise<UserChallengeProgress> {
-    const challenge = await this.findOneChallenge(dto.challengeId);
+    // Verify challenge exists (throws if not found)
+    await this.findOneChallenge(dto.challengeId);
     const activity = await this.activityModel.findByPk(dto.activityId);
 
     if (!activity) {
       throw new NotFoundException(
-        `Activity with ID ${dto.activityId} not found`
+        `Activity with ID ${dto.activityId} not found`,
       );
     }
 
     if (activity.userId !== userId) {
-      throw new BadRequestException("Activity does not belong to you");
+      throw new BadRequestException('Activity does not belong to you');
     }
 
     return this.progressModel.create({
@@ -80,7 +81,7 @@ export class ChallengeService {
       challengeId: dto.challengeId,
       activityId: dto.activityId,
       startDatetime: new Date(),
-      status: "started",
+      status: 'started',
       pointsEarned: 0,
     } as any);
   }
@@ -88,19 +89,19 @@ export class ChallengeService {
   async completeChallenge(
     progressId: number,
     userId: number,
-    dto: CompleteChallengeDto
+    dto: CompleteChallengeDto,
   ): Promise<UserChallengeProgress> {
     const progress = await this.progressModel.findByPk(progressId);
 
     if (!progress) {
       throw new NotFoundException(
-        `Challenge progress with ID ${progressId} not found`
+        `Challenge progress with ID ${progressId} not found`,
       );
     }
 
     if (progress.userId !== userId) {
       throw new BadRequestException(
-        "Challenge progress does not belong to you"
+        'Challenge progress does not belong to you',
       );
     }
 
@@ -110,7 +111,7 @@ export class ChallengeService {
       pointsEarned: dto.pointsEarned,
     });
 
-    if (dto.status === "completed" && dto.pointsEarned > 0) {
+    if (dto.status === 'completed' && dto.pointsEarned > 0) {
       const user = await this.userModel.findByPk(userId);
       if (user) {
         await user.update({
@@ -123,12 +124,12 @@ export class ChallengeService {
   }
 
   async getUserChallengeProgress(
-    userId: number
+    userId: number,
   ): Promise<UserChallengeProgress[]> {
     return this.progressModel.findAll({
       where: { userId },
       include: [Challenge, UserActivity],
-      order: [["startDatetime", "DESC"]],
+      order: [['startDatetime', 'DESC']],
     });
   }
 }

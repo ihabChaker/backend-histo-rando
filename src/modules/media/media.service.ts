@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { Podcast } from "./entities/podcast.entity";
-import { ParcoursPodcast } from "@/modules/parcours/entities/parcours-podcast.entity";
-import { Parcours } from "@/modules/parcours/entities/parcours.entity";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Podcast } from './entities/podcast.entity';
+import { ParcoursPodcast } from '@/modules/parcours/entities/parcours-podcast.entity';
+import { Parcours } from '@/modules/parcours/entities/parcours.entity';
 import {
   CreatePodcastDto,
   UpdatePodcastDto,
   AssociatePodcastToParcoursDto,
-} from "./dto/podcast.dto";
+} from './dto/podcast.dto';
 
 @Injectable()
 export class MediaService {
@@ -17,7 +17,7 @@ export class MediaService {
     @InjectModel(ParcoursPodcast)
     private parcoursPodcastModel: typeof ParcoursPodcast,
     @InjectModel(Parcours)
-    private parcoursModel: typeof Parcours
+    private parcoursModel: typeof Parcours,
   ) {}
 
   async createPodcast(createDto: CreatePodcastDto): Promise<Podcast> {
@@ -29,10 +29,10 @@ export class MediaService {
       include: [
         {
           model: Parcours,
-          through: { attributes: ["playOrder", "suggestedKm"] },
+          through: { attributes: ['playOrder', 'suggestedKm'] },
         },
       ],
-      order: [["creationDate", "DESC"]],
+      order: [['creationDate', 'DESC']],
     });
   }
 
@@ -41,7 +41,7 @@ export class MediaService {
       include: [
         {
           model: Parcours,
-          through: { attributes: ["playOrder", "suggestedKm"] },
+          through: { attributes: ['playOrder', 'suggestedKm'] },
         },
       ],
     });
@@ -53,7 +53,7 @@ export class MediaService {
 
   async updatePodcast(
     id: number,
-    updateDto: UpdatePodcastDto
+    updateDto: UpdatePodcastDto,
   ): Promise<Podcast> {
     const podcast = await this.findOnePodcast(id);
     await podcast.update(updateDto);
@@ -67,7 +67,7 @@ export class MediaService {
 
   async associatePodcastToParcours(
     podcastId: number,
-    dto: AssociatePodcastToParcoursDto
+    dto: AssociatePodcastToParcoursDto,
   ): Promise<ParcoursPodcast> {
     // Verify podcast exists
     await this.findOnePodcast(podcastId);
@@ -76,7 +76,7 @@ export class MediaService {
     const parcours = await this.parcoursModel.findByPk(dto.parcoursId);
     if (!parcours) {
       throw new NotFoundException(
-        `Parcours with ID ${dto.parcoursId} not found`
+        `Parcours with ID ${dto.parcoursId} not found`,
       );
     }
 
@@ -94,15 +94,15 @@ export class MediaService {
         {
           model: Parcours,
           where: { id: parcoursId },
-          through: { attributes: ["playOrder", "suggestedKm"] },
+          through: { attributes: ['playOrder', 'suggestedKm'] },
         },
       ],
       order: [
         [
-          { model: Parcours, as: "parcours" },
+          { model: Parcours, as: 'parcours' },
           ParcoursPodcast,
-          "playOrder",
-          "ASC",
+          'playOrder',
+          'ASC',
         ],
       ],
     });
@@ -110,13 +110,13 @@ export class MediaService {
 
   async dissociatePodcastFromParcours(
     podcastId: number,
-    parcoursId: number
+    parcoursId: number,
   ): Promise<void> {
     const association = await this.parcoursPodcastModel.findOne({
       where: { podcastId, parcoursId },
     });
     if (!association) {
-      throw new NotFoundException("Association not found");
+      throw new NotFoundException('Association not found');
     }
     await association.destroy();
   }

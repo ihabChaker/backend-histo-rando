@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { createZodDto } from "nestjs-zod";
-import { ApiProperty } from "@nestjs/swagger";
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
+import { ApiProperty } from '@nestjs/swagger';
 
 export const CreateTreasureHuntSchema = z.object({
   parcoursId: z.number().int().positive(),
@@ -16,7 +16,7 @@ export const CreateTreasureHuntSchema = z.object({
 });
 
 export const UpdateTreasureHuntSchema = CreateTreasureHuntSchema.partial().omit(
-  { parcoursId: true }
+  { parcoursId: true },
 );
 
 export const RecordTreasureFoundSchema = z.object({
@@ -26,33 +26,33 @@ export const RecordTreasureFoundSchema = z.object({
 });
 
 export class CreateTreasureHuntDto extends createZodDto(
-  CreateTreasureHuntSchema
+  CreateTreasureHuntSchema,
 ) {
-  @ApiProperty({ example: 1, description: "ID du parcours" })
+  @ApiProperty({ example: 1, description: 'ID du parcours' })
   parcoursId: number;
 
   @ApiProperty({
-    example: "Bunker caché de la batterie",
-    description: "Nom du trésor",
+    example: 'Bunker caché de la batterie',
+    description: 'Nom du trésor',
   })
   name: string;
 
   @ApiProperty({
     example: "Trouvez le bunker d'observation allemand",
-    description: "Description du trésor",
+    description: 'Description du trésor',
     required: false,
   })
   description?: string;
 
   @ApiProperty({
-    example: "Bunker SK15",
-    description: "Objet cible à trouver",
+    example: 'Bunker SK15',
+    description: 'Objet cible à trouver',
   })
   targetObject: string;
 
   @ApiProperty({
     example: 49.3485,
-    description: "Latitude",
+    description: 'Latitude',
     minimum: -90,
     maximum: 90,
   })
@@ -60,7 +60,7 @@ export class CreateTreasureHuntDto extends createZodDto(
 
   @ApiProperty({
     example: -0.6911,
-    description: "Longitude",
+    description: 'Longitude',
     minimum: -180,
     maximum: 180,
   })
@@ -68,35 +68,35 @@ export class CreateTreasureHuntDto extends createZodDto(
 
   @ApiProperty({
     example: 50,
-    description: "Rayon de scan en mètres",
+    description: 'Rayon de scan en mètres',
     default: 50,
   })
   scanRadiusMeters: number;
 
-  @ApiProperty({ example: 75, description: "Points de récompense" })
+  @ApiProperty({ example: 75, description: 'Points de récompense' })
   pointsReward: number;
 
   @ApiProperty({
-    example: "QR_TREASURE_001",
-    description: "Code QR du trésor",
+    example: 'QR_TREASURE_001',
+    description: 'Code QR du trésor',
     required: false,
   })
   qrCode?: string;
 
-  @ApiProperty({ example: true, description: "Trésor actif", default: true })
+  @ApiProperty({ example: true, description: 'Trésor actif', default: true })
   isActive: boolean;
 }
 
 export class UpdateTreasureHuntDto extends createZodDto(
-  UpdateTreasureHuntSchema
+  UpdateTreasureHuntSchema,
 ) {
-  @ApiProperty({ example: "Trésor mis à jour", required: false })
+  @ApiProperty({ example: 'Trésor mis à jour', required: false })
   name?: string;
 
-  @ApiProperty({ example: "Nouvelle description", required: false })
+  @ApiProperty({ example: 'Nouvelle description', required: false })
   description?: string;
 
-  @ApiProperty({ example: "Nouvel objet", required: false })
+  @ApiProperty({ example: 'Nouvel objet', required: false })
   targetObject?: string;
 
   @ApiProperty({ example: 49.35, required: false })
@@ -111,7 +111,7 @@ export class UpdateTreasureHuntDto extends createZodDto(
   @ApiProperty({ example: 100, required: false })
   pointsReward?: number;
 
-  @ApiProperty({ example: "QR_TREASURE_002", required: false })
+  @ApiProperty({ example: 'QR_TREASURE_002', required: false })
   qrCode?: string;
 
   @ApiProperty({ example: false, required: false })
@@ -119,9 +119,9 @@ export class UpdateTreasureHuntDto extends createZodDto(
 }
 
 export class RecordTreasureFoundDto extends createZodDto(
-  RecordTreasureFoundSchema
+  RecordTreasureFoundSchema,
 ) {
-  @ApiProperty({ example: 1, description: "ID du trésor trouvé" })
+  @ApiProperty({ example: 1, description: 'ID du trésor trouvé' })
   treasureId: number;
 
   @ApiProperty({ example: 49.3485, description: "Latitude de l'utilisateur" })

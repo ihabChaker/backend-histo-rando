@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { createZodDto } from "nestjs-zod";
-import { ApiProperty } from "@nestjs/swagger";
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
+import { ApiProperty } from '@nestjs/swagger';
 
 export const UpdateUserProfileSchema = z.object({
   username: z.string().min(3).max(100).optional(),
@@ -12,41 +12,41 @@ export const UpdateUserProfileSchema = z.object({
 });
 
 export class UpdateUserProfileDto extends createZodDto(
-  UpdateUserProfileSchema
+  UpdateUserProfileSchema,
 ) {
   @ApiProperty({
-    example: "john_updated",
+    example: 'john_updated',
     description: "Nom d'utilisateur",
     required: false,
   })
   username?: string;
 
-  @ApiProperty({ example: "Jean", description: "Prénom", required: false })
+  @ApiProperty({ example: 'Jean', description: 'Prénom', required: false })
   firstName?: string;
 
   @ApiProperty({
-    example: "Dupont",
-    description: "Nom de famille",
+    example: 'Dupont',
+    description: 'Nom de famille',
     required: false,
   })
   lastName?: string;
 
   @ApiProperty({
     example: true,
-    description: "Personne à mobilité réduite",
+    description: 'Personne à mobilité réduite',
     required: false,
   })
   isPmr?: boolean;
 
   @ApiProperty({
-    example: "+33698765432",
-    description: "Numéro de téléphone",
+    example: '+33698765432',
+    description: 'Numéro de téléphone',
     required: false,
   })
   phoneNumber?: string;
 
   @ApiProperty({
-    example: "https://example.com/avatars/john.jpg",
+    example: 'https://example.com/avatars/john.jpg',
     description: "URL de l'avatar",
     required: false,
   })

@@ -2,20 +2,20 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
-} from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { InjectModel } from "@nestjs/sequelize";
-import * as bcrypt from "bcrypt";
-import { User } from "../users/entities/user.entity";
-import { RegisterDto, LoginDto } from "./dto/auth.dto";
-import { AuthResponse, JwtPayload } from "@/common/types/auth.types";
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { InjectModel } from '@nestjs/sequelize';
+import * as bcrypt from 'bcrypt';
+import { User } from '../users/entities/user.entity';
+import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { AuthResponse, JwtPayload } from '@/common/types/auth.types';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -27,7 +27,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException("Email déjà utilisé");
+      throw new ConflictException('Email déjà utilisé');
     }
 
     const existingUsername = await this.userModel.findOne({
@@ -80,14 +80,14 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException("Email ou mot de passe incorrect");
+      throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException("Email ou mot de passe incorrect");
+      throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
     // Generate token
