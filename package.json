@@ -21,7 +21,12 @@
     "migration:generate": "sequelize-cli migration:generate --name",
     "migration:run": "sequelize-cli db:migrate",
     "migration:revert": "sequelize-cli db:migrate:undo",
-    "seed:run": "sequelize-cli db:seed:all"
+    "seed:run": "sequelize-cli db:seed:all",
+    "heroku-postbuild": "npm run build"
+  },
+  "engines": {
+    "node": "20.x",
+    "npm": "10.x"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",

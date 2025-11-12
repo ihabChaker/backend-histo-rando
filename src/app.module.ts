@@ -13,6 +13,7 @@ import { ChallengeModule } from "./modules/challenge/challenge.module";
 import { TreasureHuntModule } from "./modules/treasure-hunt/treasure-hunt.module";
 import { RewardModule } from "./modules/reward/reward.module";
 import { HistoricalModule } from "./modules/historical/historical.module";
+import { HealthModule } from "./modules/health/health.module";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { HistoricalModule } from "./modules/historical/historical.module";
       envFilePath: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
     }),
     DatabaseModule,
+    HealthModule,
     AuthModule,
     UsersModule,
     ParcoursModule,

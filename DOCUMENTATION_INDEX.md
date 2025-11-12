@@ -107,6 +107,49 @@ Bienvenue dans la documentation complète du backend HistoRando ! Ce document vo
 
 ---
 
+### 6. **CI_CD_GUIDE.md** 🔄
+
+**Objectif** : Pipeline d'intégration et déploiement continus
+
+**Contenu** :
+
+- ✅ Architecture du pipeline GitHub Actions
+- ✅ Jobs CI : Lint, Tests, Build, Security Audit
+- ✅ Configuration PostgreSQL pour tests E2E
+- ✅ Artefacts et rapports de tests
+- ✅ Workflow de déploiement (désactivé pour tests)
+- ✅ Simulation locale du pipeline
+- ✅ Dépannage des erreurs CI
+- ✅ Métriques de performance
+- ✅ Activation du déploiement automatique
+
+**À lire pour** : Comprendre le processus de CI/CD et préparer le déploiement
+
+---
+
+### 7. **HEROKU_DEPLOYMENT.md** 🚀
+
+**Objectif** : Guide complet de déploiement sur Heroku
+
+**Contenu** :
+
+- ✅ Configuration Heroku CLI
+- ✅ Création de l'application Heroku
+- ✅ Configuration PostgreSQL (add-on)
+- ✅ Variables d'environnement
+- ✅ Déploiement manuel et automatique
+- ✅ Migrations de base de données
+- ✅ Monitoring et logs
+- ✅ Gestion des backups
+- ✅ Résolution de problèmes courants
+- ✅ Bonnes pratiques de sécurité
+- ✅ Configuration domaine personnalisé
+- ✅ Checklist de déploiement
+
+**À lire avant** : Le déploiement en production
+
+---
+
 ## 🗺️ Parcours d'apprentissage recommandé
 
 ### Pour les débutants

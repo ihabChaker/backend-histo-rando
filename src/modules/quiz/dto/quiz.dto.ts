@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createZodDto } from "nestjs-zod";
+import { ApiProperty } from "@nestjs/swagger";
 
 // Zod Schemas
 export const CreateQuizSchema = z.object({
@@ -51,22 +52,165 @@ export const AssociateQuizToParcoursSchema = z.object({
 });
 
 // DTOs
-export class CreateQuizDto extends createZodDto(CreateQuizSchema) {}
+export class CreateQuizDto extends createZodDto(CreateQuizSchema) {
+  @ApiProperty({ example: "Quiz D-Day", description: "Titre du quiz" })
+  title: string;
 
-export class UpdateQuizDto extends createZodDto(UpdateQuizSchema) {}
+  @ApiProperty({
+    example: "Testez vos connaissances sur le débarquement",
+    description: "Description du quiz",
+    required: false,
+  })
+  description?: string;
 
-export class CreateQuestionDto extends createZodDto(CreateQuestionSchema) {}
+  @ApiProperty({
+    example: "medium",
+    enum: ["easy", "medium", "hard"],
+    description: "Niveau de difficulté",
+    default: "medium",
+  })
+  difficulty: "easy" | "medium" | "hard";
 
-export class UpdateQuestionDto extends createZodDto(UpdateQuestionSchema) {}
+  @ApiProperty({ example: 50, description: "Points de récompense" })
+  pointsReward: number;
 
-export class CreateAnswerDto extends createZodDto(CreateAnswerSchema) {}
+  @ApiProperty({
+    example: true,
+    description: "Quiz actif",
+    default: true,
+  })
+  isActive: boolean;
+}
 
-export class UpdateAnswerDto extends createZodDto(UpdateAnswerSchema) {}
+export class UpdateQuizDto extends createZodDto(UpdateQuizSchema) {
+  @ApiProperty({
+    example: "Quiz D-Day - Édition 2024",
+    description: "Titre du quiz",
+    required: false,
+  })
+  title?: string;
+
+  @ApiProperty({
+    example: "Version mise à jour",
+    description: "Description",
+    required: false,
+  })
+  description?: string;
+
+  @ApiProperty({
+    example: "hard",
+    enum: ["easy", "medium", "hard"],
+    required: false,
+  })
+  difficulty?: "easy" | "medium" | "hard";
+
+  @ApiProperty({ example: 100, required: false })
+  pointsReward?: number;
+
+  @ApiProperty({ example: false, required: false })
+  isActive?: boolean;
+}
+
+export class CreateQuestionDto extends createZodDto(CreateQuestionSchema) {
+  @ApiProperty({ example: 1, description: "ID du quiz" })
+  quizId: number;
+
+  @ApiProperty({
+    example: "Quelle date correspond au débarquement ?",
+    description: "Texte de la question",
+  })
+  questionText: string;
+
+  @ApiProperty({
+    example: "6 juin 1944",
+    description: "Réponse correcte",
+  })
+  correctAnswer: string;
+
+  @ApiProperty({ example: 1, description: "Ordre de la question dans le quiz" })
+  questionOrder: number;
+
+  @ApiProperty({ example: 10, description: "Points pour cette question" })
+  points: number;
+}
+
+export class UpdateQuestionDto extends createZodDto(UpdateQuestionSchema) {
+  @ApiProperty({
+    example: "Question mise à jour",
+    required: false,
+  })
+  questionText?: string;
+
+  @ApiProperty({ example: "Nouvelle réponse", required: false })
+  correctAnswer?: string;
+
+  @ApiProperty({ example: 2, required: false })
+  questionOrder?: number;
+
+  @ApiProperty({ example: 15, required: false })
+  points?: number;
+}
+
+export class CreateAnswerDto extends createZodDto(CreateAnswerSchema) {
+  @ApiProperty({ example: 1, description: "ID de la question" })
+  questionId: number;
+
+  @ApiProperty({ example: "6 juin 1944", description: "Texte de la réponse" })
+  answerText: string;
+
+  @ApiProperty({ example: true, description: "Est-ce la bonne réponse ?" })
+  isCorrect: boolean;
+}
+
+export class UpdateAnswerDto extends createZodDto(UpdateAnswerSchema) {
+  @ApiProperty({ example: "Réponse mise à jour", required: false })
+  answerText?: string;
+
+  @ApiProperty({ example: false, required: false })
+  isCorrect?: boolean;
+}
 
 export class SubmitQuizAttemptDto extends createZodDto(
   SubmitQuizAttemptSchema
-) {}
+) {
+  @ApiProperty({ example: 1, description: "ID du quiz" })
+  quizId: number;
+
+  @ApiProperty({
+    example: [
+      { questionId: 1, answerId: 1 },
+      { questionId: 2, answerId: 4 },
+    ],
+    description: "Liste des réponses",
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        questionId: { type: "number", example: 1 },
+        answerId: { type: "number", example: 1 },
+      },
+    },
+  })
+  answers: Array<{ questionId: number; answerId: number }>;
+
+  @ApiProperty({
+    example: 120,
+    description: "Temps pris en secondes",
+    required: false,
+  })
+  timeTakenSeconds?: number;
+}
 
 export class AssociateQuizToParcoursDto extends createZodDto(
   AssociateQuizToParcoursSchema
-) {}
+) {
+  @ApiProperty({ example: 1, description: "ID du parcours" })
+  parcoursId: number;
+
+  @ApiProperty({
+    example: 5.0,
+    description: "Débloquer après X km du parcours",
+    required: false,
+  })
+  unlockAtKm?: number;
+}
