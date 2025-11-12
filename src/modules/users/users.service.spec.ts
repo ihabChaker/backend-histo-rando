@@ -3,16 +3,28 @@ import { getModelToken } from '@nestjs/sequelize';
 import { NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
+import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
+import { UserPOIVisit } from '@/modules/activity/entities/user-poi-visit.entity';
 import { UpdateUserProfileDto } from './dto/user.dto';
 
 describe('UsersService', () => {
   let service: UsersService;
   let userModel: any;
+  let userActivityModel: any;
+  let userPOIVisitModel: any;
 
   beforeEach(async () => {
     userModel = {
       findByPk: jest.fn(),
       findOne: jest.fn(),
+    };
+
+    userActivityModel = {
+      count: jest.fn(),
+    };
+
+    userPOIVisitModel = {
+      count: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -21,6 +33,14 @@ describe('UsersService', () => {
         {
           provide: getModelToken(User),
           useValue: userModel,
+        },
+        {
+          provide: getModelToken(UserActivity),
+          useValue: userActivityModel,
+        },
+        {
+          provide: getModelToken(UserPOIVisit),
+          useValue: userPOIVisitModel,
         },
       ],
     }).compile();
@@ -88,14 +108,28 @@ describe('UsersService', () => {
         isPmr: false,
       };
       userModel.findByPk.mockResolvedValue(mockUser);
+      userActivityModel.count.mockResolvedValue(5);
+      userPOIVisitModel.count.mockResolvedValue(10);
 
       const result = await service.getUserStats(1);
 
+      expect(userActivityModel.count).toHaveBeenCalledWith({
+        where: { userId: 1 },
+        distinct: true,
+        col: 'parcoursId',
+      });
+      expect(userPOIVisitModel.count).toHaveBeenCalledWith({
+        where: { userId: 1 },
+        distinct: true,
+        col: 'poiId',
+      });
       expect(result).toEqual({
         totalPoints: 100,
         totalKm: 10.5,
         username: 'test',
         isPmr: false,
+        totalParcours: 5,
+        totalPOIsVisited: 10,
       });
     });
   });

@@ -10,6 +10,10 @@ export class UsersService {
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
+    @InjectModel(UserActivity)
+    private userActivityModel: typeof UserActivity,
+    @InjectModel(UserPOIVisit)
+    private userPOIVisitModel: typeof UserPOIVisit,
   ) {}
 
   async findById(id: number): Promise<User> {
@@ -41,13 +45,13 @@ export class UsersService {
     const user = await this.findById(userId);
 
     // Count related activities
-    const totalParcours = await UserActivity.count({
+    const totalParcours = await this.userActivityModel.count({
       where: { userId },
       distinct: true,
       col: 'parcoursId',
     });
 
-    const totalPOIsVisited = await UserPOIVisit.count({
+    const totalPOIsVisited = await this.userPOIVisitModel.count({
       where: { userId },
       distinct: true,
       col: 'poiId',
