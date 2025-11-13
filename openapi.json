@@ -1,0 +1,3170 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "summary": "Health check endpoint",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Application is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "status": "ok",
+                    "timestamp": "2025-11-12T18:30:00.000Z",
+                    "uptime": 12345.67,
+                    "environment": "production",
+                    "version": "1.0.0"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Health"]
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "operationId": "HealthController_ready",
+        "summary": "Readiness check endpoint",
+        "parameters": [],
+        "responses": {
+          "200": { "description": "Application is ready to serve traffic" }
+        },
+        "tags": ["Health"]
+      }
+    },
+    "/api/v1/health/live": {
+      "get": {
+        "operationId": "HealthController_live",
+        "summary": "Liveness check endpoint",
+        "parameters": [],
+        "responses": { "200": { "description": "Application is alive" } },
+        "tags": ["Health"]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "summary": "Inscription d'un nouvel utilisateur",
+        "description": "Créer un nouveau compte utilisateur avec email, username et mot de passe. Retourne un JWT token pour l'authentification.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Informations d'inscription",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterDto" },
+              "examples": {
+                "example1": {
+                  "summary": "Utilisateur standard",
+                  "value": {
+                    "email": "jean.dupont@example.com",
+                    "username": "jeandupont",
+                    "password": "SecurePassword123!",
+                    "firstName": "Jean",
+                    "lastName": "Dupont",
+                    "isPmr": false
+                  }
+                },
+                "example2": {
+                  "summary": "Utilisateur PMR",
+                  "value": {
+                    "email": "marie.martin@example.com",
+                    "username": "mariemartin",
+                    "password": "SecurePassword456!",
+                    "firstName": "Marie",
+                    "lastName": "Martin",
+                    "isPmr": true,
+                    "phoneNumber": "+33612345678"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Utilisateur créé avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "user": {
+                      "id": 1,
+                      "email": "user@example.com",
+                      "username": "johndoe",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "isPmr": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "statusCode": 400,
+                    "message": [
+                      "email must be a valid email",
+                      "password must be at least 8 characters"
+                    ],
+                    "error": "Bad Request"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email ou username déjà utilisé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "statusCode": 409,
+                    "message": "Email déjà utilisé",
+                    "error": "Conflict"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "summary": "Connexion utilisateur",
+        "description": "Authentifier un utilisateur avec email et mot de passe. Retourne un JWT token.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Identifiants de connexion",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginDto" },
+              "examples": {
+                "example1": {
+                  "summary": "Connexion standard",
+                  "value": {
+                    "email": "jean.dupont@example.com",
+                    "password": "SecurePassword123!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connexion réussie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "user": {
+                      "id": 1,
+                      "email": "user@example.com",
+                      "username": "johndoe",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "isPmr": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "statusCode": 400,
+                    "message": ["email must be a valid email"],
+                    "error": "Bad Request"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Email ou mot de passe incorrect",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "statusCode": 401,
+                    "message": "Email ou mot de passe incorrect",
+                    "error": "Unauthorized"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "operationId": "UsersController_getCurrentUser",
+        "summary": "Obtenir le profil de l'utilisateur connecté",
+        "description": "Retourne les informations complètes du profil de l'utilisateur authentifié",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profil utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "username": "johndoe",
+                    "email": "john@example.com",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "isPmr": false,
+                    "totalPoints": 1250,
+                    "totalKm": 45.8,
+                    "avatarUrl": "https://example.com/avatar.jpg",
+                    "registrationDate": "2025-01-15T10:00:00Z"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["users"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "UsersController_updateProfile",
+        "summary": "Mettre à jour le profil utilisateur (PUT)",
+        "description": "Modifier les informations du profil de l'utilisateur connecté",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateUserProfileDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profil mis à jour avec succès" },
+          "404": { "description": "Utilisateur non trouvé" }
+        },
+        "tags": ["users"],
+        "security": [{ "bearer": [] }]
+      },
+      "patch": {
+        "operationId": "UsersController_patchProfile",
+        "summary": "Mettre à jour le profil utilisateur (PATCH)",
+        "description": "Modifier partiellement les informations du profil de l'utilisateur connecté",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateUserProfileDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profil mis à jour avec succès" },
+          "404": { "description": "Utilisateur non trouvé" }
+        },
+        "tags": ["users"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/users/me/stats": {
+      "get": {
+        "operationId": "UsersController_getUserStats",
+        "summary": "Obtenir les statistiques de l'utilisateur",
+        "description": "Retourne les stats cumulées (points, km) de l'utilisateur connecté",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Statistiques utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "totalPoints": 1250,
+                    "totalKm": 45.8,
+                    "username": "johndoe",
+                    "isPmr": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["users"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "operationId": "UsersController_getUserById",
+        "summary": "Obtenir un profil utilisateur par ID",
+        "description": "Retourne les informations publiques d'un utilisateur",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Profil utilisateur trouvé" },
+          "404": { "description": "Utilisateur non trouvé" }
+        },
+        "tags": ["users"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/parcours": {
+      "post": {
+        "operationId": "ParcoursController_create",
+        "summary": "Créer un nouveau parcours",
+        "description": "Créer un parcours de randonnée avec points GPS, difficulté et thème historique",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateParcoursDto" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Parcours créé avec succès" },
+          "400": { "description": "Données invalides" }
+        },
+        "tags": ["parcours"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "ParcoursController_findAll",
+        "summary": "Lister tous les parcours",
+        "description": "Obtenir la liste des parcours avec filtres optionnels (difficulté, PMR, distance)",
+        "parameters": [
+          {
+            "name": "difficultyLevel",
+            "required": false,
+            "in": "query",
+            "description": "Filtrer par niveau de difficulté",
+            "schema": { "enum": ["easy", "medium", "hard"], "type": "string" }
+          },
+          {
+            "name": "isPmrAccessible",
+            "required": false,
+            "in": "query",
+            "description": "Filtrer les parcours accessibles PMR",
+            "schema": { "example": true, "type": "boolean" }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filtrer les parcours actifs",
+            "schema": { "example": true, "type": "boolean" }
+          },
+          {
+            "name": "minDistance",
+            "required": false,
+            "in": "query",
+            "description": "Distance minimale en km",
+            "schema": { "example": 5, "type": "number" }
+          },
+          {
+            "name": "maxDistance",
+            "required": false,
+            "in": "query",
+            "description": "Distance maximale en km",
+            "schema": { "example": 15, "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des parcours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "id": 1,
+                      "name": "Chemin du Débarquement",
+                      "description": "Parcours historique le long des plages du débarquement",
+                      "difficultyLevel": "medium",
+                      "distanceKm": 12.5,
+                      "estimatedDuration": 180,
+                      "isPmrAccessible": true,
+                      "historicalTheme": "D-Day 1944",
+                      "startingPointLat": 49.3394,
+                      "startingPointLon": -0.8566
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": ["parcours"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/parcours/nearby": {
+      "get": {
+        "operationId": "ParcoursController_findNearby",
+        "summary": "Trouver les parcours à proximité",
+        "description": "Rechercher les parcours dans un rayon donné autour d'une position GPS",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "lon",
+            "required": true,
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "radius",
+            "required": false,
+            "in": "query",
+            "description": "Rayon en km (défaut: 50)",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Parcours à proximité" } },
+        "tags": ["parcours"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/parcours/{id}": {
+      "get": {
+        "operationId": "ParcoursController_findOne",
+        "summary": "Obtenir un parcours par ID",
+        "description": "Retourne les détails complets d'un parcours avec ses POI",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Parcours trouvé" },
+          "404": { "description": "Parcours non trouvé" }
+        },
+        "tags": ["parcours"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "ParcoursController_update",
+        "summary": "Mettre à jour un parcours",
+        "description": "Modifier les informations d'un parcours existant",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateParcoursDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Parcours mis à jour" },
+          "404": { "description": "Parcours non trouvé" }
+        },
+        "tags": ["parcours"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "ParcoursController_remove",
+        "summary": "Supprimer un parcours",
+        "description": "Supprimer définitivement un parcours",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Parcours supprimé" },
+          "404": { "description": "Parcours non trouvé" }
+        },
+        "tags": ["parcours"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/poi": {
+      "post": {
+        "operationId": "PoiController_create",
+        "summary": "Créer un nouveau point d'intérêt",
+        "description": "Ajouter un POI (bunker, mémorial, etc.) à un parcours",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreatePOIDto" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "POI créé avec succès" } },
+        "tags": ["poi"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/poi/parcours/{parcoursId}": {
+      "get": {
+        "operationId": "PoiController_findByParcours",
+        "summary": "Lister les POI d'un parcours",
+        "description": "Obtenir tous les points d'intérêt d'un parcours spécifique, triés par ordre",
+        "parameters": [
+          {
+            "name": "parcoursId",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Liste des POI" } },
+        "tags": ["poi"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/poi/{id}": {
+      "get": {
+        "operationId": "PoiController_findOne",
+        "summary": "Obtenir un POI par ID",
+        "description": "Retourne les détails d'un point d'intérêt",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "POI trouvé" },
+          "404": { "description": "POI non trouvé" }
+        },
+        "tags": ["poi"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "PoiController_update",
+        "summary": "Mettre à jour un POI (PUT)",
+        "description": "Modifier les informations d'un point d'intérêt",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdatePOIDto" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "POI mis à jour" } },
+        "tags": ["poi"],
+        "security": [{ "bearer": [] }]
+      },
+      "patch": {
+        "operationId": "PoiController_patchUpdate",
+        "summary": "Mettre à jour un POI (PATCH)",
+        "description": "Modifier partiellement les informations d'un point d'intérêt",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdatePOIDto" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "POI mis à jour" } },
+        "tags": ["poi"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "PoiController_remove",
+        "summary": "Supprimer un POI",
+        "description": "Supprimer définitivement un point d'intérêt",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "POI supprimé" } },
+        "tags": ["poi"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/podcasts": {
+      "post": {
+        "operationId": "MediaController_create",
+        "summary": "Créer un nouveau podcast",
+        "description": "Ajouter un podcast audio avec narrateur et description historique",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreatePodcastDto" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Podcast créé avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "title": "Le Débarquement de Normandie",
+                    "description": "Récit historique du D-Day",
+                    "durationSeconds": 600,
+                    "audioFileUrl": "https://example.com/podcasts/dday.mp3",
+                    "narrator": "Jean Dupont",
+                    "language": "fr",
+                    "thumbnailUrl": "https://example.com/thumbnails/dday.jpg",
+                    "creationDate": "2025-11-12T14:30:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Données invalides" }
+        },
+        "tags": ["media"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "MediaController_findAll",
+        "summary": "Lister tous les podcasts",
+        "description": "Obtenir la liste de tous les podcasts disponibles avec leurs associations aux parcours",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des podcasts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "id": 1,
+                      "title": "Le Débarquement de Normandie",
+                      "durationSeconds": 600,
+                      "narrator": "Jean Dupont",
+                      "language": "fr",
+                      "parcours": [
+                        {
+                          "id": 1,
+                          "name": "Chemin du Débarquement",
+                          "ParcoursPodcast": {
+                            "playOrder": 1,
+                            "suggestedKm": 2.5
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": ["media"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/podcasts/{id}": {
+      "get": {
+        "operationId": "MediaController_findOne",
+        "summary": "Obtenir un podcast par ID",
+        "description": "Retourne les détails complets d'un podcast",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du podcast",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Podcast trouvé" },
+          "404": { "description": "Podcast non trouvé" }
+        },
+        "tags": ["media"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "MediaController_update",
+        "summary": "Mettre à jour un podcast",
+        "description": "Modifier les informations d'un podcast existant",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du podcast",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdatePodcastDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Podcast mis à jour" },
+          "404": { "description": "Podcast non trouvé" }
+        },
+        "tags": ["media"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "MediaController_remove",
+        "summary": "Supprimer un podcast",
+        "description": "Supprimer définitivement un podcast",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du podcast",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Podcast supprimé" },
+          "404": { "description": "Podcast non trouvé" }
+        },
+        "tags": ["media"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/podcasts/{id}/parcours": {
+      "post": {
+        "operationId": "MediaController_associateToParcours",
+        "summary": "Associer un podcast à un parcours",
+        "description": "Créer une association entre un podcast et un parcours avec ordre de lecture",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du podcast",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssociatePodcastToParcoursDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Association créée" },
+          "404": { "description": "Podcast ou parcours non trouvé" }
+        },
+        "tags": ["media"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/podcasts/parcours/{parcoursId}": {
+      "get": {
+        "operationId": "MediaController_getPodcastsByParcours",
+        "summary": "Obtenir les podcasts d'un parcours",
+        "description": "Lister tous les podcasts associés à un parcours spécifique, triés par ordre de lecture",
+        "parameters": [
+          {
+            "name": "parcoursId",
+            "required": true,
+            "in": "path",
+            "description": "ID du parcours",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Liste des podcasts du parcours" }
+        },
+        "tags": ["media"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/podcasts/{podcastId}/parcours/{parcoursId}": {
+      "delete": {
+        "operationId": "MediaController_dissociate",
+        "summary": "Dissocier un podcast d'un parcours",
+        "description": "Supprimer l'association entre un podcast et un parcours",
+        "parameters": [
+          {
+            "name": "podcastId",
+            "required": true,
+            "in": "path",
+            "description": "ID du podcast",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "parcoursId",
+            "required": true,
+            "in": "path",
+            "description": "ID du parcours",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Association supprimée" },
+          "404": { "description": "Association non trouvée" }
+        },
+        "tags": ["media"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/activities": {
+      "post": {
+        "operationId": "ActivityController_startActivity",
+        "summary": "Démarrer une nouvelle activité",
+        "description": "Commencer un parcours (marche, course ou vélo)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateUserActivityDto" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Activité démarrée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "userId": 1,
+                    "parcoursId": 1,
+                    "activityType": "walking",
+                    "startDatetime": "2025-11-12T14:30:00Z",
+                    "status": "in_progress",
+                    "distanceCoveredKm": 0,
+                    "pointsEarned": 0
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Parcours non trouvé" }
+        },
+        "tags": ["activities"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "ActivityController_getUserActivities",
+        "summary": "Obtenir toutes mes activités",
+        "description": "Liste de toutes les activités de l'utilisateur connecté",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des activités",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "id": 1,
+                      "parcoursId": 1,
+                      "activityType": "walking",
+                      "startDatetime": "2025-11-12T14:30:00Z",
+                      "endDatetime": "2025-11-12T17:45:00Z",
+                      "status": "completed",
+                      "distanceCoveredKm": 12.5,
+                      "pointsEarned": 125,
+                      "averageSpeed": 4.2,
+                      "parcours": { "id": 1, "name": "Chemin du Débarquement" }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": ["activities"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/activities/stats": {
+      "get": {
+        "operationId": "ActivityController_getActivityStats",
+        "summary": "Obtenir les statistiques d'activités",
+        "description": "Statistiques globales des activités de l'utilisateur",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Statistiques des activités",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "totalActivities": 10,
+                    "completedActivities": 8,
+                    "totalDistance": 85.3,
+                    "totalPoints": 853,
+                    "totalPOIVisits": 45
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["activities"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/activities/{id}": {
+      "get": {
+        "operationId": "ActivityController_getActivity",
+        "summary": "Obtenir une activité par ID",
+        "description": "Détails complets d'une activité avec POI visités",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de l'activité",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Activité trouvée" },
+          "404": { "description": "Activité non trouvée" }
+        },
+        "tags": ["activities"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "ActivityController_updateActivity",
+        "summary": "Mettre à jour une activité",
+        "description": "Modifier une activité (compléter, abandonner, mettre à jour distance/points)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de l'activité",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateUserActivityDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Activité mise à jour" },
+          "404": { "description": "Activité non trouvée" }
+        },
+        "tags": ["activities"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "ActivityController_deleteActivity",
+        "summary": "Supprimer une activité",
+        "description": "Supprimer une activité de l'historique",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de l'activité",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Activité supprimée" },
+          "404": { "description": "Activité non trouvée" }
+        },
+        "tags": ["activities"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/activities/poi-visits": {
+      "post": {
+        "operationId": "ActivityController_recordPOIVisit",
+        "summary": "Enregistrer une visite de POI",
+        "description": "Marquer un POI comme visité lors d'une activité (scan QR, écoute audio)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RecordPOIVisitDto" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Visite enregistrée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": 1,
+                    "userId": 1,
+                    "poiId": 1,
+                    "activityId": 1,
+                    "visitDatetime": "2025-11-12T15:30:00Z",
+                    "scannedQr": true,
+                    "listenedAudio": true,
+                    "pointsEarned": 10
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "POI déjà visité ou données invalides" }
+        },
+        "tags": ["activities"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/activities/poi-visits/me": {
+      "get": {
+        "operationId": "ActivityController_getUserPOIVisits",
+        "summary": "Obtenir mes visites de POI",
+        "description": "Liste de tous les POI visités par l'utilisateur",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des visites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "id": 1,
+                      "poiId": 1,
+                      "visitDatetime": "2025-11-12T15:30:00Z",
+                      "scannedQr": true,
+                      "listenedAudio": true,
+                      "pointsEarned": 10,
+                      "poi": {
+                        "id": 1,
+                        "name": "Bunker Allemand",
+                        "poiType": "bunker"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": ["activities"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes": {
+      "post": {
+        "operationId": "QuizController_createQuiz",
+        "summary": "Créer un nouveau quiz",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateQuizDto" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Quiz créé" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "QuizController_findAllQuizzes",
+        "summary": "Lister tous les quizzes",
+        "parameters": [],
+        "responses": { "200": { "description": "Liste des quizzes" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes/{id}": {
+      "get": {
+        "operationId": "QuizController_findOneQuiz",
+        "summary": "Obtenir un quiz par ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Quiz trouvé" },
+          "404": { "description": "Quiz non trouvé" }
+        },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "QuizController_updateQuiz",
+        "summary": "Mettre à jour un quiz",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateQuizDto" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Quiz mis à jour" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "QuizController_removeQuiz",
+        "summary": "Supprimer un quiz",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Quiz supprimé" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes/{quizId}/questions": {
+      "post": {
+        "operationId": "QuizController_createQuestion",
+        "summary": "Créer une nouvelle question pour un quiz",
+        "parameters": [
+          {
+            "name": "quizId",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "201": { "description": "Question créée" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes/questions/{id}": {
+      "put": {
+        "operationId": "QuizController_updateQuestion",
+        "summary": "Mettre à jour une question",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la question",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateQuestionDto" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Question mise à jour" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "QuizController_removeQuestion",
+        "summary": "Supprimer une question",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la question",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Question supprimée" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes/questions/{questionId}/answers": {
+      "post": {
+        "operationId": "QuizController_createAnswer",
+        "summary": "Créer une nouvelle réponse pour une question",
+        "parameters": [
+          {
+            "name": "questionId",
+            "required": true,
+            "in": "path",
+            "description": "ID de la question",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "201": { "description": "Réponse créée" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes/answers/{id}": {
+      "put": {
+        "operationId": "QuizController_updateAnswer",
+        "summary": "Mettre à jour une réponse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la réponse",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateAnswerDto" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Réponse mise à jour" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "QuizController_removeAnswer",
+        "summary": "Supprimer une réponse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la réponse",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Réponse supprimée" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes/attempts": {
+      "post": {
+        "operationId": "QuizController_submitQuizAttempt",
+        "summary": "Soumettre une tentative de quiz",
+        "description": "Envoyer les réponses et obtenir le score",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SubmitQuizAttemptDto" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tentative enregistrée avec score",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "attempt": {
+                      "id": 1,
+                      "userId": 1,
+                      "quizId": 1,
+                      "score": 80,
+                      "pointsEarned": 50,
+                      "timeTakenSeconds": 180
+                    },
+                    "score": 80,
+                    "maxScore": 100,
+                    "pointsEarned": 50,
+                    "results": [
+                      { "questionId": 1, "correct": true, "points": 10 },
+                      { "questionId": 2, "correct": false, "points": 0 }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes/attempts/me": {
+      "get": {
+        "operationId": "QuizController_getUserQuizAttempts",
+        "summary": "Obtenir mes tentatives de quiz",
+        "description": "Historique de toutes les tentatives de quiz de l'utilisateur",
+        "parameters": [],
+        "responses": { "200": { "description": "Liste des tentatives" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes/{id}/parcours": {
+      "post": {
+        "operationId": "QuizController_associateQuizToParcours",
+        "summary": "Associer un quiz à un parcours",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssociateQuizToParcoursDto"
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Association créée" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/quizzes/parcours/{parcoursId}": {
+      "get": {
+        "operationId": "QuizController_getQuizzesByParcours",
+        "summary": "Obtenir les quizzes d'un parcours",
+        "parameters": [
+          {
+            "name": "parcoursId",
+            "required": true,
+            "in": "path",
+            "description": "ID du parcours",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Liste des quizzes" } },
+        "tags": ["quiz"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/challenges": {
+      "post": {
+        "operationId": "ChallengeController_create",
+        "summary": "Créer un nouveau défi",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateChallengeDto" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Défi créé" } },
+        "tags": ["challenges"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "ChallengeController_findAll",
+        "summary": "Lister tous les défis actifs",
+        "parameters": [],
+        "responses": { "200": { "description": "Liste des défis" } },
+        "tags": ["challenges"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/challenges/{id}": {
+      "get": {
+        "operationId": "ChallengeController_findOne",
+        "summary": "Obtenir un défi par ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du défi",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Défi trouvé" },
+          "404": { "description": "Défi non trouvé" }
+        },
+        "tags": ["challenges"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "ChallengeController_update",
+        "summary": "Mettre à jour un défi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du défi",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateChallengeDto" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Défi mis à jour" } },
+        "tags": ["challenges"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "ChallengeController_remove",
+        "summary": "Supprimer un défi",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du défi",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Défi supprimé" } },
+        "tags": ["challenges"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/challenges/start": {
+      "post": {
+        "operationId": "ChallengeController_startChallenge",
+        "summary": "Démarrer un défi",
+        "description": "Commencer un défi lors d'une activité",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StartChallengeDto" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Défi démarré" } },
+        "tags": ["challenges"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/challenges/progress/{id}": {
+      "put": {
+        "operationId": "ChallengeController_completeChallenge",
+        "summary": "Compléter un défi",
+        "description": "Marquer un défi comme complété ou échoué",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la progression du défi",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CompleteChallengeDto" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Défi complété" } },
+        "tags": ["challenges"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/challenges/progress/me": {
+      "get": {
+        "operationId": "ChallengeController_getUserProgress",
+        "summary": "Obtenir ma progression des défis",
+        "parameters": [],
+        "responses": { "200": { "description": "Liste des progressions" } },
+        "tags": ["challenges"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/treasure-hunts": {
+      "post": {
+        "operationId": "TreasureHuntController_create",
+        "summary": "Créer une nouvelle chasse au trésor",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateTreasureHuntDto" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Chasse au trésor créée" } },
+        "tags": ["treasure-hunt"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "TreasureHuntController_findAll",
+        "summary": "Lister toutes les chasses au trésor actives",
+        "parameters": [],
+        "responses": {
+          "200": { "description": "Liste des chasses au trésor" }
+        },
+        "tags": ["treasure-hunt"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/treasure-hunts/parcours/{parcoursId}": {
+      "get": {
+        "operationId": "TreasureHuntController_findByParcours",
+        "summary": "Obtenir les chasses au trésor d'un parcours",
+        "parameters": [
+          {
+            "name": "parcoursId",
+            "required": true,
+            "in": "path",
+            "description": "ID du parcours",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Liste des chasses au trésor" }
+        },
+        "tags": ["treasure-hunt"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/treasure-hunts/{id}": {
+      "get": {
+        "operationId": "TreasureHuntController_findOne",
+        "summary": "Obtenir une chasse au trésor par ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la chasse au trésor",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Chasse au trésor trouvée" },
+          "404": { "description": "Chasse au trésor non trouvée" }
+        },
+        "tags": ["treasure-hunt"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "TreasureHuntController_update",
+        "summary": "Mettre à jour une chasse au trésor",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la chasse au trésor",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateTreasureHuntDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Chasse au trésor mise à jour" }
+        },
+        "tags": ["treasure-hunt"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "TreasureHuntController_remove",
+        "summary": "Supprimer une chasse au trésor",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la chasse au trésor",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Chasse au trésor supprimée" } },
+        "tags": ["treasure-hunt"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/treasure-hunts/found": {
+      "post": {
+        "operationId": "TreasureHuntController_recordFound",
+        "summary": "Enregistrer une découverte de trésor",
+        "description": "Marquer un trésor comme trouvé si l'utilisateur est dans le rayon de scan",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordTreasureFoundDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Trésor trouvé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "found": {
+                      "id": 1,
+                      "userId": 1,
+                      "treasureId": 1,
+                      "foundDatetime": "2025-11-12T16:00:00Z",
+                      "pointsEarned": 75
+                    },
+                    "message": "Félicitations ! Vous avez trouvé le trésor !",
+                    "pointsEarned": 75
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Trésor déjà trouvé ou trop loin" }
+        },
+        "tags": ["treasure-hunt"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/treasure-hunts/found/me": {
+      "get": {
+        "operationId": "TreasureHuntController_getUserTreasures",
+        "summary": "Obtenir mes trésors trouvés",
+        "parameters": [],
+        "responses": { "200": { "description": "Liste des trésors trouvés" } },
+        "tags": ["treasure-hunt"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/rewards": {
+      "post": {
+        "operationId": "RewardController_create",
+        "summary": "Créer une nouvelle récompense",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateRewardDto" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Récompense créée" } },
+        "tags": ["rewards"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "RewardController_findAll",
+        "summary": "Lister toutes les récompenses disponibles",
+        "parameters": [],
+        "responses": { "200": { "description": "Liste des récompenses" } },
+        "tags": ["rewards"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/rewards/{id}": {
+      "get": {
+        "operationId": "RewardController_findOne",
+        "summary": "Obtenir une récompense par ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la récompense",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Récompense trouvée" },
+          "404": { "description": "Récompense non trouvée" }
+        },
+        "tags": ["rewards"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "RewardController_update",
+        "summary": "Mettre à jour une récompense",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la récompense",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateRewardDto" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Récompense mise à jour" } },
+        "tags": ["rewards"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "RewardController_remove",
+        "summary": "Supprimer une récompense",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la récompense",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Récompense supprimée" } },
+        "tags": ["rewards"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/rewards/redeem": {
+      "post": {
+        "operationId": "RewardController_redeem",
+        "summary": "Échanger des points contre une récompense",
+        "description": "Utiliser vos points pour obtenir une récompense",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RedeemRewardDto" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Récompense échangée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "redemption": {
+                      "id": 1,
+                      "userId": 1,
+                      "rewardId": 1,
+                      "redemptionDatetime": "2025-11-12T17:00:00Z",
+                      "pointsSpent": 500,
+                      "status": "pending",
+                      "redemptionCode": "RWD-1731425000-ABC123"
+                    },
+                    "message": "Reward redeemed successfully",
+                    "redemptionCode": "RWD-1731425000-ABC123"
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Points insuffisants ou stock épuisé" }
+        },
+        "tags": ["rewards"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/rewards/redemptions/me": {
+      "get": {
+        "operationId": "RewardController_getUserRedemptions",
+        "summary": "Obtenir mes échanges de récompenses",
+        "parameters": [],
+        "responses": { "200": { "description": "Liste des échanges" } },
+        "tags": ["rewards"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/historical/battalions": {
+      "post": {
+        "operationId": "HistoricalController_createBattalion",
+        "summary": "Créer un nouveau bataillon historique",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateBattalionDto" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Bataillon créé" } },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "HistoricalController_findAllBattalions",
+        "summary": "Lister tous les bataillons historiques",
+        "parameters": [],
+        "responses": { "200": { "description": "Liste des bataillons" } },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/historical/battalions/{id}": {
+      "get": {
+        "operationId": "HistoricalController_findOneBattalion",
+        "summary": "Obtenir un bataillon par ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du bataillon",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Bataillon trouvé" },
+          "404": { "description": "Bataillon non trouvé" }
+        },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      },
+      "put": {
+        "operationId": "HistoricalController_updateBattalion",
+        "summary": "Mettre à jour un bataillon",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du bataillon",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateBattalionDto" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Bataillon mis à jour" } },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "HistoricalController_removeBattalion",
+        "summary": "Supprimer un bataillon",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du bataillon",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Bataillon supprimé" } },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/historical/routes": {
+      "post": {
+        "operationId": "HistoricalController_createBattalionRoute",
+        "summary": "Créer une nouvelle route de bataillon",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBattalionRouteDto"
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Route créée" } },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/historical/routes/battalion/{battalionId}": {
+      "get": {
+        "operationId": "HistoricalController_findRoutesByBattalion",
+        "summary": "Obtenir les routes d'un bataillon",
+        "parameters": [
+          {
+            "name": "battalionId",
+            "required": true,
+            "in": "path",
+            "description": "ID du bataillon",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Liste des routes" } },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/historical/routes/parcours/{parcoursId}": {
+      "get": {
+        "operationId": "HistoricalController_findRoutesByParcours",
+        "summary": "Obtenir l'historique des bataillons d'un parcours",
+        "parameters": [
+          {
+            "name": "parcoursId",
+            "required": true,
+            "in": "path",
+            "description": "ID du parcours",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Liste des routes historiques" }
+        },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/v1/historical/routes/{id}": {
+      "put": {
+        "operationId": "HistoricalController_updateBattalionRoute",
+        "summary": "Mettre à jour une route de bataillon",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la route",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBattalionRouteDto"
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Route mise à jour" } },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "HistoricalController_removeBattalionRoute",
+        "summary": "Supprimer une route de bataillon",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID de la route",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": { "200": { "description": "Route supprimée" } },
+        "tags": ["historical"],
+        "security": [{ "bearer": [] }]
+      }
+    }
+  },
+  "info": {
+    "title": "HistoRando API",
+    "description": "API Backend pour HistoRando - Randonnées historiques en Normandie. Cette API permet de gérer les parcours, points d'intérêt, activités utilisateur, quizzes, challenges, chasses aux trésors et récompenses.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    { "name": "auth", "description": "Authentification et autorisation" },
+    { "name": "users", "description": "Gestion des profils utilisateurs" },
+    { "name": "parcours", "description": "Gestion des parcours de randonnée" },
+    { "name": "poi", "description": "Points d'intérêt historiques" },
+    { "name": "media", "description": "Gestion des médias (podcasts, images)" },
+    { "name": "activities", "description": "Suivi des activités utilisateur" },
+    { "name": "quiz", "description": "Quizzes et questions" },
+    { "name": "challenges", "description": "Défis physiques" },
+    { "name": "treasure-hunt", "description": "Chasse aux trésors" },
+    { "name": "rewards", "description": "Système de récompenses" },
+    { "name": "historical", "description": "Données historiques (bataillons)" }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": { "scheme": "bearer", "bearerFormat": "JWT", "type": "http" }
+    },
+    "schemas": {
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "johndoe",
+            "description": "Nom d'utilisateur unique",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "description": "Adresse email",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "example": "SecurePass123!",
+            "description": "Mot de passe",
+            "minLength": 8,
+            "maxLength": 100,
+            "format": "password"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John",
+            "description": "Prénom"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe",
+            "description": "Nom de famille"
+          },
+          "isPmr": {
+            "type": "boolean",
+            "example": false,
+            "description": "Personne à mobilité réduite",
+            "default": false
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+33612345678",
+            "description": "Numéro de téléphone"
+          }
+        },
+        "required": ["username", "email", "password"]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com",
+            "description": "Adresse email",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "example": "SecurePass123!",
+            "description": "Mot de passe",
+            "format": "password"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "UpdateUserProfileDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "john_updated",
+            "description": "Nom d'utilisateur"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jean",
+            "description": "Prénom"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Dupont",
+            "description": "Nom de famille"
+          },
+          "isPmr": {
+            "type": "boolean",
+            "example": true,
+            "description": "Personne à mobilité réduite"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+33698765432",
+            "description": "Numéro de téléphone"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "example": "https://example.com/avatars/john.jpg",
+            "description": "URL de l'avatar"
+          }
+        }
+      },
+      "CreateParcoursDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Plages du Débarquement",
+            "description": "Nom du parcours"
+          },
+          "description": {
+            "type": "string",
+            "example": "Un parcours historique le long des plages du débarquement de Normandie",
+            "description": "Description du parcours"
+          },
+          "difficultyLevel": {
+            "type": "string",
+            "example": "medium",
+            "enum": ["easy", "medium", "hard"],
+            "description": "Niveau de difficulté"
+          },
+          "distanceKm": {
+            "type": "number",
+            "example": 8.5,
+            "description": "Distance en kilomètres"
+          },
+          "estimatedDuration": {
+            "type": "number",
+            "example": 180,
+            "description": "Durée estimée en minutes"
+          },
+          "isPmrAccessible": {
+            "type": "boolean",
+            "example": true,
+            "description": "Accessible aux personnes à mobilité réduite",
+            "default": false
+          },
+          "historicalTheme": {
+            "type": "string",
+            "example": "Débarquement de Normandie",
+            "description": "Thème historique"
+          },
+          "startingPointLat": {
+            "type": "number",
+            "example": 49.3714,
+            "description": "Latitude du point de départ",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "startingPointLon": {
+            "type": "number",
+            "example": -0.8494,
+            "description": "Longitude du point de départ",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "gpxFileUrl": {
+            "type": "string",
+            "example": "https://example.com/tracks/parcours1.gpx",
+            "description": "URL du fichier GPX"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://example.com/images/parcours1.jpg",
+            "description": "URL de l'image"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true,
+            "description": "Parcours actif",
+            "default": true
+          }
+        },
+        "required": [
+          "name",
+          "difficultyLevel",
+          "distanceKm",
+          "estimatedDuration",
+          "startingPointLat",
+          "startingPointLon"
+        ]
+      },
+      "UpdateParcoursDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Plages du Débarquement - Mise à jour",
+            "description": "Nom du parcours"
+          },
+          "description": {
+            "type": "string",
+            "example": "Description mise à jour",
+            "description": "Description du parcours"
+          },
+          "difficultyLevel": {
+            "type": "string",
+            "example": "hard",
+            "enum": ["easy", "medium", "hard"],
+            "description": "Niveau de difficulté"
+          },
+          "distanceKm": {
+            "type": "number",
+            "example": 10,
+            "description": "Distance en kilomètres"
+          },
+          "estimatedDuration": {
+            "type": "number",
+            "example": 240,
+            "description": "Durée estimée en minutes"
+          },
+          "isPmrAccessible": {
+            "type": "boolean",
+            "example": false,
+            "description": "Accessible aux PMR"
+          },
+          "historicalTheme": {
+            "type": "string",
+            "example": "Seconde Guerre Mondiale",
+            "description": "Thème historique"
+          },
+          "startingPointLat": {
+            "type": "number",
+            "example": 49.3714,
+            "description": "Latitude du point de départ"
+          },
+          "startingPointLon": {
+            "type": "number",
+            "example": -0.8494,
+            "description": "Longitude du point de départ"
+          },
+          "gpxFileUrl": {
+            "type": "string",
+            "example": "https://example.com/tracks/updated.gpx",
+            "description": "URL du fichier GPX"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://example.com/images/updated.jpg",
+            "description": "URL de l'image"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": false,
+            "description": "Parcours actif"
+          }
+        }
+      },
+      "CreatePOIDto": {
+        "type": "object",
+        "properties": {
+          "parcoursId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du parcours associé"
+          },
+          "name": {
+            "type": "string",
+            "example": "Batterie de Longues-sur-Mer",
+            "description": "Nom du point d'intérêt"
+          },
+          "description": {
+            "type": "string",
+            "example": "Batterie côtière allemande construite en 1943",
+            "description": "Description détaillée"
+          },
+          "poiType": {
+            "type": "string",
+            "example": "bunker",
+            "enum": [
+              "bunker",
+              "blockhaus",
+              "memorial",
+              "museum",
+              "beach",
+              "monument"
+            ],
+            "description": "Type de POI"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 49.3485,
+            "description": "Latitude",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "example": -0.6911,
+            "description": "Longitude",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "historicalPeriod": {
+            "type": "string",
+            "example": "Seconde Guerre Mondiale",
+            "description": "Période historique"
+          },
+          "orderInParcours": {
+            "type": "number",
+            "example": 1,
+            "description": "Ordre dans le parcours"
+          },
+          "qrCode": {
+            "type": "string",
+            "example": "QR_LONGUES_001",
+            "description": "Code QR pour scanner"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://example.com/images/longues.jpg",
+            "description": "URL de l'image"
+          },
+          "audioUrl": {
+            "type": "string",
+            "example": "https://example.com/audio/longues.mp3",
+            "description": "URL du podcast audio"
+          }
+        },
+        "required": [
+          "parcoursId",
+          "name",
+          "poiType",
+          "latitude",
+          "longitude",
+          "orderInParcours"
+        ]
+      },
+      "UpdatePOIDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Batterie de Longues - Mise à jour",
+            "description": "Nom du point d'intérêt"
+          },
+          "description": {
+            "type": "string",
+            "example": "Description mise à jour",
+            "description": "Description détaillée"
+          },
+          "poiType": {
+            "type": "string",
+            "example": "memorial",
+            "enum": [
+              "bunker",
+              "blockhaus",
+              "memorial",
+              "museum",
+              "beach",
+              "monument"
+            ],
+            "description": "Type de POI"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 49.35,
+            "description": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "example": -0.69,
+            "description": "Longitude"
+          },
+          "historicalPeriod": {
+            "type": "string",
+            "example": "1939-1945",
+            "description": "Période historique"
+          },
+          "orderInParcours": {
+            "type": "number",
+            "example": 2,
+            "description": "Ordre dans le parcours"
+          },
+          "qrCode": {
+            "type": "string",
+            "example": "QR_UPDATED_001",
+            "description": "Code QR"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://example.com/images/updated.jpg",
+            "description": "URL de l'image"
+          },
+          "audioUrl": {
+            "type": "string",
+            "example": "https://example.com/audio/updated.mp3",
+            "description": "URL du podcast"
+          }
+        }
+      },
+      "CreatePodcastDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Le débarquement du 6 juin 1944",
+            "description": "Titre du podcast"
+          },
+          "description": {
+            "type": "string",
+            "example": "Récit détaillé des événements du jour J",
+            "description": "Description du podcast"
+          },
+          "durationSeconds": {
+            "type": "number",
+            "example": 420,
+            "description": "Durée en secondes"
+          },
+          "audioFileUrl": {
+            "type": "string",
+            "example": "https://example.com/podcasts/d-day.mp3",
+            "description": "URL du fichier audio"
+          },
+          "narrator": {
+            "type": "string",
+            "example": "Jean Dupont",
+            "description": "Narrateur"
+          },
+          "language": {
+            "type": "string",
+            "example": "fr",
+            "description": "Langue",
+            "default": "fr"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "example": "https://example.com/thumbnails/d-day.jpg",
+            "description": "URL de la miniature"
+          }
+        },
+        "required": ["title", "durationSeconds", "audioFileUrl", "language"]
+      },
+      "UpdatePodcastDto": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "example": "Titre mis à jour" },
+          "description": {
+            "type": "string",
+            "example": "Nouvelle description"
+          },
+          "durationSeconds": { "type": "number", "example": 600 },
+          "audioFileUrl": {
+            "type": "string",
+            "example": "https://example.com/new.mp3"
+          },
+          "narrator": { "type": "string", "example": "Marie Martin" },
+          "language": { "type": "string", "example": "en" },
+          "thumbnailUrl": {
+            "type": "string",
+            "example": "https://example.com/new.jpg"
+          }
+        }
+      },
+      "AssociatePodcastToParcoursDto": {
+        "type": "object",
+        "properties": {
+          "parcoursId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du parcours"
+          },
+          "playOrder": {
+            "type": "number",
+            "example": 1,
+            "description": "Ordre de lecture"
+          },
+          "suggestedKm": {
+            "type": "number",
+            "example": 3.5,
+            "description": "Kilomètre suggéré pour la lecture"
+          }
+        },
+        "required": ["parcoursId", "playOrder"]
+      },
+      "CreateUserActivityDto": {
+        "type": "object",
+        "properties": {
+          "parcoursId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du parcours"
+          },
+          "activityType": {
+            "type": "string",
+            "example": "walking",
+            "enum": ["walking", "running", "cycling"],
+            "description": "Type d'activité",
+            "default": "walking"
+          }
+        },
+        "required": ["parcoursId", "activityType"]
+      },
+      "UpdateUserActivityDto": {
+        "type": "object",
+        "properties": {
+          "endDatetime": {
+            "type": "string",
+            "example": "2024-11-12T18:30:00Z",
+            "description": "Date et heure de fin"
+          },
+          "distanceCoveredKm": {
+            "type": "number",
+            "example": 8.5,
+            "description": "Distance parcourue en km"
+          },
+          "pointsEarned": {
+            "type": "number",
+            "example": 150,
+            "description": "Points gagnés"
+          },
+          "status": {
+            "type": "string",
+            "example": "completed",
+            "enum": ["in_progress", "completed", "abandoned"],
+            "description": "Statut de l'activité"
+          },
+          "averageSpeed": {
+            "type": "number",
+            "example": 10.5,
+            "description": "Vitesse moyenne en km/h"
+          },
+          "gpxTraceUrl": {
+            "type": "string",
+            "example": "https://example.com/traces/activity123.gpx",
+            "description": "URL de la trace GPX"
+          }
+        }
+      },
+      "RecordPOIVisitDto": {
+        "type": "object",
+        "properties": {
+          "poiId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du POI visité"
+          },
+          "activityId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID de l'activité en cours"
+          },
+          "scannedQr": {
+            "type": "boolean",
+            "example": true,
+            "description": "QR code scanné"
+          },
+          "listenedAudio": {
+            "type": "boolean",
+            "example": true,
+            "description": "Audio écouté"
+          },
+          "pointsEarned": {
+            "type": "number",
+            "example": 10,
+            "description": "Points gagnés pour cette visite"
+          }
+        },
+        "required": ["poiId"]
+      },
+      "CreateQuizDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Quiz D-Day",
+            "description": "Titre du quiz"
+          },
+          "description": {
+            "type": "string",
+            "example": "Testez vos connaissances sur le débarquement",
+            "description": "Description du quiz"
+          },
+          "difficulty": {
+            "type": "string",
+            "example": "medium",
+            "enum": ["easy", "medium", "hard"],
+            "description": "Niveau de difficulté",
+            "default": "medium"
+          },
+          "pointsReward": {
+            "type": "number",
+            "example": 50,
+            "description": "Points de récompense"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true,
+            "description": "Quiz actif",
+            "default": true
+          }
+        },
+        "required": ["title", "difficulty", "pointsReward", "isActive"]
+      },
+      "UpdateQuizDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Quiz D-Day - Édition 2024",
+            "description": "Titre du quiz"
+          },
+          "description": {
+            "type": "string",
+            "example": "Version mise à jour",
+            "description": "Description"
+          },
+          "difficulty": {
+            "type": "string",
+            "example": "hard",
+            "enum": ["easy", "medium", "hard"]
+          },
+          "pointsReward": { "type": "number", "example": 100 },
+          "isActive": { "type": "boolean", "example": false }
+        }
+      },
+      "UpdateQuestionDto": {
+        "type": "object",
+        "properties": {
+          "questionText": {
+            "type": "string",
+            "example": "Question mise à jour"
+          },
+          "correctAnswer": { "type": "string", "example": "Nouvelle réponse" },
+          "questionOrder": { "type": "number", "example": 2 },
+          "points": { "type": "number", "example": 15 }
+        }
+      },
+      "UpdateAnswerDto": {
+        "type": "object",
+        "properties": {
+          "answerText": { "type": "string", "example": "Réponse mise à jour" },
+          "isCorrect": { "type": "boolean", "example": false }
+        }
+      },
+      "SubmitQuizAttemptDto": {
+        "type": "object",
+        "properties": {
+          "quizId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du quiz"
+          },
+          "answers": {
+            "type": "array",
+            "example": [
+              { "questionId": 1, "answerId": 1 },
+              { "questionId": 2, "answerId": 4 }
+            ],
+            "description": "Liste des réponses",
+            "items": {
+              "type": "object",
+              "properties": {
+                "questionId": { "type": "number", "example": 1 },
+                "answerId": { "type": "number", "example": 1 }
+              }
+            }
+          },
+          "timeTakenSeconds": {
+            "type": "number",
+            "example": 120,
+            "description": "Temps pris en secondes"
+          }
+        },
+        "required": ["quizId", "answers"]
+      },
+      "AssociateQuizToParcoursDto": {
+        "type": "object",
+        "properties": {
+          "parcoursId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du parcours"
+          },
+          "unlockAtKm": {
+            "type": "number",
+            "example": 5,
+            "description": "Débloquer après X km du parcours"
+          }
+        },
+        "required": ["parcoursId"]
+      },
+      "CreateChallengeDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Marche avec sac lesté",
+            "description": "Nom du challenge"
+          },
+          "description": {
+            "type": "string",
+            "example": "Parcourir 5km avec un sac de 10kg",
+            "description": "Description du challenge"
+          },
+          "challengeType": {
+            "type": "string",
+            "example": "weighted_backpack",
+            "enum": [
+              "weighted_backpack",
+              "period_clothing",
+              "distance",
+              "time"
+            ],
+            "description": "Type de challenge"
+          },
+          "pointsReward": {
+            "type": "number",
+            "example": 100,
+            "description": "Points de récompense"
+          },
+          "difficultyMultiplier": {
+            "type": "number",
+            "example": 1.5,
+            "description": "Multiplicateur de difficulté",
+            "default": 1
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true,
+            "description": "Challenge actif",
+            "default": true
+          }
+        },
+        "required": [
+          "name",
+          "challengeType",
+          "pointsReward",
+          "difficultyMultiplier",
+          "isActive"
+        ]
+      },
+      "UpdateChallengeDto": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Challenge mis à jour" },
+          "description": {
+            "type": "string",
+            "example": "Nouvelle description"
+          },
+          "challengeType": {
+            "type": "string",
+            "example": "distance",
+            "enum": ["weighted_backpack", "period_clothing", "distance", "time"]
+          },
+          "pointsReward": { "type": "number", "example": 150 },
+          "difficultyMultiplier": { "type": "number", "example": 2 },
+          "isActive": { "type": "boolean", "example": false }
+        }
+      },
+      "StartChallengeDto": {
+        "type": "object",
+        "properties": {
+          "challengeId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du challenge"
+          },
+          "activityId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID de l'activité"
+          }
+        },
+        "required": ["challengeId", "activityId"]
+      },
+      "CompleteChallengeDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "completed",
+            "enum": ["completed", "failed"],
+            "description": "Statut du challenge"
+          },
+          "pointsEarned": {
+            "type": "number",
+            "example": 100,
+            "description": "Points gagnés"
+          }
+        },
+        "required": ["status", "pointsEarned"]
+      },
+      "CreateTreasureHuntDto": {
+        "type": "object",
+        "properties": {
+          "parcoursId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du parcours"
+          },
+          "name": {
+            "type": "string",
+            "example": "Bunker caché de la batterie",
+            "description": "Nom du trésor"
+          },
+          "description": {
+            "type": "string",
+            "example": "Trouvez le bunker d'observation allemand",
+            "description": "Description du trésor"
+          },
+          "targetObject": {
+            "type": "string",
+            "example": "Bunker SK15",
+            "description": "Objet cible à trouver"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 49.3485,
+            "description": "Latitude",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "example": -0.6911,
+            "description": "Longitude",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "scanRadiusMeters": {
+            "type": "number",
+            "example": 50,
+            "description": "Rayon de scan en mètres",
+            "default": 50
+          },
+          "pointsReward": {
+            "type": "number",
+            "example": 75,
+            "description": "Points de récompense"
+          },
+          "qrCode": {
+            "type": "string",
+            "example": "QR_TREASURE_001",
+            "description": "Code QR du trésor"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true,
+            "description": "Trésor actif",
+            "default": true
+          }
+        },
+        "required": [
+          "parcoursId",
+          "name",
+          "targetObject",
+          "latitude",
+          "longitude",
+          "scanRadiusMeters",
+          "pointsReward",
+          "isActive"
+        ]
+      },
+      "UpdateTreasureHuntDto": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Trésor mis à jour" },
+          "description": {
+            "type": "string",
+            "example": "Nouvelle description"
+          },
+          "targetObject": { "type": "string", "example": "Nouvel objet" },
+          "latitude": { "type": "number", "example": 49.35 },
+          "longitude": { "type": "number", "example": -0.69 },
+          "scanRadiusMeters": { "type": "number", "example": 100 },
+          "pointsReward": { "type": "number", "example": 100 },
+          "qrCode": { "type": "string", "example": "QR_TREASURE_002" },
+          "isActive": { "type": "boolean", "example": false }
+        }
+      },
+      "RecordTreasureFoundDto": {
+        "type": "object",
+        "properties": {
+          "treasureId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du trésor trouvé"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 49.3485,
+            "description": "Latitude de l'utilisateur"
+          },
+          "longitude": {
+            "type": "number",
+            "example": -0.6911,
+            "description": "Longitude de l'utilisateur"
+          }
+        },
+        "required": ["treasureId", "latitude", "longitude"]
+      },
+      "CreateRewardDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Réduction Musée de Caen",
+            "description": "Nom de la récompense"
+          },
+          "description": {
+            "type": "string",
+            "example": "10% de réduction sur l'entrée au Mémorial de Caen",
+            "description": "Description de la récompense"
+          },
+          "pointsCost": {
+            "type": "number",
+            "example": 500,
+            "description": "Coût en points"
+          },
+          "rewardType": {
+            "type": "string",
+            "example": "discount",
+            "enum": ["discount", "gift", "badge", "premium_content"],
+            "description": "Type de récompense"
+          },
+          "partnerName": {
+            "type": "string",
+            "example": "Mémorial de Caen",
+            "description": "Nom du partenaire"
+          },
+          "stockQuantity": {
+            "type": "number",
+            "example": 100,
+            "description": "Quantité en stock"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://example.com/rewards/memorial.jpg",
+            "description": "URL de l'image"
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "example": true,
+            "description": "Récompense disponible",
+            "default": true
+          }
+        },
+        "required": [
+          "name",
+          "pointsCost",
+          "rewardType",
+          "stockQuantity",
+          "isAvailable"
+        ]
+      },
+      "UpdateRewardDto": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Récompense mise à jour" },
+          "description": {
+            "type": "string",
+            "example": "Nouvelle description"
+          },
+          "pointsCost": { "type": "number", "example": 600 },
+          "rewardType": {
+            "type": "string",
+            "example": "gift",
+            "enum": ["discount", "gift", "badge", "premium_content"]
+          },
+          "partnerName": { "type": "string", "example": "Nouveau partenaire" },
+          "stockQuantity": { "type": "number", "example": 50 },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://example.com/new.jpg"
+          },
+          "isAvailable": { "type": "boolean", "example": false }
+        }
+      },
+      "RedeemRewardDto": {
+        "type": "object",
+        "properties": {
+          "rewardId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID de la récompense à échanger"
+          }
+        },
+        "required": ["rewardId"]
+      },
+      "CreateBattalionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "2nd Ranger Battalion",
+            "description": "Nom du bataillon"
+          },
+          "country": {
+            "type": "string",
+            "example": "USA",
+            "description": "Pays d'origine"
+          },
+          "militaryUnit": {
+            "type": "string",
+            "example": "US Army Rangers",
+            "description": "Unité militaire"
+          },
+          "period": {
+            "type": "string",
+            "example": "Seconde Guerre Mondiale",
+            "description": "Période historique"
+          },
+          "description": {
+            "type": "string",
+            "example": "Bataillon d'élite américain ayant participé au débarquement",
+            "description": "Description"
+          }
+        },
+        "required": ["name", "country"]
+      },
+      "UpdateBattalionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "2nd Ranger Battalion - Mise à jour"
+          },
+          "country": { "type": "string", "example": "États-Unis" },
+          "militaryUnit": { "type": "string", "example": "Rangers" },
+          "period": { "type": "string", "example": "1944-1945" },
+          "description": { "type": "string", "example": "Nouvelle description" }
+        }
+      },
+      "CreateBattalionRouteDto": {
+        "type": "object",
+        "properties": {
+          "battalionId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du bataillon"
+          },
+          "parcoursId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID du parcours"
+          },
+          "routeDate": {
+            "type": "string",
+            "example": "1944-06-06",
+            "description": "Date de la route (YYYY-MM-DD)"
+          },
+          "historicalContext": {
+            "type": "string",
+            "example": "Route d'assaut vers la Pointe du Hoc",
+            "description": "Contexte historique"
+          }
+        },
+        "required": ["battalionId", "parcoursId", "routeDate"]
+      },
+      "UpdateBattalionRouteDto": {
+        "type": "object",
+        "properties": {
+          "routeDate": {
+            "type": "string",
+            "example": "1944-06-07",
+            "description": "Date de la route"
+          },
+          "historicalContext": {
+            "type": "string",
+            "example": "Contexte mis à jour"
+          }
+        }
+      }
+    }
+  }
+}
