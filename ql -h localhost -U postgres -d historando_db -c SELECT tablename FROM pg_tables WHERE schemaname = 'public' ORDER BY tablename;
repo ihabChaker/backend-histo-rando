@@ -1,0 +1,25 @@
+                   List of tables
+ Schema |          Name           | Type  |  Owner   
+--------+-------------------------+-------+----------
+ public | answers                 | table | postgres
+ public | battalion_routes        | table | postgres
+ public | challenges              | table | postgres
+ public | historical_battalions   | table | postgres
+ public | parcours                | table | postgres
+ public | parcours_podcasts       | table | postgres
+ public | parcours_quizzes        | table | postgres
+ public | podcasts                | table | postgres
+ public | points_of_interest      | table | postgres
+ public | questions               | table | postgres
+ public | quizzes                 | table | postgres
+ public | rewards                 | table | postgres
+ public | treasure_hunts          | table | postgres
+ public | user_activities         | table | postgres
+ public | user_challenge_progress | table | postgres
+ public | user_poi_visits         | table | postgres
+ public | user_quiz_attempts      | table | postgres
+ public | user_rewards_redeemed   | table | postgres
+ public | user_treasures_found    | table | postgres
+ public | users                   | table | postgres
+(20 rows)
+

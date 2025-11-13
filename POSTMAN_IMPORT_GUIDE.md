@@ -146,7 +146,7 @@ Après l'import, vous devrez configurer l'authentification Bearer Token:
 
    ```
    base_url: http://localhost:3000
-   access_token: (sera rempli après le login)
+   bearerToken: (sera rempli après le login)
    ```
 
 3. **Sauvegarder et activer l'environnement**
@@ -159,7 +159,7 @@ Après l'import, vous devrez configurer l'authentification Bearer Token:
      ```javascript
      pm.test('Login successful', function () {
        const response = pm.response.json();
-       pm.environment.set('access_token', response.access_token);
+       pm.environment.set('bearerToken', response.access_token);
      });
      ```
    - Le token sera automatiquement sauvegardé
