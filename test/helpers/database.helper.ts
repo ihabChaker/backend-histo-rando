@@ -27,18 +27,19 @@ export async function setupTestDatabase(): Promise<Sequelize> {
     return sequelize;
   }
 
-  const testDbName = process.env.TEST_DB_NAME || 'histo_rando_test';
-  const dbHost = process.env.DB_HOST || 'localhost';
-  const dbPort = parseInt(process.env.DB_PORT || '5432', 10);
-  const dbUser = process.env.DB_USER || 'postgres';
-  const dbPassword = String(process.env.DB_PASSWORD || 'postgres');
+  const testDbName = process.env.TEST_DB_NAME || process.env.DB_DATABASE!;
+  const dbHost = process.env.DB_HOST!;
+  const dbPort = parseInt(process.env.DB_PORT!, 10);
+  const dbUser = process.env.DB_USERNAME!;
+  const dbPassword = String(process.env.DB_PASSWORD!);
+  const dbDialect = process.env.DB_DIALECT! as any;
 
   console.log(
     `🔧 Database Config: user=${dbUser}, password=${dbPassword.substring(0, 4)}***, db=${testDbName}`,
   );
 
   sequelize = new Sequelize({
-    dialect: 'postgres',
+    dialect: dbDialect,
     host: dbHost,
     port: dbPort,
     username: dbUser,
@@ -96,8 +97,6 @@ export async function cleanDatabase(): Promise<void> {
 
   // Clean all tables - truncate in reverse order of dependencies
   try {
-    await sequelize.query('SET CONSTRAINTS ALL DEFERRED');
-
     await UserRewardRedeemed.truncate({ cascade: true, force: true });
     await UserTreasureFound.truncate({ cascade: true, force: true });
     await UserChallengeProgress.truncate({ cascade: true, force: true });

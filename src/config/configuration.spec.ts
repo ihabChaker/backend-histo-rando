@@ -13,15 +13,24 @@ describe('Configuration', () => {
   });
 
   it('should return default configuration when env vars are not set', () => {
-    delete process.env.PORT;
-    delete process.env.DB_HOST;
-    delete process.env.JWT_SECRET;
+    // Since we removed all defaults, we need to set the env vars
+    process.env.PORT = '3000';
+    process.env.DB_HOST = 'localhost';
+    process.env.DB_PORT = '3306';
+    process.env.DB_USERNAME = 'root';
+    process.env.DB_PASSWORD = '';
+    process.env.DB_DATABASE = 'histo_rando';
+    process.env.JWT_SECRET = 'change-me-in-production';
+    process.env.JWT_EXPIRATION = '7d';
 
     const config = configuration();
 
     expect(config.port).toBe(3000);
     expect(config.database.host).toBe('localhost');
-    expect(config.database.port).toBe(5432);
+    expect(config.database.port).toBe(3306);
+    expect(config.database.username).toBe('root');
+    expect(config.database.password).toBe('');
+    expect(config.database.database).toBe('histo_rando');
     expect(config.jwt.secret).toBe('change-me-in-production');
     expect(config.jwt.expiresIn).toBe('7d');
   });

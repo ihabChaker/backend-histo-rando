@@ -27,6 +27,7 @@ import { BattalionRoute } from '@/modules/historical/entities/battalion-route.en
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
+        const dialect = process.env.DB_DIALECT;
         const host = configService.get('database.host');
         const port = configService.get('database.port');
         const username = configService.get('database.username');
@@ -34,6 +35,7 @@ import { BattalionRoute } from '@/modules/historical/entities/battalion-route.en
         const database = configService.get('database.database');
 
         console.log('🔍 Database config:', {
+          dialect,
           host,
           port,
           username,
@@ -43,7 +45,7 @@ import { BattalionRoute } from '@/modules/historical/entities/battalion-route.en
         });
 
         return {
-          dialect: 'postgres',
+          dialect: dialect as any,
           host,
           port,
           username,
