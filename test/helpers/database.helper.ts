@@ -98,7 +98,7 @@ export async function cleanDatabase(): Promise<void> {
   try {
     // Get all table names from models
     const tableNames = Object.keys(sequelize.models).map(
-      (modelName) => sequelize.models[modelName].tableName,
+      (modelName) => sequelize!.models[modelName].tableName,
     );
 
     // Disable foreign key checks
