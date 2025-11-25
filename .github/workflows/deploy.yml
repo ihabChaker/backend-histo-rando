@@ -1,16 +1,17 @@
 name: Deploy to Heroku
 
 # This workflow is currently DISABLED
-# Uncomment the 'on:' section below when ready to deploy
+# To enable, uncomment the workflow_dispatch line below
 
-# on:
-#   workflow_run:
-#     workflows: ["CI Pipeline"]
-#     types:
-#       - completed
-#     branches:
-#       - main
-#   workflow_dispatch:
+on:
+  workflow_dispatch:  # Manual trigger only - workflow is disabled by default
+  # Uncomment below to enable automatic deployment after CI passes
+  # workflow_run:
+  #   workflows: ["CI Pipeline"]
+  #   types:
+  #     - completed
+  #   branches:
+  #     - main
 
 jobs:
   deploy:
