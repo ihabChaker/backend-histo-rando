@@ -68,8 +68,6 @@ jobs:
 
       - name: TypeScript compilation check
         run: npm run build
-        env:
-          PATH: ${{ github.workspace }}/node_modules/.bin:${{ env.PATH }}
 
   unit-tests:
     name: Unit Tests
@@ -273,8 +271,6 @@ jobs:
 
       - name: Build for production
         run: npm run build
-        env:
-          PATH: ${{ github.workspace }}/node_modules/.bin:${{ env.PATH }}
 
       - name: Check build artifacts
         run: |
