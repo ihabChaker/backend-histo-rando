@@ -95,32 +95,32 @@ export async function cleanDatabase(): Promise<void> {
     return;
   }
 
-  // Clean all tables - truncate in reverse order of dependencies
   try {
-    await UserRewardRedeemed.truncate({ cascade: true, force: true });
-    await UserTreasureFound.truncate({ cascade: true, force: true });
-    await UserChallengeProgress.truncate({ cascade: true, force: true });
-    await UserQuizAttempt.truncate({ cascade: true, force: true });
-    await UserPOIVisit.truncate({ cascade: true, force: true });
-    await UserActivity.truncate({ cascade: true, force: true });
-    await ParcoursQuiz.truncate({ cascade: true, force: true });
-    await ParcoursPodcast.truncate({ cascade: true, force: true });
-    await Answer.truncate({ cascade: true, force: true });
-    await Question.truncate({ cascade: true, force: true });
-    await Quiz.truncate({ cascade: true, force: true });
-    await PointOfInterest.truncate({ cascade: true, force: true });
-    await BattalionRoute.truncate({ cascade: true, force: true });
-    await HistoricalBattalion.truncate({ cascade: true, force: true });
-    await Reward.truncate({ cascade: true, force: true });
-    await TreasureHunt.truncate({ cascade: true, force: true });
-    await Challenge.truncate({ cascade: true, force: true });
-    await Podcast.truncate({ cascade: true, force: true });
-    await Parcours.truncate({ cascade: true, force: true });
-    await User.truncate({ cascade: true, force: true });
+    // Get all table names from models
+    const tableNames = Object.keys(sequelize.models).map(
+      (modelName) => sequelize.models[modelName].tableName,
+    );
+
+    // Disable foreign key checks
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+
+    // Truncate all tables using raw SQL
+    for (const tableName of tableNames) {
+      await sequelize.query(`TRUNCATE TABLE \`${tableName}\``);
+    }
+
+    // Re-enable foreign key checks
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
 
     console.log('✅ Test database cleaned');
   } catch (error) {
     console.error('Error cleaning database:', error);
+    // Re-enable foreign key checks even on error
+    try {
+      await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    } catch (e) {
+      // Ignore error when re-enabling
+    }
     // Fallback: drop and recreate
     await sequelize.sync({ force: true });
     console.log('✅ Test database cleaned (via sync force)');
