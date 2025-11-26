@@ -42,6 +42,7 @@
         "dist",
         "test",
         "**/*.spec.ts",
-        "**/*.e2e-spec.ts"
+        "**/*.e2e-spec.ts",
+        "src/test-utils"
     ]
 }
