@@ -53,11 +53,11 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
-  console.log(`🚀 HistoRando API is running on: http://localhost:${port}`);
+  console.log(`🚀 HistoRando API is running on: http://0.0.0.0:${port}`);
   console.log(
-    `📚 Swagger docs available at: http://localhost:${port}/${process.env.SWAGGER_PATH || 'api/docs'}`,
+    `📚 Swagger docs available at: http://0.0.0.0:${port}/${process.env.SWAGGER_PATH || 'api/docs'}`,
   );
 }
 

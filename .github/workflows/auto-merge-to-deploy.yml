@@ -1,0 +1,53 @@
+name: Auto-Merge to Deploy Branch
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+    branches: [main]
+
+jobs:
+  merge-to-deploy:
+    name: Merge main to deploy branch
+    runs-on: ubuntu-latest
+    # Only merge if CI pipeline succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Configure git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Merge main into deploy branch
+        run: |
+          # Fetch all branches
+          git fetch origin
+          
+          # Check if deploy branch exists
+          if git ls-remote --exit-code --heads origin deploy; then
+            echo "✅ Deploy branch exists, checking it out..."
+            git checkout deploy
+            git pull origin deploy
+          else
+            echo "🆕 Deploy branch doesn't exist, creating it..."
+            git checkout -b deploy
+          fi
+          
+          # Merge main into deploy
+          echo "🔀 Merging main into deploy..."
+          git merge origin/main -m "chore: auto-merge main to deploy after CI success"
+          
+          # Push to deploy branch
+          echo "📤 Pushing to deploy branch..."
+          git push origin deploy
+          
+          echo "✅ Successfully merged main to deploy branch!"
+          echo "🚀 DigitalOcean will auto-deploy from the deploy branch"

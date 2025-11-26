@@ -5,16 +5,29 @@ Backend NestJS en architecture **Modular Monolith** pour l'application mobile Hi
 ## 🏗️ Architecture
 
 - **Framework**: NestJS (TypeScript)
-- **Base de données**: PostgreSQL avec Sequelize ORM
+- **Base de données**: MySQL avec Sequelize ORM
 - **Validation**: Zod schemas
 - **Documentation API**: Swagger / OpenAPI
 - **Authentification**: JWT Bearer tokens
+- **CI/CD**: GitHub Actions with automated deployment gating
+
+## 🚀 Deployment Status
+
+[![CI Pipeline](https://github.com/ihabChaker/backend-histo-rando/actions/workflows/ci.yml/badge.svg)](https://github.com/ihabChaker/backend-histo-rando/actions/workflows/ci.yml)
+
+**Automated CI/CD Workflow:**
+
+```
+main branch → CI Tests → ✓ Pass → Auto-merge to deploy → DigitalOcean Deploys
+```
+
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for deployment instructions.
 
 ## 📋 Prérequis
 
-- Node.js >= 18.x
-- PostgreSQL >= 14.x
-- npm ou yarn
+- Node.js >= 20.x
+- MySQL >= 8.0
+- npm >= 10.x
 
 ## 🚀 Installation
 
