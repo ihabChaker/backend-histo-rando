@@ -1,0 +1,98 @@
+name: histo-rando-backend
+region: fra  # Change to your preferred region (nyc, sfo, ams, sgp, fra)
+
+databases:
+  - name: histo-rando-db
+    engine: MYSQL
+    version: "8"
+    production: false  # Set to true for production
+    cluster_name: histo-rando-db-cluster
+
+services:
+  - name: api
+    github:
+      repo: ihabChaker/backend-histo-rando
+      branch: main
+      deploy_on_push: true
+    
+    build_command: npm ci && npm run build
+    run_command: node dist/main.js
+    
+    http_port: 3000
+    
+    instance_count: 1
+    instance_size_slug: basic-xxs  # Smallest size, upgrade as needed
+    
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    
+    envs:
+      - key: NODE_ENV
+        value: "production"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: DB_DIALECT
+        value: "mysql"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: DB_HOST
+        value: "${histo-rando-db.HOSTNAME}"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: DB_PORT
+        value: "${histo-rando-db.PORT}"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: DB_USERNAME
+        value: "${histo-rando-db.USERNAME}"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: DB_PASSWORD
+        value: "${histo-rando-db.PASSWORD}"
+        scope: RUN_TIME
+        type: SECRET
+      
+      - key: DB_DATABASE
+        value: "${histo-rando-db.DATABASE}"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: DB_NAME
+        value: "${histo-rando-db.DATABASE}"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: JWT_SECRET
+        value: "CHANGE_THIS_TO_A_STRONG_SECRET"  # Generate with: openssl rand -hex 64
+        scope: RUN_TIME
+        type: SECRET
+      
+      - key: JWT_EXPIRATION
+        value: "7d"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: MAX_FILE_SIZE
+        value: "10485760"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: UPLOAD_DIRECTORY
+        value: "./uploads"
+        scope: RUN_TIME
+        type: GENERAL
+      
+      - key: DB_LOGGING
+        value: "false"
+        scope: RUN_TIME
+        type: GENERAL

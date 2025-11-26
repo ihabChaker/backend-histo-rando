@@ -1,0 +1,17 @@
+# .dockerignore
+node_modules
+npm-debug.log
+dist
+coverage
+.git
+.github
+.env
+.env.test
+.env.local
+*.md
+test
+uploads/*
+!uploads/.gitkeep
+.vscode
+.idea
+*.log
