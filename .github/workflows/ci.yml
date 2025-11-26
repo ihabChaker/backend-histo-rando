@@ -67,9 +67,7 @@ jobs:
         run: npm ci
 
       - name: TypeScript compilation check
-        run: |
-          export PATH="$PWD/node_modules/.bin:$PATH"
-          npm run build
+        run: npm run build
 
   unit-tests:
     name: Unit Tests
@@ -272,9 +270,7 @@ jobs:
         run: npm ci
 
       - name: Build for production
-        run: |
-          export PATH="$PWD/node_modules/.bin:$PATH"
-          npm run build
+        run: npm run build
 
       - name: Check build artifacts
         run: |
