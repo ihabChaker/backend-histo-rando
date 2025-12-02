@@ -114,7 +114,9 @@ export class TreasureHuntService {
       }
 
       if (dto.treasureId && treasure.id !== dto.treasureId) {
-        throw new BadRequestException('QR Code does not match the specified treasure');
+        throw new BadRequestException(
+          'QR Code does not match the specified treasure',
+        );
       }
     } else if (dto.treasureId) {
       // Find by ID
@@ -135,7 +137,9 @@ export class TreasureHuntService {
         );
       }
     } else {
-      throw new BadRequestException('Either treasureId or qrCode must be provided');
+      throw new BadRequestException(
+        'Either treasureId or qrCode must be provided',
+      );
     }
 
     // Check if already found by this user

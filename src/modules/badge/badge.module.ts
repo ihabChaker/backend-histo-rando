@@ -9,10 +9,7 @@ import { UserBadge } from './entities/user-badge.entity';
 import { User } from '../users/entities/user.entity';
 
 @Module({
-  imports: [
-    SequelizeModule.forFeature([Badge, UserBadge, User]),
-    AuthModule,
-  ],
+  imports: [SequelizeModule.forFeature([Badge, UserBadge, User]), AuthModule],
   controllers: [BadgeController, LeaderboardController],
   providers: [BadgeService],
   exports: [BadgeService],

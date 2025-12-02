@@ -75,19 +75,20 @@ export class AdminService {
     // Activity statistics
     const totalActivities = await this.userActivityModel.count();
     const completedActivities = await this.userActivityModel.count({
-      where: { isCompleted: true },
+      where: { status: 'completed' },
     });
     const activitiesLast30Days = await this.userActivityModel.count({
-      where: { startTime: { [Op.gte]: last30Days } },
+      where: { startDatetime: { [Op.gte]: last30Days } },
     });
     const totalPOIVisits = await this.userPOIVisitModel.count();
     const totalQuizAttempts = await this.userQuizAttemptModel.count();
-    const passedQuizzes = await this.userQuizAttemptModel.count({
-      where: { isPassing: true },
-    });
-    const totalChallengesCompleted = await this.userChallengeProgressModel.count(
-      { where: { isCompleted: true } },
-    );
+    // Determine passed quizzes in a simplified way for stats (score > 0)
+    const attempts = await this.userQuizAttemptModel.findAll();
+    const passedQuizzes = attempts.filter((a: any) => a.score > 0).length;
+    const totalChallengesCompleted =
+      await this.userChallengeProgressModel.count({
+        where: { status: 'completed' },
+      });
     const totalTreasuresFound = await this.userTreasureFoundModel.count();
     const totalRewardsRedeemed = await this.userRewardRedeemedModel.count();
 
@@ -179,12 +180,12 @@ export class AdminService {
     const user = await this.userModel.findByPk(userId, {
       attributes: { exclude: ['passwordHash'] },
       include: [
-        { model: UserActivity, limit: 10, order: [['startTime', 'DESC']] },
+        { model: UserActivity, limit: 10, order: [['startDatetime', 'DESC']] },
         { model: UserPOIVisit, limit: 10, order: [['visitDatetime', 'DESC']] },
         {
           model: UserQuizAttempt,
           limit: 10,
-          order: [['attemptDate', 'DESC']],
+          order: [['attemptDatetime', 'DESC']],
         },
       ],
     });
@@ -226,7 +227,7 @@ export class AdminService {
   async getRecentActivities(limit: number = 20) {
     const recentActivities = await this.userActivityModel.findAll({
       limit,
-      order: [['startTime', 'DESC']],
+      order: [['startDatetime', 'DESC']],
       include: [
         {
           model: User,

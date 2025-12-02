@@ -61,8 +61,8 @@ export class BadgeService {
       return existing;
     }
 
-    const badge = await this.findOne(badgeId);
-    
+    await this.findOne(badgeId);
+
     // Create user badge
     const userBadge = await this.userBadgeModel.create({
       userId,
@@ -74,39 +74,48 @@ export class BadgeService {
     // Award points to user?
     // Usually handled by the trigger of the badge, but we can do it here if needed.
     // For now, we assume points are added separately or this is just a record.
-    
+
     return userBadge;
   }
 
-  async getLeaderboard(period: string = 'all'): Promise<any[]> {
+  async getLeaderboard(_period: string = 'all'): Promise<any[]> {
     // For now, we only support 'all' time based on totalPoints
     // In a real app, we would query a PointsHistory table for 'week', 'month', etc.
-    
+
     const users = await this.userModel.findAll({
       order: [['totalPoints', 'DESC']],
       limit: 50,
-      attributes: ['id', 'username', 'totalPoints', 'avatarUrl', 'firstName', 'lastName'],
+      attributes: [
+        'id',
+        'username',
+        'totalPoints',
+        'avatarUrl',
+        'firstName',
+        'lastName',
+      ],
     });
 
     // We need to count badges for each user
     // This is N+1 query, but for 50 users it's acceptable for now.
     // Better: use a subquery or join.
-    
-    const leaderboard = await Promise.all(users.map(async (user, index) => {
-      const badgesCount = await this.userBadgeModel.count({
-        where: { userId: user.id },
-      });
 
-      return {
-        rank: index + 1,
-        userId: user.id,
-        username: user.username,
-        points: user.totalPoints,
-        level: Math.floor(user.totalPoints / 1000) + 1, // Simple level formula
-        badgesCount,
-        avatarUrl: user.avatarUrl,
-      };
-    }));
+    const leaderboard = await Promise.all(
+      users.map(async (user, index) => {
+        const badgesCount = await this.userBadgeModel.count({
+          where: { userId: user.id },
+        });
+
+        return {
+          rank: index + 1,
+          userId: user.id,
+          username: user.username,
+          points: user.totalPoints,
+          level: Math.floor(user.totalPoints / 1000) + 1, // Simple level formula
+          badgesCount,
+          avatarUrl: user.avatarUrl,
+        };
+      }),
+    );
 
     return leaderboard;
   }

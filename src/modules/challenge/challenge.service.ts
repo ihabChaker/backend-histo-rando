@@ -64,7 +64,7 @@ export class ChallengeService {
   ): Promise<UserChallengeProgress> {
     // Verify challenge exists (throws if not found)
     await this.findOneChallenge(dto.challengeId);
-    
+
     if (dto.activityId) {
       const activity = await this.activityModel.findByPk(dto.activityId);
 

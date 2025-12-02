@@ -122,7 +122,11 @@ export class UpdateTreasureHuntDto extends createZodDto(
 export class RecordTreasureFoundDto extends createZodDto(
   RecordTreasureFoundSchema,
 ) {
-  @ApiProperty({ example: 1, description: 'ID du trésor trouvé', required: false })
+  @ApiProperty({
+    example: 1,
+    description: 'ID du trésor trouvé',
+    required: false,
+  })
   treasureId?: number;
 
   @ApiProperty({ example: 49.3485, description: "Latitude de l'utilisateur" })
@@ -131,6 +135,10 @@ export class RecordTreasureFoundDto extends createZodDto(
   @ApiProperty({ example: -0.6911, description: "Longitude de l'utilisateur" })
   longitude: number;
 
-  @ApiProperty({ example: 'QR_CODE_123', description: 'Code QR scanné', required: false })
+  @ApiProperty({
+    example: 'QR_CODE_123',
+    description: 'Code QR scanné',
+    required: false,
+  })
   qrCode?: string;
 }

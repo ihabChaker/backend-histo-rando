@@ -43,10 +43,19 @@ describe('Admin E2E Tests', () => {
     adminToken = adminResponse.body.access_token;
 
     // Manually set admin role (in real scenario, this would be done via DB migration or seed)
-    const adminUser = await sequelize
-      .models['User']
-      .findOne({ where: { email: adminData.email } });
+    const adminUser = await sequelize.models['User'].findOne({
+      where: { email: adminData.email },
+    });
+    if (!adminUser) {
+      throw new Error('Admin user not found after registration');
+    }
     await adminUser.update({ role: 'admin' });
+
+    // Re-authenticate to obtain a token that contains the updated role claim
+    const relogin = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send({ email: adminData.email, password: adminData.password });
+    adminToken = relogin.body.access_token;
 
     // Create regular user
     const userData = createRegisterData({

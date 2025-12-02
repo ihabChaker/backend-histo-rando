@@ -1,5 +1,12 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsString, IsInt, IsOptional, IsEnum, IsBoolean, Min } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsOptional,
+  IsEnum,
+  IsBoolean,
+  Min,
+} from 'class-validator';
 
 export enum BadgeRarity {
   COMMON = 'commun',
@@ -13,7 +20,10 @@ export class CreateBadgeDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ example: 'Parcourir 42km au total', description: 'Description du badge' })
+  @ApiProperty({
+    example: 'Parcourir 42km au total',
+    description: 'Description du badge',
+  })
   @IsString()
   description: string;
 

@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Put,
   Delete,
   Param,
@@ -9,6 +8,7 @@ import {
   Body,
   UseGuards,
   ParseIntPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -166,6 +166,10 @@ export class AdminController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserRoleDto: UpdateUserRoleDto,
   ) {
+    // Basic validation to avoid passing invalid enum values to the DB
+    if (!['user', 'admin'].includes(updateUserRoleDto.role)) {
+      throw new BadRequestException('Invalid role');
+    }
     return this.adminService.updateUserRole(id, updateUserRoleDto.role);
   }
 
