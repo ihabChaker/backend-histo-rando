@@ -2,6 +2,7 @@ import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { PromoteToAdminDto } from './dto/promote-to-admin.dto';
 import { Public } from '@/common/decorators/public.decorator';
 
 @ApiTags('auth')
@@ -153,5 +154,67 @@ export class AuthController {
   })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Public()
+  @Post('promote-to-admin')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Promote user to admin role',
+    description:
+      'Promote any user to admin role using a secret key. This is a public endpoint protected by a secret key configured in environment variables.',
+  })
+  @ApiBody({
+    type: PromoteToAdminDto,
+    description: 'Email and secret key',
+    examples: {
+      example1: {
+        summary: 'Promote user to admin',
+        value: {
+          email: 'user@example.com',
+          secretKey: 'your-secret-key-here',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User promoted successfully',
+    schema: {
+      example: {
+        message: 'User successfully promoted to admin',
+        user: {
+          id: 1,
+          email: 'user@example.com',
+          username: 'johndoe',
+          role: 'admin',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Invalid secret key',
+    schema: {
+      example: {
+        statusCode: 403,
+        message: 'Invalid secret key',
+        error: 'Forbidden',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'User not found',
+        error: 'Not Found',
+      },
+    },
+  })
+  async promoteToAdmin(@Body() promoteDto: PromoteToAdminDto) {
+    return this.authService.promoteToAdmin(promoteDto);
   }
 }

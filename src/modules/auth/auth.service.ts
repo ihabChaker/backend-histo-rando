@@ -2,12 +2,16 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/sequelize';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { PromoteToAdminDto } from './dto/promote-to-admin.dto';
 import { AuthResponse, JwtPayload } from '@/common/types/auth.types';
 
 @Injectable()
@@ -16,6 +20,7 @@ export class AuthService {
     @InjectModel(User)
     private userModel: typeof User,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -117,5 +122,55 @@ export class AuthService {
 
   async validateUser(userId: number): Promise<User | null> {
     return this.userModel.findByPk(userId);
+  }
+
+  async promoteToAdmin(
+    promoteDto: PromoteToAdminDto,
+  ): Promise<{ message: string; user: any }> {
+    const { email, secretKey } = promoteDto;
+
+    // Verify secret key
+    const adminSecretKey = this.configService.get<string>(
+      'ADMIN_PROMOTION_SECRET',
+    );
+    if (!adminSecretKey || secretKey !== adminSecretKey) {
+      throw new ForbiddenException('Invalid secret key');
+    }
+
+    // Find user
+    const user = await this.userModel.findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if already admin
+    if (user.role === 'admin') {
+      return {
+        message: 'User is already an admin',
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          role: user.role,
+        },
+      };
+    }
+
+    // Promote to admin
+    user.role = 'admin';
+    await user.save();
+
+    return {
+      message: 'User successfully promoted to admin',
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+      },
+    };
   }
 }

@@ -40,6 +40,11 @@ lerna-debug.log*
 .env.local
 .env.*.local
 
+# Database certificates and credentials
+ca-certificate.crt
+*.pem
+*.crt
+
 # Uploads
 uploads/*
 !uploads/.gitkeep
