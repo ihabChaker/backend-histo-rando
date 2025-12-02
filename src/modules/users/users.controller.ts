@@ -36,25 +36,7 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Put(':id')
-  @Roles('admin')
-  @UseGuards(RolesGuard)
-  @ApiOperation({ summary: 'Mettre à jour un utilisateur (Admin)' })
-  async updateUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: AdminUpdateUserDto,
-  ) {
-    return this.usersService.adminUpdateUser(id, updateDto);
-  }
-
-  @Delete(':id')
-  @Roles('admin')
-  @UseGuards(RolesGuard)
-  @ApiOperation({ summary: 'Supprimer un utilisateur (Admin)' })
-  async deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.deleteUser(id);
-  }
-
+  // User profile routes - must come BEFORE parameterized routes like ':id'
   @Get('me')
   @ApiOperation({
     summary: "Obtenir le profil de l'utilisateur connecté",
@@ -139,6 +121,26 @@ export class UsersController {
     @Body() updateDto: UpdateUserProfileDto,
   ) {
     return this.usersService.updateProfile(user.sub, updateDto);
+  }
+
+  // Admin routes with parameterized :id - must come AFTER specific routes
+  @Put(':id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Mettre à jour un utilisateur (Admin)' })
+  async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: AdminUpdateUserDto,
+  ) {
+    return this.usersService.adminUpdateUser(id, updateDto);
+  }
+
+  @Delete(':id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Supprimer un utilisateur (Admin)' })
+  async deleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.deleteUser(id);
   }
 
   @Get(':id')
