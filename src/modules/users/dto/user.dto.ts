@@ -53,6 +53,28 @@ export class UpdateUserProfileDto extends createZodDto(
   avatarUrl?: string;
 }
 
+export const AdminUpdateUserSchema = UpdateUserProfileSchema.extend({
+  role: z.enum(['user', 'admin']).optional(),
+  email: z.string().email().optional(),
+});
+
+export class AdminUpdateUserDto extends createZodDto(AdminUpdateUserSchema) {
+  @ApiProperty({
+    example: 'admin',
+    description: "Rôle de l'utilisateur",
+    required: false,
+    enum: ['user', 'admin'],
+  })
+  role?: 'user' | 'admin';
+
+  @ApiProperty({
+    example: 'admin@example.com',
+    description: "Email de l'utilisateur",
+    required: false,
+  })
+  email?: string;
+}
+
 export const UserResponseSchema = z.object({
   id: z.number(),
   username: z.string(),

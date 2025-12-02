@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './entities/user.entity';
-import { UpdateUserProfileDto } from './dto/user.dto';
+import { UpdateUserProfileDto, AdminUpdateUserDto } from './dto/user.dto';
 import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
 import { UserPOIVisit } from '@/modules/activity/entities/user-poi-visit.entity';
 
@@ -26,6 +26,10 @@ export class UsersService {
     return user;
   }
 
+  async findAll(): Promise<User[]> {
+    return this.userModel.findAll();
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.userModel.findOne({ where: { email } });
   }
@@ -39,6 +43,20 @@ export class UsersService {
     await user.update(updateDto);
 
     return user;
+  }
+
+  async adminUpdateUser(
+    userId: number,
+    updateDto: AdminUpdateUserDto,
+  ): Promise<User> {
+    const user = await this.findById(userId);
+    await user.update(updateDto);
+    return user;
+  }
+
+  async deleteUser(userId: number): Promise<void> {
+    const user = await this.findById(userId);
+    await user.destroy();
   }
 
   async getUserStats(userId: number) {

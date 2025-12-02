@@ -14,6 +14,12 @@ export class PoiService {
     return this.poiModel.create(createDto as any);
   }
 
+  async findAll(): Promise<PointOfInterest[]> {
+    return this.poiModel.findAll({
+      order: [['id', 'DESC']],
+    });
+  }
+
   async findAllByParcours(parcoursId: number): Promise<PointOfInterest[]> {
     return this.poiModel.findAll({
       where: { parcoursId },

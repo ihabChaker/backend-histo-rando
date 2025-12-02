@@ -22,6 +22,7 @@ describe('UsersController', () => {
     sub: 1,
     email: 'test@example.com',
     username: 'testuser',
+    role: 'user',
   };
 
   beforeEach(async () => {

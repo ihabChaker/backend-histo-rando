@@ -3,8 +3,9 @@ import { INestApplication } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { Sequelize } from 'sequelize-typescript';
 import {
-  setupTestDatabase,
+  setSequelizeInstance,
   syncDatabase,
   cleanDatabase,
   closeDatabase,
@@ -17,9 +18,6 @@ describe('Users E2E Tests (Real Database)', () => {
   let userId: number;
 
   beforeAll(async () => {
-    await setupTestDatabase();
-    await syncDatabase(true);
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -29,6 +27,10 @@ describe('Users E2E Tests (Real Database)', () => {
     app.useGlobalPipes(new ZodValidationPipe());
 
     await app.init();
+
+    const sequelize = app.get(Sequelize);
+    setSequelizeInstance(sequelize);
+    await syncDatabase(true);
   });
 
   afterAll(async () => {

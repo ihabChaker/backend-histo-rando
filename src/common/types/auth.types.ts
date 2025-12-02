@@ -2,6 +2,7 @@ export interface JwtPayload {
   sub: number;
   email: string;
   username: string;
+  role: 'user' | 'admin';
 }
 
 export interface AuthResponse {
@@ -13,5 +14,6 @@ export interface AuthResponse {
     firstName?: string;
     lastName?: string;
     isPmr?: boolean;
+    role: 'user' | 'admin';
   };
 }

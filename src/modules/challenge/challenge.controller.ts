@@ -47,6 +47,14 @@ export class ChallengeController {
   }
 
   @Public()
+  @Get('active')
+  @ApiOperation({ summary: 'Lister tous les défis actifs (Alias)' })
+  @ApiResponse({ status: 200, description: 'Liste des défis' })
+  async findAllActive() {
+    return this.challengeService.findAllChallenges();
+  }
+
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Obtenir un défi par ID' })
   @ApiParam({ name: 'id', description: 'ID du défi' })
@@ -108,6 +116,13 @@ export class ChallengeController {
   @ApiOperation({ summary: 'Obtenir ma progression des défis' })
   @ApiResponse({ status: 200, description: 'Liste des progressions' })
   async getUserProgress(@CurrentUser() user: any) {
+    return this.challengeService.getUserChallengeProgress(user.sub);
+  }
+
+  @Get('my-challenges')
+  @ApiOperation({ summary: 'Obtenir ma progression des défis (Alias)' })
+  @ApiResponse({ status: 200, description: 'Liste des progressions' })
+  async getMyChallenges(@CurrentUser() user: any) {
     return this.challengeService.getUserChallengeProgress(user.sub);
   }
 }

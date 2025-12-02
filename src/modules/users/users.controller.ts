@@ -3,9 +3,11 @@ import {
   Get,
   Put,
   Patch,
+  Delete,
   Body,
   Param,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,15 +16,44 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { UpdateUserProfileDto } from './dto/user.dto';
+import { UpdateUserProfileDto, AdminUpdateUserDto } from './dto/user.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload } from '@/common/types/auth.types';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { RolesGuard } from '@/common/guards/roles.guard';
 
 @ApiTags('users')
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Obtenir tous les utilisateurs (Admin)' })
+  async findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Put(':id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Mettre à jour un utilisateur (Admin)' })
+  async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: AdminUpdateUserDto,
+  ) {
+    return this.usersService.adminUpdateUser(id, updateDto);
+  }
+
+  @Delete(':id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Supprimer un utilisateur (Admin)' })
+  async deleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.deleteUser(id);
+  }
 
   @Get('me')
   @ApiOperation({

@@ -12,8 +12,10 @@ import { QuizModule } from './modules/quiz/quiz.module';
 import { ChallengeModule } from './modules/challenge/challenge.module';
 import { TreasureHuntModule } from './modules/treasure-hunt/treasure-hunt.module';
 import { RewardModule } from './modules/reward/reward.module';
+import { BadgeModule } from './modules/badge/badge.module';
 import { HistoricalModule } from './modules/historical/historical.module';
 import { HealthModule } from './modules/health/health.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -34,7 +36,9 @@ import { HealthModule } from './modules/health/health.module';
     ChallengeModule,
     TreasureHuntModule,
     RewardModule,
+    BadgeModule,
     HistoricalModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

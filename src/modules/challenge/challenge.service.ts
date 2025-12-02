@@ -64,22 +64,25 @@ export class ChallengeService {
   ): Promise<UserChallengeProgress> {
     // Verify challenge exists (throws if not found)
     await this.findOneChallenge(dto.challengeId);
-    const activity = await this.activityModel.findByPk(dto.activityId);
+    
+    if (dto.activityId) {
+      const activity = await this.activityModel.findByPk(dto.activityId);
 
-    if (!activity) {
-      throw new NotFoundException(
-        `Activity with ID ${dto.activityId} not found`,
-      );
-    }
+      if (!activity) {
+        throw new NotFoundException(
+          `Activity with ID ${dto.activityId} not found`,
+        );
+      }
 
-    if (activity.userId !== userId) {
-      throw new BadRequestException('Activity does not belong to you');
+      if (activity.userId !== userId) {
+        throw new BadRequestException('Activity does not belong to you');
+      }
     }
 
     return this.progressModel.create({
       userId,
       challengeId: dto.challengeId,
-      activityId: dto.activityId,
+      activityId: dto.activityId || null,
       startDatetime: new Date(),
       status: 'started',
       pointsEarned: 0,

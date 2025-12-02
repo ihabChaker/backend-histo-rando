@@ -20,7 +20,7 @@ export const UpdateChallengeSchema = CreateChallengeSchema.partial();
 
 export const StartChallengeSchema = z.object({
   challengeId: z.number().int().positive(),
-  activityId: z.number().int().positive(),
+  activityId: z.number().int().positive().optional(),
 });
 
 export const CompleteChallengeSchema = z.object({
@@ -91,8 +91,8 @@ export class StartChallengeDto extends createZodDto(StartChallengeSchema) {
   @ApiProperty({ example: 1, description: 'ID du challenge' })
   challengeId: number;
 
-  @ApiProperty({ example: 1, description: "ID de l'activité" })
-  activityId: number;
+  @ApiProperty({ example: 1, description: "ID de l'activité", required: false })
+  activityId?: number;
 }
 
 export class CompleteChallengeDto extends createZodDto(

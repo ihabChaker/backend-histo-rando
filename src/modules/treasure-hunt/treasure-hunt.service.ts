@@ -59,7 +59,6 @@ export class TreasureHuntService {
 
   async findAllTreasureHunts(): Promise<TreasureHunt[]> {
     return this.treasureHuntModel.findAll({
-      where: { isActive: true },
       include: [Parcours],
       order: [['pointsReward', 'DESC']],
     });
@@ -102,35 +101,56 @@ export class TreasureHuntService {
     userId: number,
     dto: RecordTreasureFoundDto,
   ): Promise<any> {
-    const treasure = await this.findOneTreasureHunt(dto.treasureId);
+    let treasure: TreasureHunt | null = null;
+
+    if (dto.qrCode) {
+      // Find by QR Code
+      treasure = await this.treasureHuntModel.findOne({
+        where: { qrCode: dto.qrCode },
+      });
+
+      if (!treasure) {
+        throw new NotFoundException('Invalid QR Code');
+      }
+
+      if (dto.treasureId && treasure.id !== dto.treasureId) {
+        throw new BadRequestException('QR Code does not match the specified treasure');
+      }
+    } else if (dto.treasureId) {
+      // Find by ID
+      treasure = await this.findOneTreasureHunt(dto.treasureId);
+
+      // Verify user is within scan radius ONLY if not using QR code (or we could enforce both)
+      // For now, let's assume QR code proves presence, but if no QR code, we need location.
+      const distance = this.calculateDistance(
+        dto.latitude,
+        dto.longitude,
+        treasure.latitude,
+        treasure.longitude,
+      );
+
+      if (distance > treasure.scanRadiusMeters) {
+        throw new BadRequestException(
+          `You are too far from the treasure (${Math.round(distance)}m away, need to be within ${treasure.scanRadiusMeters}m)`,
+        );
+      }
+    } else {
+      throw new BadRequestException('Either treasureId or qrCode must be provided');
+    }
 
     // Check if already found by this user
     const existing = await this.treasureFoundModel.findOne({
-      where: { userId, treasureId: dto.treasureId },
+      where: { userId, treasureId: treasure.id },
     });
 
     if (existing) {
       throw new ConflictException('You have already found this treasure');
     }
 
-    // Verify user is within scan radius
-    const distance = this.calculateDistance(
-      dto.latitude,
-      dto.longitude,
-      treasure.latitude,
-      treasure.longitude,
-    );
-
-    if (distance > treasure.scanRadiusMeters) {
-      throw new BadRequestException(
-        `You are too far from the treasure (${Math.round(distance)}m away, need to be within ${treasure.scanRadiusMeters}m)`,
-      );
-    }
-
     // Record the find
     const found = await this.treasureFoundModel.create({
       userId,
-      treasureId: dto.treasureId,
+      treasureId: treasure.id,
       foundDatetime: new Date(),
       pointsEarned: treasure.pointsReward,
     } as any);

@@ -141,3 +141,7 @@ export function getSequelizeInstance(): Sequelize {
   }
   return sequelize;
 }
+
+export function setSequelizeInstance(instance: Sequelize): void {
+  sequelize = instance;
+}

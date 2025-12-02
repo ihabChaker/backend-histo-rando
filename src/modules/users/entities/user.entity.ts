@@ -95,6 +95,13 @@ export class User extends Model {
   })
   phoneNumber: string;
 
+  @Column({
+    type: DataType.ENUM('user', 'admin'),
+    allowNull: false,
+    defaultValue: 'user',
+  })
+  role: 'user' | 'admin';
+
   @CreatedAt
   @Column({
     type: DataType.DATE,

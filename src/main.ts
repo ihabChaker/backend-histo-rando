@@ -29,6 +29,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('auth', 'Authentification et autorisation')
     .addTag('users', 'Gestion des profils utilisateurs')
+    .addTag('admin', 'Administration et tableau de bord')
     .addTag('parcours', 'Gestion des parcours de randonnée')
     .addTag('poi', "Points d'intérêt historiques")
     .addTag('media', 'Gestion des médias (podcasts, images)')

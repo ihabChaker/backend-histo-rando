@@ -2,12 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import request from 'supertest';
+import { Sequelize } from 'sequelize-typescript';
 import { AppModule } from '../src/app.module';
 import {
-  setupTestDatabase,
   syncDatabase,
   cleanDatabase,
-  closeDatabase,
+  setSequelizeInstance,
 } from './helpers/database.helper';
 import {
   createRegisterData,
@@ -24,9 +24,6 @@ describe('POI E2E Tests (Real Database)', () => {
   let parcoursId: number;
 
   beforeAll(async () => {
-    await setupTestDatabase();
-    await syncDatabase(true);
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -36,6 +33,10 @@ describe('POI E2E Tests (Real Database)', () => {
     app.useGlobalPipes(new ZodValidationPipe());
 
     await app.init();
+
+    const sequelize = app.get(Sequelize);
+    setSequelizeInstance(sequelize);
+    await syncDatabase(true);
 
     // Create a user and parcours for testing
     const registerData = createRegisterData();
@@ -55,7 +56,6 @@ describe('POI E2E Tests (Real Database)', () => {
   });
 
   afterAll(async () => {
-    await closeDatabase();
     await app.close();
   });
 

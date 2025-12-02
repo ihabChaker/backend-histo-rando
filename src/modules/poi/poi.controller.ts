@@ -35,6 +35,16 @@ export class PoiController {
     return this.poiService.create(createDto);
   }
 
+  @Get()
+  @ApiOperation({
+    summary: 'Lister tous les POI',
+    description: "Obtenir la liste complète des points d'intérêt",
+  })
+  @ApiResponse({ status: 200, description: 'Liste de tous les POI' })
+  async findAll() {
+    return this.poiService.findAll();
+  }
+
   @Public()
   @Get('parcours/:parcoursId')
   @ApiOperation({
