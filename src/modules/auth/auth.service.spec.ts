@@ -1,11 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { getModelToken } from '@nestjs/sequelize';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnauthorizedException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { User } from '../users/entities/user.entity';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { PromoteToAdminDto } from './dto/promote-to-admin.dto';
 import { createMockModel } from '@/test-utils/mocks/sequelize.mock';
 import { mockUser } from '@/test-utils/fixtures/user.fixture';
 
@@ -15,6 +22,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let userModel: ReturnType<typeof createMockModel>;
   let jwtService: JwtService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     userModel = createMockModel<User>();
@@ -33,11 +41,18 @@ describe('AuthService', () => {
             verifyAsync: jest.fn(),
           },
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('test-secret-key'),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
     jwtService = module.get<JwtService>(JwtService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   afterEach(() => {
@@ -64,6 +79,8 @@ describe('AuthService', () => {
         passwordHash: 'hashed-password',
         firstName: registerDto.firstName,
         lastName: registerDto.lastName,
+        isPmr: registerDto.isPmr,
+        role: 'user',
       });
 
       const result = await service.register(registerDto);
@@ -86,6 +103,8 @@ describe('AuthService', () => {
           username: registerDto.username,
           firstName: registerDto.firstName,
           lastName: registerDto.lastName,
+          isPmr: registerDto.isPmr,
+          role: 'user',
         },
       });
     });
@@ -140,6 +159,7 @@ describe('AuthService', () => {
         sub: mockUser.id,
         email: mockUser.email,
         username: mockUser.username,
+        role: mockUser.role,
       });
       expect(result).toEqual({
         access_token: 'mock-jwt-token',
@@ -149,6 +169,7 @@ describe('AuthService', () => {
           username: mockUser.username,
           firstName: mockUser.firstName,
           lastName: mockUser.lastName,
+          role: mockUser.role,
         },
       });
     });
@@ -199,6 +220,87 @@ describe('AuthService', () => {
 
       expect(userModel.findByPk).toHaveBeenCalledWith(999);
       expect(result).toBeNull();
+    });
+  });
+
+  describe('promoteToAdmin', () => {
+    const promoteDto: PromoteToAdminDto = {
+      email: 'user@example.com',
+      secretKey: 'test-secret-key',
+    };
+
+    it('should successfully promote user to admin', async () => {
+      const regularUser = {
+        ...mockUser,
+        role: 'user',
+        save: jest.fn().mockResolvedValue(true),
+      };
+      userModel.findOne.mockResolvedValue(regularUser);
+
+      const result = await service.promoteToAdmin(promoteDto);
+
+      expect(configService.get).toHaveBeenCalledWith('ADMIN_PROMOTION_SECRET');
+      expect(userModel.findOne).toHaveBeenCalledWith({
+        where: { email: promoteDto.email },
+      });
+      expect(regularUser.role).toBe('admin');
+      expect(regularUser.save).toHaveBeenCalled();
+      expect(result).toEqual({
+        message: 'User successfully promoted to admin',
+        user: {
+          id: regularUser.id,
+          email: regularUser.email,
+          username: regularUser.username,
+          role: 'admin',
+        },
+      });
+    });
+
+    it('should throw ForbiddenException if secret key is invalid', async () => {
+      const invalidDto: PromoteToAdminDto = {
+        email: 'user@example.com',
+        secretKey: 'wrong-secret',
+      };
+
+      await expect(service.promoteToAdmin(invalidDto)).rejects.toThrow(
+        new ForbiddenException('Invalid secret key'),
+      );
+
+      expect(userModel.findOne).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if user not found', async () => {
+      userModel.findOne.mockResolvedValue(null);
+
+      await expect(service.promoteToAdmin(promoteDto)).rejects.toThrow(
+        new NotFoundException('User not found'),
+      );
+
+      expect(userModel.findOne).toHaveBeenCalledWith({
+        where: { email: promoteDto.email },
+      });
+    });
+
+    it('should return message if user is already admin', async () => {
+      const adminUser = {
+        ...mockUser,
+        role: 'admin',
+        save: jest.fn(),
+      };
+      userModel.findOne.mockResolvedValue(adminUser);
+
+      const result = await service.promoteToAdmin(promoteDto);
+
+      expect(result).toEqual({
+        message: 'User is already an admin',
+        user: {
+          id: adminUser.id,
+          email: adminUser.email,
+          username: adminUser.username,
+          role: 'admin',
+        },
+      });
+      expect(adminUser.save).not.toHaveBeenCalled();
     });
   });
 });
