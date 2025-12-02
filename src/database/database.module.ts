@@ -74,7 +74,7 @@ import { BattalionRoute } from '@/modules/historical/entities/battalion-route.en
             BattalionRoute,
           ],
           autoLoadModels: true,
-          synchronize: true, // Automatically sync tables in development
+          sync: { alter: true }, // Automatically sync and alter tables to match models
           logging: configService.get('database.logging') ? console.log : false,
         };
       },
