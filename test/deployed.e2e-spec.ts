@@ -8,6 +8,10 @@ describe('Deployed API E2E Tests (DigitalOcean)', () => {
   const testUsername = `testuser-${Date.now()}`;
   const testPassword = 'Test123!';
 
+  // Skip these tests in CI if SKIP_DEPLOYED_TESTS is set
+  // (useful when deployment is in progress)
+  const testOrSkip = process.env.SKIP_DEPLOYED_TESTS === 'true' ? it.skip : it;
+
   describe('Health Checks', () => {
     it('/api/v1/health (GET) - should return ok status', () => {
       return request(baseURL)
@@ -40,67 +44,79 @@ describe('Deployed API E2E Tests (DigitalOcean)', () => {
   });
 
   describe('Authentication', () => {
-    it('/api/v1/auth/register (POST) - should register a new user', () => {
-      return request(baseURL)
-        .post('/api/v1/auth/register')
-        .send({
-          email: testEmail,
-          username: testUsername,
-          password: testPassword,
-        })
-        .expect(201)
-        .expect((res) => {
-          expect(res.body.access_token).toBeDefined();
-          expect(res.body.user).toBeDefined();
-          expect(res.body.user.email).toBe(testEmail);
-          expect(res.body.user.username).toBe(testUsername);
-          authToken = res.body.access_token;
-          userId = res.body.user.id;
-        });
-    });
+    testOrSkip(
+      '/api/v1/auth/register (POST) - should register a new user',
+      () => {
+        return request(baseURL)
+          .post('/api/v1/auth/register')
+          .send({
+            email: testEmail,
+            username: testUsername,
+            password: testPassword,
+          })
+          .expect(201)
+          .expect((res) => {
+            expect(res.body.access_token).toBeDefined();
+            expect(res.body.user).toBeDefined();
+            expect(res.body.user.email).toBe(testEmail);
+            expect(res.body.user.username).toBe(testUsername);
+            authToken = res.body.access_token;
+            userId = res.body.user.id;
+          });
+      },
+    );
 
-    it('/api/v1/auth/login (POST) - should login with credentials', () => {
-      return request(baseURL)
-        .post('/api/v1/auth/login')
-        .send({
-          email: testEmail,
-          password: testPassword,
-        })
-        .expect(200)
-        .expect((res) => {
-          expect(res.body.access_token).toBeDefined();
-          expect(res.body.user).toBeDefined();
-          expect(res.body.user.email).toBe(testEmail);
-        });
-    });
+    testOrSkip(
+      '/api/v1/auth/login (POST) - should login with credentials',
+      () => {
+        return request(baseURL)
+          .post('/api/v1/auth/login')
+          .send({
+            email: testEmail,
+            password: testPassword,
+          })
+          .expect(200)
+          .expect((res) => {
+            expect(res.body.access_token).toBeDefined();
+            expect(res.body.user).toBeDefined();
+            expect(res.body.user.email).toBe(testEmail);
+          });
+      },
+    );
 
-    it('/api/v1/auth/login (POST) - should fail with wrong password', () => {
-      return request(baseURL)
-        .post('/api/v1/auth/login')
-        .send({
-          email: testEmail,
-          password: 'WrongPassword!',
-        })
-        .expect(401);
-    });
+    testOrSkip(
+      '/api/v1/auth/login (POST) - should fail with wrong password',
+      () => {
+        return request(baseURL)
+          .post('/api/v1/auth/login')
+          .send({
+            email: testEmail,
+            password: 'WrongPassword!',
+          })
+          .expect(401);
+      },
+    );
   });
 
   describe('User Profile', () => {
-    it('/api/v1/users/me (GET) - should get current user profile', () => {
-      return request(baseURL)
-        .get('/api/v1/users/me')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body.id).toBe(userId);
-          expect(res.body.email).toBe(testEmail);
-          expect(res.body.username).toBe(testUsername);
-          expect(res.body.totalPoints).toBe(0);
-          expect(res.body.totalKm).toBe(0);
-        });
-    });
+    testOrSkip(
+      '/api/v1/users/me (GET) - should get current user profile',
+      () => {
+        return request(baseURL)
+          .get('/api/v1/users/me')
+          .set('Authorization', `Bearer ${authToken}`)
+          .expect(200)
+          .expect((res) => {
+            expect(res.body.id).toBe(userId);
+            expect(res.body.email).toBe(testEmail);
+            expect(res.body.username).toBe(testUsername);
+            expect(res.body.totalPoints).toBe(0);
+            expect(res.body.totalKm).toBe(0);
+          });
+      },
+    );
 
-    it('/api/v1/users/me (PUT) - should update user profile', () => {
+    testOrSkip('/api/v1/users/me (PUT) - should update user profile', () => {
       return request(baseURL)
         .put('/api/v1/users/me')
         .set('Authorization', `Bearer ${authToken}`)

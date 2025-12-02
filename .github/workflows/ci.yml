@@ -153,6 +153,7 @@ jobs:
       UPLOAD_DIRECTORY: ./uploads
       PORT: 3001
       DB_LOGGING: false
+      SKIP_DEPLOYED_TESTS: true  # Skip deployed API tests during CI (tests against production)
 
     steps:
       - name: Checkout code
