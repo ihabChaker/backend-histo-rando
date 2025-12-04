@@ -33,20 +33,20 @@ describe('GPX Upload (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
-    // Login to get auth token
-    const loginResponse = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
+    // Register a user to get auth token
+    const registerResponse = await request(app.getHttpServer())
+      .post('/api/v1/auth/register')
       .send({
-        username: 'admin',
-        password: 'password',
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'password123',
       });
 
-    if (loginResponse.status === 200 || loginResponse.status === 201) {
-      authToken = loginResponse.body.accessToken;
-    }
+    authToken = registerResponse.body.access_token;
   });
 
   afterAll(async () => {

@@ -112,8 +112,8 @@ describe('Historical E2E Tests', () => {
         .get('/api/v1/historical/battalions')
         .expect(200)
         .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body.length).toBeGreaterThanOrEqual(2);
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.data.length).toBeGreaterThanOrEqual(2);
         });
     });
   });
@@ -246,8 +246,8 @@ describe('Historical E2E Tests', () => {
         .get(`/api/v1/historical/routes/battalion/${battalionRes.body.id}`)
         .expect(200)
         .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body.length).toBeGreaterThanOrEqual(1);
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.data.length).toBeGreaterThanOrEqual(1);
         });
     });
   });
@@ -292,8 +292,8 @@ describe('Historical E2E Tests', () => {
         .get(`/api/v1/historical/routes/parcours/${parcoursId}`)
         .expect(200)
         .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body.length).toBeGreaterThanOrEqual(2);
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.data.length).toBeGreaterThanOrEqual(2);
         });
     });
   });

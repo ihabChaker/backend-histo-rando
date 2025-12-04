@@ -65,7 +65,7 @@ describe('POI E2E Tests (Real Database)', () => {
       .get('/api/v1/poi/parcours/' + parcoursId)
       .set('Authorization', `Bearer ${authToken}`)
       .then(async (response) => {
-        for (const poi of response.body) {
+        for (const poi of (response.body.data || response.body)) {
           await request(app.getHttpServer())
             .delete(`/api/v1/poi/${poi.id}`)
             .set('Authorization', `Bearer ${authToken}`);
@@ -109,8 +109,8 @@ describe('POI E2E Tests (Real Database)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBe(3);
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBe(3);
     });
 
     it('should get a single POI by ID', async () => {
@@ -230,8 +230,8 @@ describe('POI E2E Tests (Real Database)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(response.body.length).toBe(2);
-      const types = response.body.map((poi: any) => poi.poiType);
+      expect(response.body.data.length).toBe(2);
+      const types = response.body.data.map((poi: any) => poi.poiType);
       expect(types).toContain('monument');
       expect(types).toContain('memorial');
     });
@@ -257,9 +257,9 @@ describe('POI E2E Tests (Real Database)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(response.body[0].name).toBe('First POI');
-      expect(response.body[1].name).toBe('Second POI');
-      expect(response.body[2].name).toBe('Third POI');
+      expect((response.body.data || response.body)[0].name).toBe('First POI');
+      expect((response.body.data || response.body)[1].name).toBe('Second POI');
+      expect((response.body.data || response.body)[2].name).toBe('Third POI');
     });
   });
 

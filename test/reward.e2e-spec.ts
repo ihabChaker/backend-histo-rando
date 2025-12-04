@@ -115,8 +115,8 @@ describe('Reward E2E Tests', () => {
         .get('/api/v1/rewards')
         .expect(200)
         .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body.length).toBeGreaterThanOrEqual(2);
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.data.length).toBeGreaterThanOrEqual(2);
         });
     });
   });
@@ -292,9 +292,9 @@ describe('Reward E2E Tests', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body.length).toBeGreaterThanOrEqual(1);
-          expect(res.body[0]).toHaveProperty('redemptionCode');
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.data.length).toBeGreaterThanOrEqual(1);
+          expect(res.body.data[0]).toHaveProperty('redemptionCode');
         });
     });
   });
