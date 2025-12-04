@@ -5,6 +5,11 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import {
+  PaginationDto,
+  PaginatedResponse,
+  createPaginatedResponse,
+} from '@/common/dto/pagination.dto';
 import { UserActivity } from './entities/user-activity.entity';
 import { UserPOIVisit } from './entities/user-poi-visit.entity';
 import { Parcours } from '@/modules/parcours/entities/parcours.entity';
@@ -54,15 +59,21 @@ export class ActivityService {
     } as any);
   }
 
-  async getUserActivities(userId: number): Promise<UserActivity[]> {
-    return this.userActivityModel.findAll({
+  async getUserActivities(
+    userId: number,
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<UserActivity>> {
+    const { rows, count } = await this.userActivityModel.findAndCountAll({
       where: { userId },
       include: [
         { model: Parcours },
         { model: UserPOIVisit, include: [PointOfInterest] },
       ],
       order: [['startDatetime', 'DESC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async getActivity(id: number): Promise<UserActivity> {
@@ -171,12 +182,18 @@ export class ActivityService {
     return visit;
   }
 
-  async getUserPOIVisits(userId: number): Promise<UserPOIVisit[]> {
-    return this.userPOIVisitModel.findAll({
+  async getUserPOIVisits(
+    userId: number,
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<UserPOIVisit>> {
+    const { rows, count } = await this.userPOIVisitModel.findAndCountAll({
       where: { userId },
       include: [PointOfInterest, UserActivity],
       order: [['visitDatetime', 'DESC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async getActivityStats(userId: number): Promise<any> {

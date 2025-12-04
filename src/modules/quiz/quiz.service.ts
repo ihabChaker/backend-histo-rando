@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import {
+  PaginationDto,
+  PaginatedResponse,
+  createPaginatedResponse,
+} from '@/common/dto/pagination.dto';
 import { Quiz } from './entities/quiz.entity';
 import { Question } from './entities/question.entity';
 import { Answer } from './entities/answer.entity';
@@ -36,8 +41,10 @@ export class QuizService {
     return this.quizModel.create(createDto as any);
   }
 
-  async findAllQuizzes(): Promise<Quiz[]> {
-    return this.quizModel.findAll({
+  async findAllQuizzes(
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<Quiz>> {
+    const { rows, count } = await this.quizModel.findAndCountAll({
       include: [
         {
           model: Question,
@@ -45,7 +52,10 @@ export class QuizService {
         },
       ],
       order: [['creationDate', 'DESC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async findOneQuiz(id: number): Promise<Quiz> {
@@ -205,12 +215,18 @@ export class QuizService {
     };
   }
 
-  async getUserQuizAttempts(userId: number): Promise<UserQuizAttempt[]> {
-    return this.quizAttemptModel.findAll({
+  async getUserQuizAttempts(
+    userId: number,
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<UserQuizAttempt>> {
+    const { rows, count } = await this.quizAttemptModel.findAndCountAll({
       where: { userId },
       include: [Quiz],
       order: [['attemptDatetime', 'DESC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   // Parcours associations

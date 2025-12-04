@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,7 +15,9 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 import { ChallengeService } from './challenge.service';
 import {
   CreateChallengeDto,
@@ -41,17 +44,73 @@ export class ChallengeController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'Lister tous les défis actifs' })
-  @ApiResponse({ status: 200, description: 'Liste des défis' })
-  async findAll() {
-    return this.challengeService.findAllChallenges();
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des défis',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 100,
+          totalPages: 10,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async findAll(@Query() pagination: PaginationDto) {
+    return this.challengeService.findAllChallenges(pagination);
   }
 
   @Public()
   @Get('active')
   @ApiOperation({ summary: 'Lister tous les défis actifs (Alias)' })
-  @ApiResponse({ status: 200, description: 'Liste des défis' })
-  async findAllActive() {
-    return this.challengeService.findAllChallenges();
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des défis',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 100,
+          totalPages: 10,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async findAllActive(@Query() pagination: PaginationDto) {
+    return this.challengeService.findAllChallenges(pagination);
   }
 
   @Public()
@@ -114,15 +173,77 @@ export class ChallengeController {
 
   @Get('progress/me')
   @ApiOperation({ summary: 'Obtenir ma progression des défis' })
-  @ApiResponse({ status: 200, description: 'Liste des progressions' })
-  async getUserProgress(@CurrentUser() user: any) {
-    return this.challengeService.getUserChallengeProgress(user.sub);
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des progressions',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 50,
+          totalPages: 5,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async getUserProgress(
+    @CurrentUser() user: any,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.challengeService.getUserChallengeProgress(user.sub, pagination);
   }
 
   @Get('my-challenges')
   @ApiOperation({ summary: 'Obtenir ma progression des défis (Alias)' })
-  @ApiResponse({ status: 200, description: 'Liste des progressions' })
-  async getMyChallenges(@CurrentUser() user: any) {
-    return this.challengeService.getUserChallengeProgress(user.sub);
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des progressions',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 50,
+          totalPages: 5,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async getMyChallenges(
+    @CurrentUser() user: any,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.challengeService.getUserChallengeProgress(user.sub, pagination);
   }
 }

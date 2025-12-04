@@ -31,6 +31,7 @@ import {
 import { Public } from '@/common/decorators/public.decorator';
 import { FileUploadService } from '../file-upload/file-upload.service';
 import { GpxParserService } from '../file-upload/gpx-parser.service';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 
 @ApiTags('parcours')
 @ApiBearerAuth()
@@ -55,11 +56,14 @@ export class ParcoursController {
   }
 
   @Post('upload-gpx')
-  @UseInterceptors(FileInterceptor('file', new FileUploadService().getGPXMulterConfig()))
+  @UseInterceptors(
+    FileInterceptor('file', new FileUploadService().getGPXMulterConfig()),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: 'Upload GPX file and extract data',
-    description: 'Upload a GPX file to extract waypoints, start/end points, and calculate distance',
+    description:
+      'Upload a GPX file to extract waypoints, start/end points, and calculate distance',
   })
   @ApiBody({
     schema: {
@@ -100,7 +104,10 @@ export class ParcoursController {
 
       // Generate public URL
       const baseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
-      const gpxFileUrl = this.fileUploadService.getFileUrl(file.filename, baseUrl);
+      const gpxFileUrl = this.fileUploadService.getFileUrl(
+        file.filename,
+        baseUrl,
+      );
 
       // Convert waypoints to GeoJSON for frontend
       const geoJson = this.gpxParserService.toGeoJSON(gpxData.waypoints);
@@ -127,7 +134,7 @@ export class ParcoursController {
   @ApiOperation({
     summary: 'Lister tous les parcours',
     description:
-      'Obtenir la liste des parcours avec filtres optionnels (difficulté, PMR, distance)',
+      'Obtenir la liste des parcours avec filtres optionnels (difficulté, PMR, distance) et pagination',
   })
   @ApiQuery({
     name: 'difficultyLevel',
@@ -137,28 +144,54 @@ export class ParcoursController {
   @ApiQuery({ name: 'isPmrAccessible', required: false, type: Boolean })
   @ApiQuery({ name: 'minDistance', required: false, type: Number })
   @ApiQuery({ name: 'maxDistance', required: false, type: Number })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Liste des parcours',
+    description: 'Liste paginée des parcours',
     schema: {
-      example: [
-        {
-          id: 1,
-          name: 'Chemin du Débarquement',
-          description: 'Parcours historique le long des plages du débarquement',
-          difficultyLevel: 'medium',
-          distanceKm: 12.5,
-          estimatedDuration: 180,
-          isPmrAccessible: true,
-          historicalTheme: 'D-Day 1944',
-          startingPointLat: 49.3394,
-          startingPointLon: -0.8566,
+      example: {
+        data: [
+          {
+            id: 1,
+            name: 'Chemin du Débarquement',
+            description:
+              'Parcours historique le long des plages du débarquement',
+            difficultyLevel: 'medium',
+            distanceKm: 12.5,
+            estimatedDuration: 180,
+            isPmrAccessible: true,
+            historicalTheme: 'D-Day 1944',
+            startingPointLat: 49.3394,
+            startingPointLon: -0.8566,
+          },
+        ],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 45,
+          totalPages: 5,
+          hasNextPage: true,
+          hasPreviousPage: false,
         },
-      ],
+      },
     },
   })
-  async findAll(@Query() query: ParcoursQueryDto) {
-    return this.parcoursService.findAll(query);
+  async findAll(
+    @Query() query: ParcoursQueryDto,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.parcoursService.findAll(query, pagination);
   }
 
   @Public()

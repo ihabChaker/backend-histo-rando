@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,7 +15,9 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 import { HistoricalService } from './historical.service';
 import {
   CreateBattalionDto,
@@ -41,9 +44,37 @@ export class HistoricalController {
   @Public()
   @Get('battalions')
   @ApiOperation({ summary: 'Lister tous les bataillons historiques' })
-  @ApiResponse({ status: 200, description: 'Liste des bataillons' })
-  async findAllBattalions() {
-    return this.historicalService.findAllBattalions();
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des bataillons',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 100,
+          totalPages: 10,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async findAllBattalions(@Query() pagination: PaginationDto) {
+    return this.historicalService.findAllBattalions(pagination);
   }
 
   @Public()
@@ -88,11 +119,43 @@ export class HistoricalController {
   @Get('routes/battalion/:battalionId')
   @ApiOperation({ summary: "Obtenir les routes d'un bataillon" })
   @ApiParam({ name: 'battalionId', description: 'ID du bataillon' })
-  @ApiResponse({ status: 200, description: 'Liste des routes' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des routes',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 100,
+          totalPages: 10,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
   async findRoutesByBattalion(
     @Param('battalionId', ParseIntPipe) battalionId: number,
+    @Query() pagination: PaginationDto,
   ) {
-    return this.historicalService.findRoutesByBattalion(battalionId);
+    return this.historicalService.findRoutesByBattalion(
+      battalionId,
+      pagination,
+    );
   }
 
   @Public()
@@ -101,11 +164,40 @@ export class HistoricalController {
     summary: "Obtenir l'historique des bataillons d'un parcours",
   })
   @ApiParam({ name: 'parcoursId', description: 'ID du parcours' })
-  @ApiResponse({ status: 200, description: 'Liste des routes historiques' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des routes historiques',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 100,
+          totalPages: 10,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
   async findRoutesByParcours(
     @Param('parcoursId', ParseIntPipe) parcoursId: number,
+    @Query() pagination: PaginationDto,
   ) {
-    return this.historicalService.findRoutesByParcours(parcoursId);
+    return this.historicalService.findRoutesByParcours(parcoursId, pagination);
   }
 
   @Put('routes/:id')

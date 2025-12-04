@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { XMLParser } from 'fast-xml-parser';
 import * as fs from 'fs';
-import * as path from 'path';
 
 export interface GPXWaypoint {
   lat: number;
@@ -42,12 +41,14 @@ export class GpxParserService {
     try {
       // Read file content
       const fileContent = fs.readFileSync(filePath, 'utf-8');
-      
+
       // Parse XML
       const parsedData = this.xmlParser.parse(fileContent);
-      
+
       if (!parsedData.gpx) {
-        throw new BadRequestException('Invalid GPX file: missing gpx root element');
+        throw new BadRequestException(
+          'Invalid GPX file: missing gpx root element',
+        );
       }
 
       const gpx = parsedData.gpx;
@@ -56,15 +57,19 @@ export class GpxParserService {
       // Extract track points (most common in hiking GPX files)
       if (gpx.trk) {
         const tracks = Array.isArray(gpx.trk) ? gpx.trk : [gpx.trk];
-        
+
         for (const track of tracks) {
           if (track.trkseg) {
-            const segments = Array.isArray(track.trkseg) ? track.trkseg : [track.trkseg];
-            
+            const segments = Array.isArray(track.trkseg)
+              ? track.trkseg
+              : [track.trkseg];
+
             for (const segment of segments) {
               if (segment.trkpt) {
-                const points = Array.isArray(segment.trkpt) ? segment.trkpt : [segment.trkpt];
-                
+                const points = Array.isArray(segment.trkpt)
+                  ? segment.trkpt
+                  : [segment.trkpt];
+
                 for (const point of points) {
                   waypoints.push({
                     lat: parseFloat(point.lat),
@@ -82,7 +87,7 @@ export class GpxParserService {
       // Extract waypoints (marked points of interest)
       if (gpx.wpt) {
         const wpts = Array.isArray(gpx.wpt) ? gpx.wpt : [gpx.wpt];
-        
+
         for (const wpt of wpts) {
           waypoints.push({
             lat: parseFloat(wpt.lat),
@@ -96,11 +101,13 @@ export class GpxParserService {
       // Extract route points (alternative to tracks)
       if (gpx.rte && waypoints.length === 0) {
         const routes = Array.isArray(gpx.rte) ? gpx.rte : [gpx.rte];
-        
+
         for (const route of routes) {
           if (route.rtept) {
-            const points = Array.isArray(route.rtept) ? route.rtept : [route.rtept];
-            
+            const points = Array.isArray(route.rtept)
+              ? route.rtept
+              : [route.rtept];
+
             for (const point of points) {
               waypoints.push({
                 lat: parseFloat(point.lat),
@@ -114,7 +121,9 @@ export class GpxParserService {
       }
 
       if (waypoints.length === 0) {
-        throw new BadRequestException('No waypoints or track points found in GPX file');
+        throw new BadRequestException(
+          'No waypoints or track points found in GPX file',
+        );
       }
 
       // Calculate total distance and elevation gain
@@ -137,7 +146,9 @@ export class GpxParserService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException(`Failed to parse GPX file: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to parse GPX file: ${error.message}`,
+      );
     }
   }
 
@@ -153,14 +164,14 @@ export class GpxParserService {
     const R = 6371; // Earth's radius in km
     const dLat = this.toRad(lat2 - lat1);
     const dLon = this.toRad(lon2 - lon1);
-    
+
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(lat1)) *
         Math.cos(this.toRad(lat2)) *
         Math.sin(dLon / 2) *
         Math.sin(dLon / 2);
-    
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -211,7 +222,7 @@ export class GpxParserService {
    */
   toGeoJSON(waypoints: GPXWaypoint[]): string {
     const coordinates = waypoints.map((wp) => [wp.lon, wp.lat]);
-    
+
     return JSON.stringify({
       type: 'LineString',
       coordinates,

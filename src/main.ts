@@ -62,7 +62,7 @@ async function bootstrap() {
   }
 
   // Expose OpenAPI JSON endpoint for Postman import
-  app.getHttpAdapter().get('/api-json', (req, res) => {
+  app.getHttpAdapter().get('/api-json', (req: any, res: any) => {
     res.status(200).send(document);
   });
 

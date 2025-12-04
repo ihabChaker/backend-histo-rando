@@ -4,6 +4,11 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import {
+  PaginationDto,
+  PaginatedResponse,
+  createPaginatedResponse,
+} from '@/common/dto/pagination.dto';
 import { Reward } from './entities/reward.entity';
 import { UserRewardRedeemed } from './entities/user-reward-redeemed.entity';
 import { User } from '@/modules/users/entities/user.entity';
@@ -30,11 +35,16 @@ export class RewardService {
     return this.rewardModel.create(createDto as any);
   }
 
-  async findAllRewards(): Promise<Reward[]> {
-    return this.rewardModel.findAll({
+  async findAllRewards(
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<Reward>> {
+    const { rows, count } = await this.rewardModel.findAndCountAll({
       where: { isAvailable: true },
       order: [['pointsCost', 'ASC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async findOneReward(id: number): Promise<Reward> {
@@ -109,12 +119,18 @@ export class RewardService {
     };
   }
 
-  async getUserRedemptions(userId: number): Promise<UserRewardRedeemed[]> {
-    return this.redeemedModel.findAll({
+  async getUserRedemptions(
+    userId: number,
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<UserRewardRedeemed>> {
+    const { rows, count } = await this.redeemedModel.findAndCountAll({
       where: { userId },
       include: [Reward],
       order: [['redemptionDatetime', 'DESC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async updateRedemptionStatus(

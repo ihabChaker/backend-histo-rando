@@ -92,30 +92,51 @@ describe('ParcoursController', () => {
   });
 
   describe('findAll', () => {
-    it('should return all parcours', async () => {
+    it('should return paginated parcours', async () => {
       const query: ParcoursQueryDto = {};
-      mockParcoursService.findAll.mockResolvedValue([
-        mockParcours,
-        mockParcours2,
-      ]);
+      const pagination = { page: 1, limit: 10, skip: 0, take: 10 };
+      const paginatedResponse = {
+        data: [mockParcours, mockParcours2],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 2,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+      mockParcoursService.findAll.mockResolvedValue(paginatedResponse);
 
-      const result = await controller.findAll(query);
+      const result = await controller.findAll(query, pagination as any);
 
-      expect(parcoursService.findAll).toHaveBeenCalledWith(query);
-      expect(result).toEqual([mockParcours, mockParcours2]);
+      expect(parcoursService.findAll).toHaveBeenCalledWith(query, pagination);
+      expect(result).toEqual(paginatedResponse);
     });
 
-    it('should return filtered parcours', async () => {
+    it('should return filtered and paginated parcours', async () => {
       const query: ParcoursQueryDto = {
         difficultyLevel: 'medium',
         isPmrAccessible: true,
       };
-      mockParcoursService.findAll.mockResolvedValue([mockParcours]);
+      const pagination = { page: 1, limit: 10, skip: 0, take: 10 };
+      const paginatedResponse = {
+        data: [mockParcours],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+      mockParcoursService.findAll.mockResolvedValue(paginatedResponse);
 
-      const result = await controller.findAll(query);
+      const result = await controller.findAll(query, pagination as any);
 
-      expect(parcoursService.findAll).toHaveBeenCalledWith(query);
-      expect(result).toEqual([mockParcours]);
+      expect(parcoursService.findAll).toHaveBeenCalledWith(query, pagination);
+      expect(result).toEqual(paginatedResponse);
     });
   });
 

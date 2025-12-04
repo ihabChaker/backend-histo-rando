@@ -4,6 +4,11 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import {
+  PaginationDto,
+  PaginatedResponse,
+  createPaginatedResponse,
+} from '@/common/dto/pagination.dto';
 import { Challenge } from './entities/challenge.entity';
 import { UserChallengeProgress } from './entities/user-challenge-progress.entity';
 import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
@@ -29,11 +34,16 @@ export class ChallengeService {
     return this.challengeModel.create(createDto as any);
   }
 
-  async findAllChallenges(): Promise<Challenge[]> {
-    return this.challengeModel.findAll({
+  async findAllChallenges(
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<Challenge>> {
+    const { rows, count } = await this.challengeModel.findAndCountAll({
       where: { isActive: true },
       order: [['pointsReward', 'DESC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async findOneChallenge(id: number): Promise<Challenge> {
@@ -128,11 +138,15 @@ export class ChallengeService {
 
   async getUserChallengeProgress(
     userId: number,
-  ): Promise<UserChallengeProgress[]> {
-    return this.progressModel.findAll({
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<UserChallengeProgress>> {
+    const { rows, count } = await this.progressModel.findAndCountAll({
       where: { userId },
       include: [Challenge, UserActivity],
       order: [['startDatetime', 'DESC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 }

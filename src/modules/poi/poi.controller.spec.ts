@@ -58,12 +58,24 @@ describe('PoiController', () => {
   });
   describe('findByParcours', () => {
     it('should return all POIs for a parcours', async () => {
-      mockPoiService.findAllByParcours.mockResolvedValue([mockPOI, mockPOI2]);
+      const paginationDto = { page: 1, limit: 10 };
+      const paginatedResponse = {
+        data: [mockPOI, mockPOI2],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 2,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+      mockPoiService.findAllByParcours.mockResolvedValue(paginatedResponse);
 
-      const result = await controller.findByParcours(1);
+      const result = await controller.findByParcours(1, paginationDto as any);
 
-      expect(poiService.findAllByParcours).toHaveBeenCalledWith(1);
-      expect(result).toEqual([mockPOI, mockPOI2]);
+      expect(poiService.findAllByParcours).toHaveBeenCalledWith(1, paginationDto);
+      expect(result).toEqual(paginatedResponse);
     });
   });
 
