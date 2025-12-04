@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -28,7 +29,16 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Global validation pipe - use ZodValidationPipe for Zod schemas
+  // Global validation pipes
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // Enables automatic type conversion
+      transformOptions: {
+        enableImplicitConversion: true, // Converts query params to correct types
+      },
+      whitelist: true,
+    }),
+  );
   app.useGlobalPipes(new ZodValidationPipe());
 
   // Swagger documentation
