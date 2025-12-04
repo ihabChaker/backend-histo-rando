@@ -12,6 +12,7 @@ import {
   UploadedFile,
   BadRequestException,
 } from '@nestjs/common';
+import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
