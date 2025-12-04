@@ -8,13 +8,19 @@ import {
   Param,
   Query,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiQuery,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { ParcoursService } from './parcours.service';
 import {
@@ -23,12 +29,18 @@ import {
   ParcoursQueryDto,
 } from './dto/parcours.dto';
 import { Public } from '@/common/decorators/public.decorator';
+import { FileUploadService } from '../file-upload/file-upload.service';
+import { GpxParserService } from '../file-upload/gpx-parser.service';
 
 @ApiTags('parcours')
 @ApiBearerAuth()
 @Controller('parcours')
 export class ParcoursController {
-  constructor(private readonly parcoursService: ParcoursService) {}
+  constructor(
+    private readonly parcoursService: ParcoursService,
+    private readonly fileUploadService: FileUploadService,
+    private readonly gpxParserService: GpxParserService,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -40,6 +52,74 @@ export class ParcoursController {
   @ApiResponse({ status: 400, description: 'Données invalides' })
   async create(@Body() createDto: CreateParcoursDto) {
     return this.parcoursService.create(createDto);
+  }
+
+  @Post('upload-gpx')
+  @UseInterceptors(FileInterceptor('file', new FileUploadService().getGPXMulterConfig()))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload GPX file and extract data',
+    description: 'Upload a GPX file to extract waypoints, start/end points, and calculate distance',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'GPX file uploaded and parsed successfully',
+    schema: {
+      example: {
+        filename: 'abc123.gpx',
+        gpxFileUrl: 'http://localhost:3000/uploads/gpx/abc123.gpx',
+        startPoint: { lat: 49.3394, lon: -0.8566 },
+        endPoint: { lat: 49.3714, lon: -0.8494 },
+        totalDistance: 12.5,
+        elevationGain: 250,
+        waypointsCount: 342,
+        geoJson: '{"type":"LineString","coordinates":[[...]]}',
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid file or GPX format' })
+  async uploadGPX(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    try {
+      // Parse GPX file
+      const gpxData = await this.gpxParserService.parseGPXFile(file.path);
+
+      // Generate public URL
+      const baseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+      const gpxFileUrl = this.fileUploadService.getFileUrl(file.filename, baseUrl);
+
+      // Convert waypoints to GeoJSON for frontend
+      const geoJson = this.gpxParserService.toGeoJSON(gpxData.waypoints);
+
+      return {
+        filename: file.filename,
+        gpxFileUrl,
+        startPoint: gpxData.startPoint,
+        endPoint: gpxData.endPoint,
+        totalDistance: gpxData.totalDistance,
+        elevationGain: gpxData.elevationGain,
+        waypointsCount: gpxData.waypoints.length,
+        geoJson,
+      };
+    } catch (error) {
+      // Delete file if parsing failed
+      this.gpxParserService.deleteFile(file.path);
+      throw error;
+    }
   }
 
   @Public()
