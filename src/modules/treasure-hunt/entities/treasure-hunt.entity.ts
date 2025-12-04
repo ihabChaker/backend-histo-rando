@@ -17,7 +17,7 @@ export class TreasureHunt extends Model {
   id: number;
 
   @ForeignKey(() => Parcours)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   parcoursId: number;
 
   @Column({ type: DataType.STRING(200), allowNull: false })

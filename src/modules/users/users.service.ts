@@ -4,6 +4,10 @@ import { User } from './entities/user.entity';
 import { UpdateUserProfileDto, AdminUpdateUserDto } from './dto/user.dto';
 import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
 import { UserPOIVisit } from '@/modules/activity/entities/user-poi-visit.entity';
+import {
+  PaginationDto,
+  PaginatedResponse,
+} from '@/common/dto/pagination.dto';
 
 @Injectable()
 export class UsersService {
@@ -26,8 +30,30 @@ export class UsersService {
     return user;
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.findAll();
+  async findAll(
+    paginationDto: PaginationDto = new PaginationDto(),
+  ): Promise<PaginatedResponse<User>> {
+    const { skip, take, page = 1, limit = 10 } = paginationDto;
+
+    const { count, rows } = await this.userModel.findAndCountAll({
+      offset: skip,
+      limit: take,
+      order: [['id', 'ASC']],
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      data: rows,
+      meta: {
+        page,
+        limit,
+        total: count,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   async findByEmail(email: string): Promise<User | null> {

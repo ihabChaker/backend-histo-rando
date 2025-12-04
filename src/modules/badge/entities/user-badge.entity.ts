@@ -16,14 +16,14 @@ export class UserBadge extends Model {
   id: number;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   userId: number;
 
   @BelongsTo(() => User)
   user: User;
 
   @ForeignKey(() => Badge)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   badgeId: number;
 
   @BelongsTo(() => Badge)

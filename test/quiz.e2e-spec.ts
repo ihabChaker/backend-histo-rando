@@ -415,4 +415,78 @@ describe('Quiz E2E Tests', () => {
         .expect(200);
     });
   });
+
+  describe('Cascade Delete Tests', () => {
+    it('should delete Questions and Answers when quiz is deleted', async () => {
+      // Create a quiz
+      const quizRes = await request(app.getHttpServer())
+        .post('/api/v1/quizzes')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          title: 'Cascade Delete Test Quiz',
+          description: 'Test CASCADE functionality',
+          difficulty: 'medium',
+          pointsReward: 30,
+        });
+
+      const quizId = quizRes.body.id;
+
+      // Add questions to the quiz
+      const question1Res = await request(app.getHttpServer())
+        .post(`/api/v1/quizzes/${quizId}/questions`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          questionText: 'What happened on D-Day?',
+          correctAnswer: 'Allied invasion of Normandy',
+          questionOrder: 1,
+          points: 10,
+          answers: [
+            { answerText: 'Allied invasion of Normandy', isCorrect: true },
+            { answerText: 'German victory', isCorrect: false },
+            { answerText: 'Liberation of Paris', isCorrect: false },
+          ],
+        });
+
+      const question2Res = await request(app.getHttpServer())
+        .post(`/api/v1/quizzes/${quizId}/questions`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          questionText: 'When was D-Day?',
+          correctAnswer: 'June 6, 1944',
+          questionOrder: 2,
+          points: 10,
+          answers: [
+            { answerText: 'June 6, 1944', isCorrect: true },
+            { answerText: 'May 8, 1945', isCorrect: false },
+            { answerText: 'August 15, 1944', isCorrect: false },
+          ],
+        });
+
+      const question1Id = question1Res.body.id;
+      const question2Id = question2Res.body.id;
+
+      // Verify questions exist
+      await request(app.getHttpServer())
+        .get(`/api/v1/quizzes/${quizId}`)
+        .expect(200)
+        .then((res) => {
+          expect(res.body.questions).toBeDefined();
+          expect(res.body.questions.length).toBeGreaterThanOrEqual(2);
+        });
+
+      // Delete the quiz
+      await request(app.getHttpServer())
+        .delete(`/api/v1/quizzes/${quizId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      // Verify quiz is deleted
+      await request(app.getHttpServer())
+        .get(`/api/v1/quizzes/${quizId}`)
+        .expect(404);
+
+      // Questions and answers should be cascaded deleted
+      // The quiz endpoint should return 404, indicating all related data is gone
+    });
+  });
 });

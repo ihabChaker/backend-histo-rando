@@ -16,7 +16,7 @@ export class Question extends Model {
   id: number;
 
   @ForeignKey(() => Quiz)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   quizId: number;
 
   @Column({ type: DataType.TEXT, allowNull: false })

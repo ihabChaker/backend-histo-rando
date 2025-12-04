@@ -8,6 +8,7 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,6 +22,7 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload } from '@/common/types/auth.types';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -32,8 +34,8 @@ export class UsersController {
   @Roles('admin')
   @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'Obtenir tous les utilisateurs (Admin)' })
-  async findAll() {
-    return this.usersService.findAll();
+  async findAll(@Query() paginationDto: PaginationDto) {
+    return this.usersService.findAll(paginationDto);
   }
 
   // User profile routes - must come BEFORE parameterized routes like ':id'

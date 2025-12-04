@@ -18,15 +18,15 @@ export class UserChallengeProgress extends Model {
   id: number;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   userId: number;
 
   @ForeignKey(() => Challenge)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   challengeId: number;
 
   @ForeignKey(() => UserActivity)
-  @Column({ type: DataType.INTEGER, allowNull: true })
+  @Column({ type: DataType.INTEGER, allowNull: true, onDelete: 'CASCADE' })
   activityId: number;
 
   @Column({ type: DataType.DATE, allowNull: false })

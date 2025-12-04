@@ -26,6 +26,7 @@ export class PointOfInterest extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    onDelete: 'CASCADE',
   })
   parcoursId: number;
 
