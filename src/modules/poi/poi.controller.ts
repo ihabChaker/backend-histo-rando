@@ -7,6 +7,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
 } from '@nestjs/common';
 import {
@@ -14,10 +15,12 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { PoiService } from './poi.service';
 import { CreatePOIDto, UpdatePOIDto } from './dto/poi.dto';
 import { Public } from '@/common/decorators/public.decorator';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 
 @ApiTags('poi')
 @ApiBearerAuth()
@@ -38,11 +41,13 @@ export class PoiController {
   @Get()
   @ApiOperation({
     summary: 'Lister tous les POI',
-    description: "Obtenir la liste complète des points d'intérêt",
+    description: "Obtenir la liste paginée des points d'intérêt",
   })
-  @ApiResponse({ status: 200, description: 'Liste de tous les POI' })
-  async findAll() {
-    return this.poiService.findAll();
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Liste paginée de tous les POI' })
+  async findAll(@Query() pagination: PaginationDto) {
+    return this.poiService.findAll(pagination);
   }
 
   @Public()
@@ -52,9 +57,14 @@ export class PoiController {
     description:
       "Obtenir tous les points d'intérêt d'un parcours spécifique, triés par ordre",
   })
-  @ApiResponse({ status: 200, description: 'Liste des POI' })
-  async findByParcours(@Param('parcoursId', ParseIntPipe) parcoursId: number) {
-    return this.poiService.findAllByParcours(parcoursId);
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Liste paginée des POI' })
+  async findByParcours(
+    @Param('parcoursId', ParseIntPipe) parcoursId: number,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.poiService.findAllByParcours(parcoursId, pagination);
   }
 
   @Public()

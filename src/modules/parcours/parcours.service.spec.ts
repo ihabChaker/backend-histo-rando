@@ -13,6 +13,7 @@ describe('ParcoursService', () => {
     parcoursModel = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findAndCountAll: jest.fn(),
       findByPk: jest.fn(),
     };
 
@@ -57,80 +58,111 @@ describe('ParcoursService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all parcours', async () => {
+    it('should return all parcours with pagination', async () => {
       const mockParcours = [{ id: 1, name: 'Test' }];
-      parcoursModel.findAll.mockResolvedValue(mockParcours);
+      parcoursModel.findAndCountAll.mockResolvedValue({
+        rows: mockParcours,
+        count: 1,
+      });
 
       const result = await service.findAll();
 
-      expect(parcoursModel.findAll).toHaveBeenCalled();
-      expect(result).toEqual(mockParcours);
+      expect(parcoursModel.findAndCountAll).toHaveBeenCalled();
+      expect(result).toEqual({
+        data: mockParcours,
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
     });
 
     it('should filter by distance range with minDistance', async () => {
       const mockParcours = [{ id: 1, name: 'Test' }];
-      parcoursModel.findAll.mockResolvedValue(mockParcours);
+      parcoursModel.findAndCountAll.mockResolvedValue({
+        rows: mockParcours,
+        count: 1,
+      });
 
       const query = { minDistance: 5 };
       const result = await service.findAll(query);
 
-      expect(parcoursModel.findAll).toHaveBeenCalled();
-      expect(result).toEqual(mockParcours);
+      expect(parcoursModel.findAndCountAll).toHaveBeenCalled();
+      expect(result.data).toEqual(mockParcours);
     });
 
     it('should filter by distance range with maxDistance', async () => {
       const mockParcours = [{ id: 1, name: 'Test' }];
-      parcoursModel.findAll.mockResolvedValue(mockParcours);
+      parcoursModel.findAndCountAll.mockResolvedValue({
+        rows: mockParcours,
+        count: 1,
+      });
 
       const query = { maxDistance: 10 };
       const result = await service.findAll(query);
 
-      expect(parcoursModel.findAll).toHaveBeenCalled();
-      expect(result).toEqual(mockParcours);
+      expect(parcoursModel.findAndCountAll).toHaveBeenCalled();
+      expect(result.data).toEqual(mockParcours);
     });
 
     it('should filter by distance range with both min and max', async () => {
       const mockParcours = [{ id: 1, name: 'Test' }];
-      parcoursModel.findAll.mockResolvedValue(mockParcours);
+      parcoursModel.findAndCountAll.mockResolvedValue({
+        rows: mockParcours,
+        count: 1,
+      });
 
       const query = { minDistance: 5, maxDistance: 10 };
       const result = await service.findAll(query);
 
-      expect(parcoursModel.findAll).toHaveBeenCalled();
-      expect(result).toEqual(mockParcours);
+      expect(parcoursModel.findAndCountAll).toHaveBeenCalled();
+      expect(result.data).toEqual(mockParcours);
     });
 
     it('should filter by difficultyLevel', async () => {
       const mockParcours = [{ id: 1, name: 'Test' }];
-      parcoursModel.findAll.mockResolvedValue(mockParcours);
+      parcoursModel.findAndCountAll.mockResolvedValue({
+        rows: mockParcours,
+        count: 1,
+      });
 
       const query = { difficultyLevel: 'EASY' as any };
       const result = await service.findAll(query);
 
-      expect(parcoursModel.findAll).toHaveBeenCalled();
-      expect(result).toEqual(mockParcours);
+      expect(parcoursModel.findAndCountAll).toHaveBeenCalled();
+      expect(result.data).toEqual(mockParcours);
     });
 
     it('should filter by isPmrAccessible', async () => {
       const mockParcours = [{ id: 1, name: 'Test' }];
-      parcoursModel.findAll.mockResolvedValue(mockParcours);
+      parcoursModel.findAndCountAll.mockResolvedValue({
+        rows: mockParcours,
+        count: 1,
+      });
 
       const query = { isPmrAccessible: true };
       const result = await service.findAll(query);
 
-      expect(parcoursModel.findAll).toHaveBeenCalled();
-      expect(result).toEqual(mockParcours);
+      expect(parcoursModel.findAndCountAll).toHaveBeenCalled();
+      expect(result.data).toEqual(mockParcours);
     });
 
     it('should filter by isActive', async () => {
       const mockParcours = [{ id: 1, name: 'Test' }];
-      parcoursModel.findAll.mockResolvedValue(mockParcours);
+      parcoursModel.findAndCountAll.mockResolvedValue({
+        rows: mockParcours,
+        count: 1,
+      });
 
       const query = { isActive: false };
       const result = await service.findAll(query);
 
-      expect(parcoursModel.findAll).toHaveBeenCalled();
-      expect(result).toEqual(mockParcours);
+      expect(parcoursModel.findAndCountAll).toHaveBeenCalled();
+      expect(result.data).toEqual(mockParcours);
     });
   });
 

@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import {
+  PaginationDto,
+  PaginatedResponse,
+  createPaginatedResponse,
+} from '@/common/dto/pagination.dto';
 import { Badge } from './entities/badge.entity';
 import { UserBadge } from './entities/user-badge.entity';
 import { CreateBadgeDto, UpdateBadgeDto } from './dto/badge.dto';
@@ -20,10 +25,13 @@ export class BadgeService {
     return this.badgeModel.create(createBadgeDto as any);
   }
 
-  async findAll(): Promise<Badge[]> {
-    return this.badgeModel.findAll({
+  async findAll(pagination: PaginationDto): Promise<PaginatedResponse<Badge>> {
+    const { rows, count } = await this.badgeModel.findAndCountAll({
       where: { isActive: true },
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async findOne(id: number): Promise<Badge> {
@@ -45,11 +53,17 @@ export class BadgeService {
     await badge.destroy();
   }
 
-  async findMyBadges(userId: number): Promise<UserBadge[]> {
-    return this.userBadgeModel.findAll({
+  async findMyBadges(
+    userId: number,
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<UserBadge>> {
+    const { rows, count } = await this.userBadgeModel.findAndCountAll({
       where: { userId },
       include: [Badge],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async awardBadge(userId: number, badgeId: number): Promise<UserBadge> {

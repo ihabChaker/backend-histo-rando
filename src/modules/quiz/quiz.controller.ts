@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,7 +15,9 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 import { QuizService } from './quiz.service';
 import {
   CreateQuizDto,
@@ -46,9 +49,37 @@ export class QuizController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'Lister tous les quizzes' })
-  @ApiResponse({ status: 200, description: 'Liste des quizzes' })
-  async findAllQuizzes() {
-    return this.quizService.findAllQuizzes();
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des quizzes',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 100,
+          totalPages: 10,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async findAllQuizzes(@Query() pagination: PaginationDto) {
+    return this.quizService.findAllQuizzes(pagination);
   }
 
   @Public()
@@ -192,9 +223,40 @@ export class QuizController {
     summary: 'Obtenir mes tentatives de quiz',
     description: "Historique de toutes les tentatives de quiz de l'utilisateur",
   })
-  @ApiResponse({ status: 200, description: 'Liste des tentatives' })
-  async getUserQuizAttempts(@CurrentUser() user: any) {
-    return this.quizService.getUserQuizAttempts(user.sub);
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des tentatives',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 50,
+          totalPages: 5,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async getUserQuizAttempts(
+    @CurrentUser() user: any,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.quizService.getUserQuizAttempts(user.sub, pagination);
   }
 
   // Parcours association

@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,7 +15,9 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 import { RewardService } from './reward.service';
 import {
   CreateRewardDto,
@@ -40,9 +43,37 @@ export class RewardController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'Lister toutes les récompenses disponibles' })
-  @ApiResponse({ status: 200, description: 'Liste des récompenses' })
-  async findAll() {
-    return this.rewardService.findAllRewards();
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des récompenses',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 100,
+          totalPages: 10,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async findAll(@Query() pagination: PaginationDto) {
+    return this.rewardService.findAllRewards(pagination);
   }
 
   @Public()
@@ -109,8 +140,39 @@ export class RewardController {
 
   @Get('redemptions/me')
   @ApiOperation({ summary: 'Obtenir mes échanges de récompenses' })
-  @ApiResponse({ status: 200, description: 'Liste des échanges' })
-  async getUserRedemptions(@CurrentUser() user: any) {
-    return this.rewardService.getUserRedemptions(user.sub);
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des échanges',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 50,
+          totalPages: 5,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async getUserRedemptions(
+    @CurrentUser() user: any,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.rewardService.getUserRedemptions(user.sub, pagination);
   }
 }

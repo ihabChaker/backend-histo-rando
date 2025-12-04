@@ -92,8 +92,10 @@ describe('Parcours E2E Tests (Real Database)', () => {
         .get('/api/v1/parcours')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBe(3);
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBe(3);
+      expect(response.body.meta).toBeDefined();
+      expect(response.body.meta.total).toBe(3);
     });
 
     it('should get a single parcours by ID', async () => {
@@ -211,7 +213,7 @@ describe('Parcours E2E Tests (Real Database)', () => {
         .expect(200);
 
       expect(
-        response.body.every((p: any) => p.difficultyLevel === 'easy'),
+        response.body.data.every((p: any) => p.difficultyLevel === 'easy'),
       ).toBe(true);
     });
   });
@@ -248,7 +250,7 @@ describe('Parcours E2E Tests (Real Database)', () => {
         .query({ isPmrAccessible: true })
         .expect(200);
 
-      expect(response.body.every((p: any) => p.isPmrAccessible === true)).toBe(
+      expect(response.body.data.every((p: any) => p.isPmrAccessible === true)).toBe(
         true,
       );
     });
@@ -297,7 +299,7 @@ describe('Parcours E2E Tests (Real Database)', () => {
         .query({ isActive: true })
         .expect(200);
 
-      expect(response.body.every((p: any) => p.isActive === true)).toBe(true);
+      expect(response.body.data.every((p: any) => p.isActive === true)).toBe(true);
     });
   });
 
@@ -318,7 +320,7 @@ describe('Parcours E2E Tests (Real Database)', () => {
         .query({ minDistance: 8.0 })
         .expect(200);
 
-      expect(response.body.every((p: any) => p.distanceKm >= 8.0)).toBe(true);
+      expect(response.body.data.every((p: any) => p.distanceKm >= 8.0)).toBe(true);
     });
 
     it('should filter by maximum distance', async () => {
@@ -337,7 +339,7 @@ describe('Parcours E2E Tests (Real Database)', () => {
         .query({ maxDistance: 10.0 })
         .expect(200);
 
-      expect(response.body.every((p: any) => p.distanceKm <= 10.0)).toBe(true);
+      expect(response.body.data.every((p: any) => p.distanceKm <= 10.0)).toBe(true);
     });
 
     it('should filter by distance range', async () => {
@@ -362,7 +364,7 @@ describe('Parcours E2E Tests (Real Database)', () => {
         .expect(200);
 
       expect(
-        response.body.every(
+        response.body.data.every(
           (p: any) => p.distanceKm >= 5.0 && p.distanceKm <= 15.0,
         ),
       ).toBe(true);
@@ -451,9 +453,9 @@ describe('Parcours E2E Tests (Real Database)', () => {
         })
         .expect(200);
 
-      expect(response.body.length).toBe(1);
-      expect(response.body[0].difficultyLevel).toBe('easy');
-      expect(response.body[0].isPmrAccessible).toBe(true);
+      expect(response.body.data.length).toBe(1);
+      expect(response.body.data[0].difficultyLevel).toBe('easy');
+      expect(response.body.data[0].isPmrAccessible).toBe(true);
     });
   });
 });

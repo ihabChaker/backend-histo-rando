@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,7 +15,9 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 import { ActivityService } from './activity.service';
 import {
   CreateUserActivityDto,
@@ -63,31 +66,56 @@ export class ActivityController {
     summary: 'Obtenir toutes mes activités',
     description: "Liste de toutes les activités de l'utilisateur connecté",
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Liste des activités',
     schema: {
-      example: [
-        {
-          id: 1,
-          parcoursId: 1,
-          activityType: 'walking',
-          startDatetime: '2025-11-12T14:30:00Z',
-          endDatetime: '2025-11-12T17:45:00Z',
-          status: 'completed',
-          distanceCoveredKm: 12.5,
-          pointsEarned: 125,
-          averageSpeed: 4.2,
-          parcours: {
+      example: {
+        data: [
+          {
             id: 1,
-            name: 'Chemin du Débarquement',
+            parcoursId: 1,
+            activityType: 'walking',
+            startDatetime: '2025-11-12T14:30:00Z',
+            endDatetime: '2025-11-12T17:45:00Z',
+            status: 'completed',
+            distanceCoveredKm: 12.5,
+            pointsEarned: 125,
+            averageSpeed: 4.2,
+            parcours: {
+              id: 1,
+              name: 'Chemin du Débarquement',
+            },
           },
+        ],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 50,
+          totalPages: 5,
+          hasNextPage: true,
+          hasPreviousPage: false,
         },
-      ],
+      },
     },
   })
-  async getUserActivities(@CurrentUser() user: any) {
-    return this.activityService.getUserActivities(user.sub);
+  async getUserActivities(
+    @CurrentUser() user: any,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.activityService.getUserActivities(user.sub, pagination);
   }
 
   @Get('stats')
@@ -195,28 +223,53 @@ export class ActivityController {
     summary: 'Obtenir mes visites de POI',
     description: "Liste de tous les POI visités par l'utilisateur",
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Liste des visites',
     schema: {
-      example: [
-        {
-          id: 1,
-          poiId: 1,
-          visitDatetime: '2025-11-12T15:30:00Z',
-          scannedQr: true,
-          listenedAudio: true,
-          pointsEarned: 10,
-          poi: {
+      example: {
+        data: [
+          {
             id: 1,
-            name: 'Bunker Allemand',
-            poiType: 'bunker',
+            poiId: 1,
+            visitDatetime: '2025-11-12T15:30:00Z',
+            scannedQr: true,
+            listenedAudio: true,
+            pointsEarned: 10,
+            poi: {
+              id: 1,
+              name: 'Bunker Allemand',
+              poiType: 'bunker',
+            },
           },
+        ],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 45,
+          totalPages: 5,
+          hasNextPage: true,
+          hasPreviousPage: false,
         },
-      ],
+      },
     },
   })
-  async getUserPOIVisits(@CurrentUser() user: any) {
-    return this.activityService.getUserPOIVisits(user.sub);
+  async getUserPOIVisits(
+    @CurrentUser() user: any,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.activityService.getUserPOIVisits(user.sub, pagination);
   }
 }

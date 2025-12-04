@@ -8,6 +8,11 @@ import {
   ParcoursQueryDto,
 } from './dto/parcours.dto';
 import { PointOfInterest } from '@/modules/poi/entities/point-of-interest.entity';
+import {
+  PaginationDto,
+  PaginatedResponse,
+  createPaginatedResponse,
+} from '@/common/dto/pagination.dto';
 
 @Injectable()
 export class ParcoursService {
@@ -20,7 +25,10 @@ export class ParcoursService {
     return this.parcoursModel.create(createDto as any);
   }
 
-  async findAll(query?: ParcoursQueryDto): Promise<Parcours[]> {
+  async findAll(
+    query?: ParcoursQueryDto,
+    pagination?: PaginationDto,
+  ): Promise<PaginatedResponse<Parcours>> {
     const where: any = {};
 
     if (query) {
@@ -36,11 +44,19 @@ export class ParcoursService {
       }
     }
 
-    return this.parcoursModel.findAll({
+    const { count, rows } = await this.parcoursModel.findAndCountAll({
       where,
       include: [PointOfInterest],
       order: [['creationDate', 'DESC']],
+      limit: pagination?.take,
+      offset: pagination?.skip,
     });
+
+    return createPaginatedResponse(
+      rows,
+      count,
+      pagination || new PaginationDto(),
+    );
   }
 
   async findOne(id: number): Promise<Parcours> {

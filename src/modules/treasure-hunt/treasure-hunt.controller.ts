@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,7 +15,9 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { PaginationDto } from '@/common/dto/pagination.dto';
 import { TreasureHuntService } from './treasure-hunt.service';
 import {
   CreateTreasureHuntDto,
@@ -40,18 +43,80 @@ export class TreasureHuntController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'Lister toutes les chasses au trésor actives' })
-  @ApiResponse({ status: 200, description: 'Liste des chasses au trésor' })
-  async findAll() {
-    return this.treasureHuntService.findAllTreasureHunts();
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des chasses au trésor',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 100,
+          totalPages: 10,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async findAll(@Query() pagination: PaginationDto) {
+    return this.treasureHuntService.findAllTreasureHunts(pagination);
   }
 
   @Public()
   @Get('parcours/:parcoursId')
   @ApiOperation({ summary: "Obtenir les chasses au trésor d'un parcours" })
   @ApiParam({ name: 'parcoursId', description: 'ID du parcours' })
-  @ApiResponse({ status: 200, description: 'Liste des chasses au trésor' })
-  async findByParcours(@Param('parcoursId', ParseIntPipe) parcoursId: number) {
-    return this.treasureHuntService.findTreasureHuntsByParcours(parcoursId);
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des chasses au trésor',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 100,
+          totalPages: 10,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async findByParcours(
+    @Param('parcoursId', ParseIntPipe) parcoursId: number,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.treasureHuntService.findTreasureHuntsByParcours(
+      parcoursId,
+      pagination,
+    );
   }
 
   @Public()
@@ -117,8 +182,39 @@ export class TreasureHuntController {
 
   @Get('found/me')
   @ApiOperation({ summary: 'Obtenir mes trésors trouvés' })
-  @ApiResponse({ status: 200, description: 'Liste des trésors trouvés' })
-  async getUserTreasures(@CurrentUser() user: any) {
-    return this.treasureHuntService.getUserTreasuresFound(user.sub);
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des trésors trouvés',
+    schema: {
+      example: {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 50,
+          totalPages: 5,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      },
+    },
+  })
+  async getUserTreasures(
+    @CurrentUser() user: any,
+    @Query() pagination: PaginationDto,
+  ) {
+    return this.treasureHuntService.getUserTreasuresFound(user.sub, pagination);
   }
 }

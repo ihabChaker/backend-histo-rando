@@ -5,6 +5,11 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import {
+  PaginationDto,
+  PaginatedResponse,
+  createPaginatedResponse,
+} from '@/common/dto/pagination.dto';
 import { TreasureHunt } from './entities/treasure-hunt.entity';
 import { UserTreasureFound } from './entities/user-treasure-found.entity';
 import { Parcours } from '@/modules/parcours/entities/parcours.entity';
@@ -57,20 +62,29 @@ export class TreasureHuntService {
     return this.treasureHuntModel.create(createDto as any);
   }
 
-  async findAllTreasureHunts(): Promise<TreasureHunt[]> {
-    return this.treasureHuntModel.findAll({
+  async findAllTreasureHunts(
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<TreasureHunt>> {
+    const { rows, count } = await this.treasureHuntModel.findAndCountAll({
       include: [Parcours],
       order: [['pointsReward', 'DESC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async findTreasureHuntsByParcours(
     parcoursId: number,
-  ): Promise<TreasureHunt[]> {
-    return this.treasureHuntModel.findAll({
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<TreasureHunt>> {
+    const { rows, count } = await this.treasureHuntModel.findAndCountAll({
       where: { parcoursId, isActive: true },
       include: [Parcours],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async findOneTreasureHunt(id: number): Promise<TreasureHunt> {
@@ -174,11 +188,17 @@ export class TreasureHuntService {
     };
   }
 
-  async getUserTreasuresFound(userId: number): Promise<UserTreasureFound[]> {
-    return this.treasureFoundModel.findAll({
+  async getUserTreasuresFound(
+    userId: number,
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<UserTreasureFound>> {
+    const { rows, count } = await this.treasureFoundModel.findAndCountAll({
       where: { userId },
       include: [TreasureHunt],
       order: [['foundDatetime', 'DESC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 }

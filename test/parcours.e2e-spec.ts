@@ -46,7 +46,7 @@ describe('Parcours E2E Tests', () => {
         .get('/api/v1/parcours')
         .expect(200)
         .then((response) => {
-          expect(Array.isArray(response.body)).toBe(true);
+          expect(Array.isArray(response.body.data)).toBe(true);
         });
     });
   });

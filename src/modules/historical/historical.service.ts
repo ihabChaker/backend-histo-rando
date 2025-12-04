@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import {
+  PaginationDto,
+  PaginatedResponse,
+  createPaginatedResponse,
+} from '@/common/dto/pagination.dto';
 import { HistoricalBattalion } from './entities/historical-battalion.entity';
 import { BattalionRoute } from './entities/battalion-route.entity';
 import { Parcours } from '@/modules/parcours/entities/parcours.entity';
@@ -27,11 +32,16 @@ export class HistoricalService {
     return this.battalionModel.create(createDto as any);
   }
 
-  async findAllBattalions(): Promise<HistoricalBattalion[]> {
-    return this.battalionModel.findAll({
+  async findAllBattalions(
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<HistoricalBattalion>> {
+    const { rows, count } = await this.battalionModel.findAndCountAll({
       include: [{ model: BattalionRoute, include: [Parcours] }],
       order: [['name', 'ASC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async findOneBattalion(id: number): Promise<HistoricalBattalion> {
@@ -74,20 +84,32 @@ export class HistoricalService {
     return this.battalionRouteModel.create(createDto as any);
   }
 
-  async findRoutesByBattalion(battalionId: number): Promise<BattalionRoute[]> {
-    return this.battalionRouteModel.findAll({
+  async findRoutesByBattalion(
+    battalionId: number,
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<BattalionRoute>> {
+    const { rows, count } = await this.battalionRouteModel.findAndCountAll({
       where: { battalionId },
       include: [Parcours],
       order: [['routeDate', 'ASC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
-  async findRoutesByParcours(parcoursId: number): Promise<BattalionRoute[]> {
-    return this.battalionRouteModel.findAll({
+  async findRoutesByParcours(
+    parcoursId: number,
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<BattalionRoute>> {
+    const { rows, count } = await this.battalionRouteModel.findAndCountAll({
       where: { parcoursId },
       include: [HistoricalBattalion],
       order: [['routeDate', 'ASC']],
+      limit: pagination.take,
+      offset: pagination.skip,
     });
+    return createPaginatedResponse(rows, count, pagination);
   }
 
   async updateBattalionRoute(

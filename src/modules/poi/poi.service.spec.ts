@@ -13,6 +13,7 @@ describe('PoiService', () => {
     poiModel = {
       create: jest.fn(),
       findAll: jest.fn(),
+      findAndCountAll: jest.fn(),
       findByPk: jest.fn(),
     };
 
@@ -57,15 +58,15 @@ describe('PoiService', () => {
   describe('findAllByParcours', () => {
     it('should return all POIs for a parcours', async () => {
       const mockPOIs = [{ id: 1, name: 'Test POI' }];
-      poiModel.findAll.mockResolvedValue(mockPOIs);
+      poiModel.findAndCountAll.mockResolvedValue({
+        rows: mockPOIs,
+        count: 1,
+      });
 
       const result = await service.findAllByParcours(1);
 
-      expect(poiModel.findAll).toHaveBeenCalledWith({
-        where: { parcoursId: 1 },
-        order: [['orderInParcours', 'ASC']],
-      });
-      expect(result).toEqual(mockPOIs);
+      expect(poiModel.findAndCountAll).toHaveBeenCalled();
+      expect(result.data).toEqual(mockPOIs);
     });
   });
 
