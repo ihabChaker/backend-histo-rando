@@ -30,16 +30,21 @@ async function bootstrap() {
   });
 
   // Global validation pipes
+  // Use ZodValidationPipe for Zod schemas (must come first)
+  app.useGlobalPipes(new ZodValidationPipe());
+  // Use ValidationPipe ONLY for query params transformation (not body validation)
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // Enables automatic type conversion
+      transform: true, // Enables automatic type conversion for query params
       transformOptions: {
         enableImplicitConversion: true, // Converts query params to correct types
       },
-      whitelist: true,
+      // Don't validate body - let Zod handle it
+      skipMissingProperties: true,
+      whitelist: false, // Don't strip properties - Zod will validate
+      forbidNonWhitelisted: false,
     }),
   );
-  app.useGlobalPipes(new ZodValidationPipe());
 
   // Swagger documentation
   const config = new DocumentBuilder()
