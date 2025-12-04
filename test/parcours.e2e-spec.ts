@@ -205,4 +205,126 @@ describe('Parcours E2E Tests', () => {
         .expect(200);
     });
   });
+
+  describe('Cascade Delete Tests', () => {
+    it('should delete POIs when parcours is deleted', async () => {
+      // Create a parcours
+      const createParcoursResponse = await request(app.getHttpServer())
+        .post('/api/v1/parcours')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Parcours for Cascade Test',
+          description: 'Test CASCADE delete functionality',
+          difficultyLevel: 'medium',
+          distanceKm: 7.5,
+          estimatedDuration: 120,
+          isPmrAccessible: false,
+          historicalTheme: 'D-Day',
+          startingPointLat: 49.3394,
+          startingPointLon: -0.8566,
+        });
+
+      const parcoursId = createParcoursResponse.body.id;
+
+      // Create POIs for the parcours
+      const poi1Response = await request(app.getHttpServer())
+        .post('/api/v1/poi')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          parcoursId,
+          name: 'Test Bunker',
+          description: 'Test POI 1',
+          poiType: 'bunker',
+          latitude: 49.3395,
+          longitude: -0.8567,
+          orderInParcours: 1,
+        });
+
+      const poi2Response = await request(app.getHttpServer())
+        .post('/api/v1/poi')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          parcoursId,
+          name: 'Test Memorial',
+          description: 'Test POI 2',
+          poiType: 'memorial',
+          latitude: 49.3396,
+          longitude: -0.8568,
+          orderInParcours: 2,
+        });
+
+      // Verify POIs were created
+      await request(app.getHttpServer())
+        .get(`/api/v1/poi/${poi1Response.body.id}`)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get(`/api/v1/poi/${poi2Response.body.id}`)
+        .expect(200);
+
+      // Delete the parcours
+      await request(app.getHttpServer())
+        .delete(`/api/v1/parcours/${parcoursId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      // Verify POIs are deleted (CASCADE)
+      await request(app.getHttpServer())
+        .get(`/api/v1/poi/${poi1Response.body.id}`)
+        .expect(404);
+
+      await request(app.getHttpServer())
+        .get(`/api/v1/poi/${poi2Response.body.id}`)
+        .expect(404);
+    });
+
+    it('should delete UserActivities when parcours is deleted', async () => {
+      // Create a parcours
+      const createParcoursResponse = await request(app.getHttpServer())
+        .post('/api/v1/parcours')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Parcours for Activity Cascade Test',
+          description: 'Test CASCADE delete for activities',
+          difficultyLevel: 'easy',
+          distanceKm: 5.0,
+          estimatedDuration: 90,
+          isPmrAccessible: true,
+          historicalTheme: 'WWII',
+          startingPointLat: 49.3394,
+          startingPointLon: -0.8566,
+        });
+
+      const parcoursId = createParcoursResponse.body.id;
+
+      // Start an activity for the parcours
+      const activityResponse = await request(app.getHttpServer())
+        .post('/api/v1/activities')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          parcoursId,
+          activityType: 'walking',
+        });
+
+      const activityId = activityResponse.body.id;
+
+      // Verify activity was created
+      await request(app.getHttpServer())
+        .get(`/api/v1/activities/${activityId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      // Delete the parcours
+      await request(app.getHttpServer())
+        .delete(`/api/v1/parcours/${parcoursId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      // Verify activity is deleted (CASCADE)
+      await request(app.getHttpServer())
+        .get(`/api/v1/activities/${activityId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+  });
 });

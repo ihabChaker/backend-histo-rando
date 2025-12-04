@@ -20,11 +20,11 @@ export class UserTreasureFound extends Model {
   id: number;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   userId: number;
 
   @ForeignKey(() => TreasureHunt)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   treasureId: number;
 
   @Column({ type: DataType.DATE, allowNull: false })

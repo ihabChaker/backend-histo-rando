@@ -15,11 +15,11 @@ export class BattalionRoute extends Model {
   id: number;
 
   @ForeignKey(() => HistoricalBattalion)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   battalionId: number;
 
   @ForeignKey(() => Parcours)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   parcoursId: number;
 
   @Column({ type: DataType.DATEONLY, allowNull: true })

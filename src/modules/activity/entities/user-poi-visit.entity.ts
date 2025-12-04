@@ -28,6 +28,7 @@ export class UserPOIVisit extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    onDelete: 'CASCADE',
   })
   userId: number;
 
@@ -35,6 +36,7 @@ export class UserPOIVisit extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    onDelete: 'CASCADE',
   })
   poiId: number;
 
@@ -42,6 +44,7 @@ export class UserPOIVisit extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
+    onDelete: 'CASCADE',
   })
   activityId: number;
 

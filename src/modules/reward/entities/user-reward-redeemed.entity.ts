@@ -20,11 +20,11 @@ export class UserRewardRedeemed extends Model {
   id: number;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   userId: number;
 
   @ForeignKey(() => Reward)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   rewardId: number;
 
   @Column({ type: DataType.DATE, allowNull: false })

@@ -24,6 +24,7 @@ export class ParcoursQuiz extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    onDelete: 'CASCADE',
   })
   parcoursId: number;
 
@@ -31,6 +32,7 @@ export class ParcoursQuiz extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    onDelete: 'CASCADE',
   })
   quizId: number;
 

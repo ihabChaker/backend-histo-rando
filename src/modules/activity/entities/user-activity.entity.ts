@@ -30,6 +30,7 @@ export class UserActivity extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    onDelete: 'CASCADE',
   })
   userId: number;
 
@@ -37,6 +38,7 @@ export class UserActivity extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    onDelete: 'CASCADE',
   })
   parcoursId: number;
 

@@ -16,11 +16,11 @@ export class UserQuizAttempt extends Model {
   id: number;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   userId: number;
 
   @ForeignKey(() => Quiz)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false, onDelete: 'CASCADE' })
   quizId: number;
 
   @Column({ type: DataType.DATE, allowNull: false })
