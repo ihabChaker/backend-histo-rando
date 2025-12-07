@@ -8,6 +8,7 @@ import {
   ParcoursQueryDto,
 } from './dto/parcours.dto';
 import { PointOfInterest } from '@/modules/poi/entities/point-of-interest.entity';
+import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
 import {
   PaginationDto,
   PaginatedResponse,
@@ -86,21 +87,44 @@ export class ParcoursService {
     lat: number,
     lon: number,
     radiusKm: number = 50,
+    userId?: number,
   ): Promise<Parcours[]> {
     // Simple distance calculation (for production, use PostGIS)
     const latRange = radiusKm / 111.0; // rough conversion km to degrees
     const lonRange = radiusKm / (111.0 * Math.cos((lat * Math.PI) / 180));
 
-    return this.parcoursModel.findAll({
-      where: {
-        startingPointLat: {
-          [Op.between]: [lat - latRange, lat + latRange],
-        },
-        startingPointLon: {
-          [Op.between]: [lon - lonRange, lon + lonRange],
-        },
-        isActive: true,
+    const whereCondition: any = {
+      startingPointLat: {
+        [Op.between]: [lat - latRange, lat + latRange],
       },
+      startingPointLon: {
+        [Op.between]: [lon - lonRange, lon + lonRange],
+      },
+      isActive: true,
+    };
+
+    // If user is authenticated, exclude completed parcours
+    if (userId) {
+      const completedParcoursIds = await UserActivity.findAll({
+        where: {
+          userId,
+          status: 'completed',
+        },
+        attributes: ['parcoursId'],
+        raw: true,
+      });
+
+      const completedIds = completedParcoursIds.map((a: any) => a.parcoursId);
+
+      if (completedIds.length > 0) {
+        whereCondition.id = {
+          [Op.notIn]: completedIds,
+        };
+      }
+    }
+
+    return this.parcoursModel.findAll({
+      where: whereCondition,
     });
   }
 }

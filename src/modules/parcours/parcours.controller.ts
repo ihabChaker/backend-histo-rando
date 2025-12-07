@@ -11,8 +11,10 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { Express } from 'express';
+import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
@@ -130,6 +132,58 @@ export class ParcoursController {
     }
   }
 
+  @Post('upload-image')
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      new FileUploadService().getImageMulterConfig('parcours'),
+    ),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload parcours image',
+    description: 'Upload an image for a parcours (jpg, png, webp, max 5MB)',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Image uploaded successfully',
+    schema: {
+      example: {
+        filename: 'abc123.jpg',
+        imageUrl: 'http://localhost:3000/uploads/images/parcours/abc123.jpg',
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid file format' })
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const baseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+    const imageUrl = this.fileUploadService.getImageUrl(
+      file.filename,
+      'parcours',
+      baseUrl,
+    );
+
+    return {
+      filename: file.filename,
+      imageUrl,
+    };
+  }
+
   @Public()
   @Get()
   @ApiOperation({
@@ -200,7 +254,7 @@ export class ParcoursController {
   @ApiOperation({
     summary: 'Trouver les parcours à proximité',
     description:
-      "Rechercher les parcours dans un rayon donné autour d'une position GPS",
+      "Rechercher les parcours dans un rayon donné autour d'une position GPS. Exclut les parcours déjà complétés pour les utilisateurs authentifiés.",
   })
   @ApiQuery({ name: 'lat', required: true, type: Number })
   @ApiQuery({ name: 'lon', required: true, type: Number })
@@ -210,16 +264,25 @@ export class ParcoursController {
     type: Number,
     description: 'Rayon en km (défaut: 50)',
   })
-  @ApiResponse({ status: 200, description: 'Parcours à proximité' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Parcours à proximité (excluant ceux déjà complétés si authentifié)',
+  })
   async findNearby(
     @Query('lat') lat: number,
     @Query('lon') lon: number,
     @Query('radius') radius?: number,
+    @Req() req?: Request,
   ) {
+    // Extract userId from request if authenticated
+    const userId = (req as any)?.user?.id;
+
     return this.parcoursService.findNearby(
       Number(lat),
       Number(lon),
       radius ? Number(radius) : 50,
+      userId,
     );
   }
 

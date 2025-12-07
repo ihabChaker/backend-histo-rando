@@ -21,6 +21,9 @@ import { ParcoursPodcast } from '@/modules/parcours/entities/parcours-podcast.en
 import { ParcoursQuiz } from '@/modules/parcours/entities/parcours-quiz.entity';
 import { HistoricalBattalion } from '@/modules/historical/entities/historical-battalion.entity';
 import { BattalionRoute } from '@/modules/historical/entities/battalion-route.entity';
+import { TreasureItem } from '@/modules/treasure-hunt/entities/treasure-item.entity';
+import { UserTreasureItemFound } from '@/modules/treasure-hunt/entities/user-treasure-item-found.entity';
+import { ActiveParcoursSession } from '@/modules/parcours-session/entities/active-parcours-session.entity';
 
 @Module({
   imports: [
@@ -61,20 +64,23 @@ import { BattalionRoute } from '@/modules/historical/entities/battalion-route.en
             Answer,
             Challenge,
             TreasureHunt,
+            TreasureItem,
             Reward,
             UserActivity,
             UserPOIVisit,
             UserQuizAttempt,
             UserChallengeProgress,
             UserTreasureFound,
+            UserTreasureItemFound,
             UserRewardRedeemed,
             ParcoursPodcast,
             ParcoursQuiz,
             HistoricalBattalion,
             BattalionRoute,
+            ActiveParcoursSession,
           ],
           autoLoadModels: true,
-          sync: { alter: true }, // Automatically sync and alter tables to match models
+          sync: { force: false }, // Sync tables without altering (prevents duplicate indexes)
           logging: configService.get('database.logging') ? console.log : false,
         };
       },

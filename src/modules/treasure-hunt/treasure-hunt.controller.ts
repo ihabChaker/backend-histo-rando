@@ -8,7 +8,13 @@ import {
   Param,
   ParseIntPipe,
   Query,
+  Req,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
@@ -16,6 +22,8 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { PaginationDto } from '@/common/dto/pagination.dto';
 import { TreasureHuntService } from './treasure-hunt.service';
@@ -24,14 +32,24 @@ import {
   UpdateTreasureHuntDto,
   RecordTreasureFoundDto,
 } from './dto/treasure-hunt.dto';
+import {
+  CreateTreasureItemDto,
+  UpdateTreasureItemDto,
+  ScanTreasureItemDto,
+  ScanTreasureItemResponseDto,
+} from './dto/treasure-item.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Public } from '@/common/decorators/public.decorator';
+import { FileUploadService } from '../file-upload/file-upload.service';
 
 @ApiTags('treasure-hunt')
 @ApiBearerAuth()
 @Controller('treasure-hunts')
 export class TreasureHuntController {
-  constructor(private readonly treasureHuntService: TreasureHuntService) {}
+  constructor(
+    private readonly treasureHuntService: TreasureHuntService,
+    private readonly fileUploadService: FileUploadService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer une nouvelle chasse au trésor' })
@@ -216,5 +234,108 @@ export class TreasureHuntController {
     @Query() pagination: PaginationDto,
   ) {
     return this.treasureHuntService.getUserTreasuresFound(user.sub, pagination);
+  }
+
+  // ===== TREASURE ITEM ENDPOINTS =====
+
+  @Post('items')
+  @ApiOperation({ summary: 'Créer un item de trésor' })
+  @ApiResponse({ status: 201, description: 'Item créé avec succès' })
+  async createItem(@Body() dto: CreateTreasureItemDto) {
+    return this.treasureHuntService.createTreasureItem(dto);
+  }
+
+  @Public()
+  @Get(':huntId/items')
+  @ApiOperation({ summary: "Lister les items d'une chasse au trésor" })
+  @ApiParam({ name: 'huntId', description: 'ID de la chasse au trésor' })
+  async getItemsByHunt(@Param('huntId', ParseIntPipe) huntId: number) {
+    return this.treasureHuntService.findItemsByHunt(huntId);
+  }
+
+  @Get('items/:id')
+  @ApiOperation({ summary: 'Obtenir un item par ID' })
+  async getItem(@Param('id', ParseIntPipe) id: number) {
+    return this.treasureHuntService.findOneItem(id);
+  }
+
+  @Put('items/:id')
+  @ApiOperation({ summary: 'Mettre à jour un item' })
+  async updateItem(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateTreasureItemDto,
+  ) {
+    return this.treasureHuntService.updateTreasureItem(id, dto);
+  }
+
+  @Delete('items/:id')
+  @ApiOperation({ summary: 'Supprimer un item' })
+  async deleteItem(@Param('id', ParseIntPipe) id: number) {
+    await this.treasureHuntService.removeTreasureItem(id);
+    return { message: 'Item supprimé avec succès' };
+  }
+
+  @Post('items/scan')
+  @ApiOperation({ summary: "Scanner le QR code d'un item de trésor" })
+  @ApiResponse({
+    status: 200,
+    description: 'Item scanné avec succès',
+    type: ScanTreasureItemResponseDto,
+  })
+  async scanItem(@Req() req: any, @Body() dto: ScanTreasureItemDto) {
+    return this.treasureHuntService.scanTreasureItem(req.user.id, dto);
+  }
+
+  @Post('upload-image')
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      new FileUploadService().getImageMulterConfig('treasure'),
+    ),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload treasure item image',
+    description:
+      'Upload an image for a treasure item (jpg, png, webp, max 5MB)',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Image uploaded successfully',
+    schema: {
+      example: {
+        filename: 'abc123.jpg',
+        imageUrl: 'http://localhost:3000/uploads/images/treasure/abc123.jpg',
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid file format' })
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const baseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+    const imageUrl = this.fileUploadService.getImageUrl(
+      file.filename,
+      'treasure',
+      baseUrl,
+    );
+
+    return {
+      filename: file.filename,
+      imageUrl,
+    };
   }
 }

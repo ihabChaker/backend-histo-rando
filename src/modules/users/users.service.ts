@@ -4,10 +4,7 @@ import { User } from './entities/user.entity';
 import { UpdateUserProfileDto, AdminUpdateUserDto } from './dto/user.dto';
 import { UserActivity } from '@/modules/activity/entities/user-activity.entity';
 import { UserPOIVisit } from '@/modules/activity/entities/user-poi-visit.entity';
-import {
-  PaginationDto,
-  PaginatedResponse,
-} from '@/common/dto/pagination.dto';
+import { PaginationDto, PaginatedResponse } from '@/common/dto/pagination.dto';
 
 @Injectable()
 export class UsersService {

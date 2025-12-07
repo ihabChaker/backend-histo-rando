@@ -7,13 +7,20 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { MediaService } from './media.service';
 import {
@@ -22,12 +29,16 @@ import {
   AssociatePodcastToParcoursDto,
 } from './dto/podcast.dto';
 import { Public } from '@/common/decorators/public.decorator';
+import { FileUploadService } from '../file-upload/file-upload.service';
 
 @ApiTags('media')
 @ApiBearerAuth()
 @Controller('podcasts')
 export class MediaController {
-  constructor(private readonly mediaService: MediaService) {}
+  constructor(
+    private readonly mediaService: MediaService,
+    private readonly fileUploadService: FileUploadService,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -55,6 +66,59 @@ export class MediaController {
   @ApiResponse({ status: 400, description: 'Données invalides' })
   async create(@Body() createDto: CreatePodcastDto) {
     return this.mediaService.createPodcast(createDto);
+  }
+
+  @Post('upload-audio')
+  @UseInterceptors(
+    FileInterceptor('file', new FileUploadService().getAudioMulterConfig()),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload podcast audio file',
+    description:
+      'Upload an audio file for a podcast (mp3, wav, ogg, m4a, max 50MB)',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Audio file uploaded successfully',
+    schema: {
+      example: {
+        filename: 'abc123.mp3',
+        audioFileUrl: 'http://localhost:3000/uploads/audio/abc123.mp3',
+        size: 5242880,
+        duration: null,
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid file format' })
+  async uploadAudio(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const baseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+    const audioFileUrl = this.fileUploadService.getAudioUrl(
+      file.filename,
+      baseUrl,
+    );
+
+    return {
+      filename: file.filename,
+      audioFileUrl,
+      size: file.size,
+      duration: null, // Could add duration detection library like ffprobe
+    };
   }
 
   @Public()

@@ -5,9 +5,13 @@ import { ParcoursPodcast } from '@/modules/parcours/entities/parcours-podcast.en
 import { Parcours } from '@/modules/parcours/entities/parcours.entity';
 import { MediaController } from './media.controller';
 import { MediaService } from './media.service';
+import { FileUploadModule } from '../file-upload/file-upload.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Podcast, ParcoursPodcast, Parcours])],
+  imports: [
+    SequelizeModule.forFeature([Podcast, ParcoursPodcast, Parcours]),
+    FileUploadModule,
+  ],
   controllers: [MediaController],
   providers: [MediaService],
   exports: [SequelizeModule, MediaService],

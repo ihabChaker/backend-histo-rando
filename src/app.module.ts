@@ -16,6 +16,7 @@ import { BadgeModule } from './modules/badge/badge.module';
 import { HistoricalModule } from './modules/historical/historical.module';
 import { HealthModule } from './modules/health/health.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { ParcoursSessionModule } from './modules/parcours-session/parcours-session.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AdminModule } from './modules/admin/admin.module';
     BadgeModule,
     HistoricalModule,
     AdminModule,
+    ParcoursSessionModule,
   ],
 })
 export class AppModule {}
