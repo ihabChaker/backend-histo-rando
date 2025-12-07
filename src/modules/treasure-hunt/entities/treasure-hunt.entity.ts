@@ -10,6 +10,7 @@ import {
 } from 'sequelize-typescript';
 import { Parcours } from '@/modules/parcours/entities/parcours.entity';
 import { UserTreasureFound } from './user-treasure-found.entity';
+import { TreasureItem } from './treasure-item.entity';
 
 @Table({ tableName: 'treasure_hunts', timestamps: true, updatedAt: false })
 export class TreasureHunt extends Model {
@@ -55,4 +56,7 @@ export class TreasureHunt extends Model {
 
   @HasMany(() => UserTreasureFound)
   foundByUsers: UserTreasureFound[];
+
+  @HasMany(() => TreasureItem)
+  items: TreasureItem[];
 }

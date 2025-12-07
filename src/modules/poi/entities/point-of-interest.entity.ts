@@ -9,6 +9,8 @@ import {
 } from 'sequelize-typescript';
 import { Parcours } from '@/modules/parcours/entities/parcours.entity';
 import { UserPOIVisit } from '@/modules/activity/entities/user-poi-visit.entity';
+import { Quiz } from '@/modules/quiz/entities/quiz.entity';
+import { Podcast } from '@/modules/media/entities/podcast.entity';
 
 @Table({
   tableName: 'points_of_interest',
@@ -97,8 +99,28 @@ export class PointOfInterest extends Model {
   })
   audioUrl: string;
 
+  @ForeignKey(() => Quiz)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  quizId: number;
+
+  @ForeignKey(() => Podcast)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  podcastId: number;
+
   @BelongsTo(() => Parcours)
   parcours: Parcours;
+
+  @BelongsTo(() => Quiz)
+  quiz: Quiz;
+
+  @BelongsTo(() => Podcast)
+  podcast: Podcast;
 
   @HasMany(() => UserPOIVisit)
   visits: UserPOIVisit[];

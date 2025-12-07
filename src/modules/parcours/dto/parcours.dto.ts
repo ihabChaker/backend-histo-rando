@@ -12,7 +12,10 @@ export const CreateParcoursSchema = z.object({
   historicalTheme: z.string().max(255).optional(),
   startingPointLat: z.number().min(-90).max(90),
   startingPointLon: z.number().min(-180).max(180),
+  endPointLat: z.number().min(-90).max(90).optional(),
+  endPointLon: z.number().min(-180).max(180).optional(),
   gpxFileUrl: z.string().url().max(255).optional(),
+  geoJsonPath: z.string().optional(),
   imageUrl: z.string().url().max(255).optional(),
   isActive: z.boolean().optional(),
 });

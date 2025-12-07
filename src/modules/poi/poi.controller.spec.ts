@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PoiController } from './poi.controller';
 import { PoiService } from './poi.service';
+import { FileUploadService } from '../file-upload/file-upload.service';
 import { CreatePOIDto, UpdatePOIDto } from './dto/poi.dto';
 import { mockPOI, mockPOI2 } from '@/test-utils/fixtures/poi.fixture';
 
@@ -16,6 +17,11 @@ describe('PoiController', () => {
     remove: jest.fn(),
   };
 
+  const mockFileUploadService = {
+    uploadFile: jest.fn(),
+    deleteFile: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PoiController],
@@ -23,6 +29,10 @@ describe('PoiController', () => {
         {
           provide: PoiService,
           useValue: mockPoiService,
+        },
+        {
+          provide: FileUploadService,
+          useValue: mockFileUploadService,
         },
       ],
     }).compile();
@@ -74,7 +84,10 @@ describe('PoiController', () => {
 
       const result = await controller.findByParcours(1, paginationDto as any);
 
-      expect(poiService.findAllByParcours).toHaveBeenCalledWith(1, paginationDto);
+      expect(poiService.findAllByParcours).toHaveBeenCalledWith(
+        1,
+        paginationDto,
+      );
       expect(result).toEqual(paginatedResponse);
     });
   });

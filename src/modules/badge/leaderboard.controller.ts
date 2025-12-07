@@ -15,4 +15,18 @@ export class LeaderboardController {
   getLeaderboard(@Query('period') period: string) {
     return this.badgeService.getLeaderboard(period);
   }
+
+  @Get('global')
+  @ApiOperation({ summary: 'Obtenir le classement global' })
+  getGlobalLeaderboard() {
+    return this.badgeService.getLeaderboard('all');
+  }
+
+  @Get('weekly')
+  @ApiOperation({ summary: 'Obtenir le classement hebdomadaire' })
+  getWeeklyLeaderboard() {
+    // TODO: Implement weekly filtering based on actual dates
+    // For now, return the same as global
+    return this.badgeService.getLeaderboard('week');
+  }
 }

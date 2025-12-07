@@ -119,14 +119,18 @@ export class BadgeService {
           where: { userId: user.id },
         });
 
+        // TODO: Get parcours completed count from UserActivity
+        // For now, use a placeholder
+        const parcoursCompleted = 0;
+
         return {
           rank: index + 1,
           userId: user.id,
           username: user.username,
-          points: user.totalPoints,
-          level: Math.floor(user.totalPoints / 1000) + 1, // Simple level formula
-          badgesCount,
-          avatarUrl: user.avatarUrl,
+          totalPoints: user.totalPoints,
+          parcoursCompleted,
+          badgesEarned: badgesCount,
+          profileImageUrl: user.avatarUrl,
         };
       }),
     );

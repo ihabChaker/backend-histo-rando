@@ -10,6 +10,7 @@ import {
 import { User } from '@/modules/users/entities/user.entity';
 import { PointOfInterest } from '@/modules/poi/entities/point-of-interest.entity';
 import { UserActivity } from './user-activity.entity';
+import { ActiveParcoursSession } from '@/modules/parcours-session/entities/active-parcours-session.entity';
 
 @Table({
   tableName: 'user_poi_visits',
@@ -75,6 +76,13 @@ export class UserPOIVisit extends Model {
   })
   pointsEarned: number;
 
+  @ForeignKey(() => ActiveParcoursSession)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  sessionId: number;
+
   @CreatedAt
   createdAt: Date;
 
@@ -86,4 +94,7 @@ export class UserPOIVisit extends Model {
 
   @BelongsTo(() => UserActivity)
   activity: UserActivity;
+
+  @BelongsTo(() => ActiveParcoursSession)
+  session: ActiveParcoursSession;
 }

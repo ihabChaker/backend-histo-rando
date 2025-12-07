@@ -97,7 +97,7 @@ describe('JwtAuthGuard', () => {
       const result = await guard.canActivate(context);
 
       expect(jwtService.verifyAsync).toHaveBeenCalledWith('valid-token');
-      expect(mockRequest.user).toEqual(payload);
+      expect(mockRequest.user).toEqual({ ...payload, id: payload.sub });
       expect(result).toBe(true);
     });
     it('should throw UnauthorizedException if no token provided', async () => {

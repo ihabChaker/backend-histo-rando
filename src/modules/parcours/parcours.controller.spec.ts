@@ -149,7 +149,12 @@ describe('ParcoursController', () => {
 
       const result = await controller.findNearby(lat, lon);
 
-      expect(parcoursService.findNearby).toHaveBeenCalledWith(lat, lon, 50);
+      expect(parcoursService.findNearby).toHaveBeenCalledWith(
+        lat,
+        lon,
+        50,
+        undefined,
+      );
       expect(result).toEqual([mockParcours]);
     });
 
@@ -165,7 +170,12 @@ describe('ParcoursController', () => {
 
       const result = await controller.findNearby(lat, lon, radius);
 
-      expect(parcoursService.findNearby).toHaveBeenCalledWith(lat, lon, radius);
+      expect(parcoursService.findNearby).toHaveBeenCalledWith(
+        lat,
+        lon,
+        radius,
+        undefined,
+      );
       expect(result).toEqual([mockParcours, mockParcours2]);
     });
   });
@@ -221,7 +231,7 @@ describe('ParcoursController', () => {
       elevationGain: 250,
       waypoints: [
         { lat: 49.3425, lon: -0.8874, ele: 100 },
-        { lat: 49.3430, lon: -0.8870, ele: 110 },
+        { lat: 49.343, lon: -0.887, ele: 110 },
       ],
     };
 
@@ -229,7 +239,7 @@ describe('ParcoursController', () => {
       type: 'LineString',
       coordinates: [
         [-0.8874, 49.3425],
-        [-0.8870, 49.3430],
+        [-0.887, 49.343],
       ],
     });
 
@@ -240,12 +250,16 @@ describe('ParcoursController', () => {
     it('should upload and parse GPX file successfully', async () => {
       mockGpxParserService.parseGPXFile.mockResolvedValue(mockParsedData);
       mockGpxParserService.toGeoJSON.mockReturnValue(mockGeoJson);
-      mockFileUploadService.getFileUrl.mockReturnValue('http://localhost:3000/uploads/gpx/test-123.gpx');
+      mockFileUploadService.getFileUrl.mockReturnValue(
+        'http://localhost:3000/uploads/gpx/test-123.gpx',
+      );
 
       const result = await controller.uploadGPX(mockFile);
 
       expect(gpxParserService.parseGPXFile).toHaveBeenCalledWith(mockFile.path);
-      expect(gpxParserService.toGeoJSON).toHaveBeenCalledWith(mockParsedData.waypoints);
+      expect(gpxParserService.toGeoJSON).toHaveBeenCalledWith(
+        mockParsedData.waypoints,
+      );
       expect(fileUploadService.getFileUrl).toHaveBeenCalledWith(
         mockFile.filename,
         'http://localhost:3000',
@@ -273,7 +287,7 @@ describe('ParcoursController', () => {
 
     it('should delete file and throw error if parsing fails', async () => {
       const parseError = new Error('Invalid GPX format');
-      
+
       mockGpxParserService.parseGPXFile.mockRejectedValue(parseError);
       mockGpxParserService.deleteFile.mockResolvedValue(undefined);
 
@@ -283,10 +297,12 @@ describe('ParcoursController', () => {
 
     it('should use API_BASE_URL from environment', async () => {
       process.env.API_BASE_URL = 'https://api.example.com';
-      
+
       mockGpxParserService.parseGPXFile.mockResolvedValue(mockParsedData);
       mockGpxParserService.toGeoJSON.mockReturnValue(mockGeoJson);
-      mockFileUploadService.getFileUrl.mockReturnValue('https://api.example.com/uploads/gpx/test-123.gpx');
+      mockFileUploadService.getFileUrl.mockReturnValue(
+        'https://api.example.com/uploads/gpx/test-123.gpx',
+      );
 
       await controller.uploadGPX(mockFile);
 

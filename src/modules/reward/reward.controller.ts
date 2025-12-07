@@ -8,7 +8,12 @@ import {
   Param,
   ParseIntPipe,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
@@ -16,6 +21,8 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { PaginationDto } from '@/common/dto/pagination.dto';
 import { RewardService } from './reward.service';
@@ -26,12 +33,16 @@ import {
 } from './dto/reward.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Public } from '@/common/decorators/public.decorator';
+import { FileUploadService } from '../file-upload/file-upload.service';
 
 @ApiTags('rewards')
 @ApiBearerAuth()
 @Controller('rewards')
 export class RewardController {
-  constructor(private readonly rewardService: RewardService) {}
+  constructor(
+    private readonly rewardService: RewardService,
+    private readonly fileUploadService: FileUploadService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer une nouvelle récompense' })
@@ -174,5 +185,57 @@ export class RewardController {
     @Query() pagination: PaginationDto,
   ) {
     return this.rewardService.getUserRedemptions(user.sub, pagination);
+  }
+
+  @Post('upload-image')
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      new FileUploadService().getImageMulterConfig('rewards'),
+    ),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload reward image',
+    description: 'Upload an image for a reward (jpg, png, webp, max 5MB)',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Image uploaded successfully',
+    schema: {
+      example: {
+        filename: 'abc123.jpg',
+        imageUrl: 'http://localhost:3000/uploads/images/rewards/abc123.jpg',
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid file format' })
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const baseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+    const imageUrl = this.fileUploadService.getImageUrl(
+      file.filename,
+      'rewards',
+      baseUrl,
+    );
+
+    return {
+      filename: file.filename,
+      imageUrl,
+    };
   }
 }

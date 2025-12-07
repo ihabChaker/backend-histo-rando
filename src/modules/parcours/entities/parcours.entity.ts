@@ -96,11 +96,38 @@ export class Parcours extends Model {
     },
   })
   startingPointLon: number;
+
+  @Column({
+    type: DataType.DECIMAL(10, 8),
+    allowNull: true,
+    get() {
+      const value = this.getDataValue('endPointLat');
+      return value ? parseFloat(value.toString()) : null;
+    },
+  })
+  endPointLat: number;
+
+  @Column({
+    type: DataType.DECIMAL(11, 8),
+    allowNull: true,
+    get() {
+      const value = this.getDataValue('endPointLon');
+      return value ? parseFloat(value.toString()) : null;
+    },
+  })
+  endPointLon: number;
+
   @Column({
     type: DataType.STRING(255),
     allowNull: true,
   })
   gpxFileUrl: string;
+
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  geoJsonPath: string;
 
   @Column({
     type: DataType.STRING(255),

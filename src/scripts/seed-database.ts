@@ -10,9 +10,12 @@ import { Challenge } from '../modules/challenge/entities/challenge.entity';
 import { Badge } from '../modules/badge/entities/badge.entity';
 import { Reward } from '../modules/reward/entities/reward.entity';
 import { TreasureHunt } from '../modules/treasure-hunt/entities/treasure-hunt.entity';
+import { TreasureItem } from '../modules/treasure-hunt/entities/treasure-item.entity';
 import { HistoricalBattalion } from '../modules/historical/entities/historical-battalion.entity';
 import { BattalionRoute } from '../modules/historical/entities/battalion-route.entity';
+import { Podcast } from '../modules/media/entities/podcast.entity';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 async function clearDatabase() {
   console.log('Clearing existing data...');
@@ -21,6 +24,7 @@ async function clearDatabase() {
   await Answer.destroy({ where: {}, force: true });
   await Question.destroy({ where: {}, force: true });
   await Quiz.destroy({ where: {}, force: true });
+  await TreasureItem.destroy({ where: {}, force: true });
   await PointOfInterest.destroy({ where: {}, force: true });
   await BattalionRoute.destroy({ where: {}, force: true });
   await HistoricalBattalion.destroy({ where: {}, force: true });
@@ -28,6 +32,7 @@ async function clearDatabase() {
   await Challenge.destroy({ where: {}, force: true });
   await Badge.destroy({ where: {}, force: true });
   await Reward.destroy({ where: {}, force: true });
+  await Podcast.destroy({ where: {}, force: true });
   await Parcours.destroy({ where: {}, force: true });
   await User.destroy({ where: {}, force: true });
 
@@ -105,15 +110,24 @@ async function seedParcours() {
       name: 'Chemin des Poilus - Verdun',
       description:
         'Parcours historique retraçant les batailles de Verdun de 1916. Découvrez les lieux de mémoire, les tranchées et les fortifications qui ont marqué cette période.',
-      difficulty: 'moyen',
-      duration: 180,
-      distance: 12.5,
+      difficultyLevel: 'medium',
+      estimatedDuration: 180,
+      distanceKm: 12.5,
       isPmrAccessible: false,
-      startLatitude: 49.1594,
-      startLongitude: 5.3878,
-      endLatitude: 49.1623,
-      endLongitude: 5.4012,
-      gpxData: null,
+      startingPointLat: 49.1594,
+      startingPointLon: 5.3878,
+      endPointLat: 49.1623,
+      endPointLon: 5.4012,
+      historicalTheme: 'World War I',
+      geoJsonPath: JSON.stringify({
+        type: 'LineString',
+        coordinates: [
+          [5.3878, 49.1594],
+          [5.3912, 49.1601],
+          [5.3956, 49.1608],
+          [5.4012, 49.1623],
+        ],
+      }),
       imageUrl: 'https://example.com/verdun.jpg',
       isActive: true,
     },
@@ -121,15 +135,24 @@ async function seedParcours() {
       name: 'Sentier du Débarquement - Normandie',
       description:
         "Revivez le Débarquement du 6 juin 1944 à travers ce parcours le long des plages d'Omaha Beach. Sites historiques, bunkers et monuments commémoratifs.",
-      difficulty: 'facile',
-      duration: 120,
-      distance: 8.0,
+      difficultyLevel: 'easy',
+      estimatedDuration: 120,
+      distanceKm: 8.0,
       isPmrAccessible: true,
-      startLatitude: 49.3708,
-      startLongitude: -0.8649,
-      endLatitude: 49.3751,
-      endLongitude: -0.8512,
-      gpxData: null,
+      startingPointLat: 49.3708,
+      startingPointLon: -0.8649,
+      endPointLat: 49.3751,
+      endPointLon: -0.8512,
+      historicalTheme: 'World War II',
+      geoJsonPath: JSON.stringify({
+        type: 'LineString',
+        coordinates: [
+          [-0.8649, 49.3708],
+          [-0.8612, 49.372],
+          [-0.8567, 49.3735],
+          [-0.8512, 49.3751],
+        ],
+      }),
       imageUrl: 'https://example.com/normandie.jpg',
       isActive: true,
     },
@@ -137,15 +160,15 @@ async function seedParcours() {
       name: 'Route Napoléonienne - Austerlitz',
       description:
         "Explorez les champs de bataille d'Austerlitz où Napoléon remporta sa plus grande victoire en 1805. Monuments, musée et points stratégiques.",
-      difficulty: 'difficile',
-      duration: 240,
-      distance: 18.0,
+      difficultyLevel: 'hard',
+      estimatedDuration: 240,
+      distanceKm: 18.0,
       isPmrAccessible: false,
-      startLatitude: 49.1323,
-      startLongitude: 16.7644,
-      endLatitude: 49.1456,
-      endLongitude: 16.7892,
-      gpxData: null,
+      startingPointLat: 49.1323,
+      startingPointLon: 16.7644,
+      endPointLat: 49.1456,
+      endPointLon: 16.7892,
+      historicalTheme: 'Napoleonic Wars',
       imageUrl: 'https://example.com/austerlitz.jpg',
       isActive: true,
     },
@@ -153,15 +176,15 @@ async function seedParcours() {
       name: 'Voie de la Liberté - Alsace',
       description:
         "Suivez le chemin de la libération de l'Alsace en 1944-1945. Bornes commémoratives, musées et villages historiques jalonnent ce parcours.",
-      difficulty: 'facile',
-      duration: 150,
-      distance: 10.5,
+      difficultyLevel: 'easy',
+      estimatedDuration: 150,
+      distanceKm: 10.5,
       isPmrAccessible: true,
-      startLatitude: 48.5734,
-      startLongitude: 7.7521,
-      endLatitude: 48.5891,
-      endLongitude: 7.7834,
-      gpxData: null,
+      startingPointLat: 48.5734,
+      startingPointLon: 7.7521,
+      endPointLat: 48.5891,
+      endPointLon: 7.7834,
+      historicalTheme: 'World War II',
       imageUrl: 'https://example.com/alsace.jpg',
       isActive: true,
     },
@@ -183,13 +206,15 @@ async function seedPOIs(parcoursList: Parcours[]) {
         'Le plus grand et le plus haut des forts de Verdun, théâtre de combats acharnés en 1916.',
       latitude: 49.1987,
       longitude: 5.4321,
-      category: 'monument',
+      poiType: 'monument',
       parcoursId: parcoursList[0].id,
-      historicalInfo:
-        'Construit entre 1885 et 1913, ce fort fut pris par les Allemands le 25 février 1916 et repris par les Français le 24 octobre 1916.',
+      historicalPeriod: 'World War I (1885-1916)',
+      orderInParcours: 1,
       imageUrl: 'https://example.com/douaumont.jpg',
-      audioGuideUrl: null,
+      audioUrl: null,
       quizId: null,
+      podcastId: null,
+      qrCode: null,
     },
     {
       name: 'Ossuaire de Douaumont',
@@ -197,13 +222,15 @@ async function seedPOIs(parcoursList: Parcours[]) {
         'Monument commémoratif abritant les restes de 130 000 soldats inconnus français et allemands.',
       latitude: 49.2012,
       longitude: 5.4389,
-      category: 'monument',
+      poiType: 'memorial',
       parcoursId: parcoursList[0].id,
-      historicalInfo:
-        "Inauguré en 1932, l'ossuaire domine le champ de bataille et offre une vue panoramique sur la nécropole nationale.",
+      historicalPeriod: 'World War I (1932)',
+      orderInParcours: 2,
       imageUrl: 'https://example.com/ossuaire.jpg',
-      audioGuideUrl: null,
+      audioUrl: null,
       quizId: null,
+      podcastId: null,
+      qrCode: null,
     },
     {
       name: 'Tranchée des Baïonnettes',
@@ -211,13 +238,15 @@ async function seedPOIs(parcoursList: Parcours[]) {
         "Site emblématique où des soldats furent ensevelis vivants lors d'un bombardement.",
       latitude: 49.1876,
       longitude: 5.4156,
-      category: 'site',
+      poiType: 'monument',
       parcoursId: parcoursList[0].id,
-      historicalInfo:
-        'Le 10 juin 1916, une section du 137e RI fut ensevelie par un obus. Seules les baïonnettes dépassaient du sol.',
+      historicalPeriod: 'World War I (1916)',
+      orderInParcours: 3,
       imageUrl: 'https://example.com/baionnettes.jpg',
-      audioGuideUrl: null,
+      audioUrl: null,
       quizId: null,
+      podcastId: null,
+      qrCode: null,
     },
 
     // Normandie POIs
@@ -227,13 +256,15 @@ async function seedPOIs(parcoursList: Parcours[]) {
         'La plage la plus célèbre du Débarquement, théâtre de combats sanglants le 6 juin 1944.',
       latitude: 49.372,
       longitude: -0.8698,
-      category: 'site',
+      poiType: 'beach',
       parcoursId: parcoursList[1].id,
-      historicalInfo:
-        'Surnommée "Bloody Omaha", cette plage vit le débarquement de la 1re Division d\'infanterie américaine.',
+      historicalPeriod: 'World War II (1944)',
+      orderInParcours: 1,
       imageUrl: 'https://example.com/omaha.jpg',
-      audioGuideUrl: null,
+      audioUrl: null,
       quizId: null,
+      podcastId: null,
+      qrCode: null,
     },
     {
       name: 'Cimetière américain de Colleville',
@@ -241,13 +272,15 @@ async function seedPOIs(parcoursList: Parcours[]) {
         'Le plus grand cimetière militaire américain en Europe avec 9 387 tombes.',
       latitude: 49.3604,
       longitude: -0.8573,
-      category: 'monument',
+      poiType: 'memorial',
       parcoursId: parcoursList[1].id,
-      historicalInfo:
-        'Inauguré en 1956, il surplombe Omaha Beach et rend hommage aux soldats tombés lors du Débarquement.',
+      historicalPeriod: 'World War II (1956)',
+      orderInParcours: 2,
       imageUrl: 'https://example.com/colleville.jpg',
-      audioGuideUrl: null,
+      audioUrl: null,
       quizId: null,
+      podcastId: null,
+      qrCode: null,
     },
     {
       name: 'Pointe du Hoc',
@@ -255,13 +288,15 @@ async function seedPOIs(parcoursList: Parcours[]) {
         "Promontoire fortifié pris d'assaut par les Rangers américains le 6 juin 1944.",
       latitude: 49.3969,
       longitude: -0.9889,
-      category: 'site',
+      poiType: 'bunker',
       parcoursId: parcoursList[1].id,
-      historicalInfo:
-        "Les Rangers escaladèrent les falaises de 30 mètres sous le feu ennemi pour neutraliser l'artillerie allemande.",
+      historicalPeriod: 'World War II (1944)',
+      orderInParcours: 3,
       imageUrl: 'https://example.com/pointe-du-hoc.jpg',
-      audioGuideUrl: null,
+      audioUrl: null,
       quizId: null,
+      podcastId: null,
+      qrCode: null,
     },
 
     // Austerlitz POIs
@@ -271,26 +306,30 @@ async function seedPOIs(parcoursList: Parcours[]) {
         "Point culminant du champ de bataille d'Austerlitz, clé de la victoire napoléonienne.",
       latitude: 49.1389,
       longitude: 16.7734,
-      category: 'site',
+      poiType: 'monument',
       parcoursId: parcoursList[2].id,
-      historicalInfo:
-        'Napoléon concentra son attaque sur ce plateau le 2 décembre 1805, brisant le centre de la coalition austro-russe.',
+      historicalPeriod: 'Napoleonic Wars (1805)',
+      orderInParcours: 1,
       imageUrl: 'https://example.com/pratzen.jpg',
-      audioGuideUrl: null,
+      audioUrl: null,
       quizId: null,
+      podcastId: null,
+      qrCode: null,
     },
     {
       name: 'Monument de la Paix',
       description: 'Monument commémorant la bataille des Trois Empereurs.',
       latitude: 49.1412,
       longitude: 16.7823,
-      category: 'monument',
+      poiType: 'memorial',
       parcoursId: parcoursList[2].id,
-      historicalInfo:
-        'Érigé en 1912 pour le centenaire de la bataille, ce monument honore tous les soldats tombés.',
+      historicalPeriod: 'Napoleonic Wars (1912)',
+      orderInParcours: 2,
       imageUrl: 'https://example.com/monument-paix.jpg',
-      audioGuideUrl: null,
+      audioUrl: null,
       quizId: null,
+      podcastId: null,
+      qrCode: null,
     },
   ];
 
@@ -307,26 +346,23 @@ async function seedQuizzes() {
       title: 'La Bataille de Verdun',
       description:
         "Testez vos connaissances sur l'une des batailles les plus meurtrières de la Première Guerre mondiale.",
-      difficulty: 'moyen',
-      points: 50,
-      passingScore: 70,
+      difficulty: 'medium',
+      pointsReward: 50,
       isActive: true,
     },
     {
       title: 'Le Débarquement de Normandie',
       description: "Que savez-vous du Jour J et de l'opération Overlord ?",
-      difficulty: 'facile',
-      points: 30,
-      passingScore: 60,
+      difficulty: 'easy',
+      pointsReward: 30,
       isActive: true,
     },
     {
       title: 'Napoléon Bonaparte',
       description:
         "Quiz sur la vie et les campagnes de l'Empereur des Français.",
-      difficulty: 'difficile',
-      points: 75,
-      passingScore: 80,
+      difficulty: 'hard',
+      pointsReward: 75,
       isActive: true,
     },
   ];
@@ -344,58 +380,50 @@ async function seedQuestions(quizzes: Quiz[]) {
     {
       quizId: quizzes[0].id,
       questionText: 'En quelle année a eu lieu la bataille de Verdun ?',
-      questionType: 'multiple_choice',
+      correctAnswer: '1916',
       points: 10,
-      orderIndex: 1,
+      questionOrder: 1,
       answers: [
         {
           answerText: '1914',
           isCorrect: false,
-          explanation: "C'était le début de la guerre.",
         },
         {
           answerText: '1916',
           isCorrect: true,
-          explanation: "La bataille s'est déroulée de février à décembre 1916.",
         },
         {
           answerText: '1918',
           isCorrect: false,
-          explanation: "C'était la fin de la guerre.",
         },
         {
           answerText: '1917',
           isCorrect: false,
-          explanation: "Année de l'entrée en guerre des États-Unis.",
         },
       ],
     },
     {
       quizId: quizzes[0].id,
       questionText: "Quel était le mot d'ordre français à Verdun ?",
-      questionType: 'multiple_choice',
+      correctAnswer: 'Ils ne passeront pas',
       points: 10,
-      orderIndex: 2,
+      questionOrder: 2,
       answers: [
         {
           answerText: "À l'attaque !",
           isCorrect: false,
-          explanation: 'Verdun était une bataille défensive.',
         },
         {
           answerText: 'Ils ne passeront pas',
           isCorrect: true,
-          explanation: 'Phrase célèbre du général Nivelle.',
         },
         {
           answerText: 'Pour la patrie',
           isCorrect: false,
-          explanation: 'Trop générique.',
         },
         {
           answerText: 'Tenir coûte que coûte',
           isCorrect: false,
-          explanation: 'Proche mais pas exact.',
         },
       ],
     },
@@ -404,30 +432,25 @@ async function seedQuestions(quizzes: Quiz[]) {
     {
       quizId: quizzes[1].id,
       questionText: 'Quelle était la date du Débarquement de Normandie ?',
-      questionType: 'multiple_choice',
+      correctAnswer: '6 juin 1944',
       points: 10,
-      orderIndex: 1,
+      questionOrder: 1,
       answers: [
         {
           answerText: '5 juin 1944',
           isCorrect: false,
-          explanation:
-            "C'était le jour prévu initialement mais reporté pour météo.",
         },
         {
           answerText: '6 juin 1944',
           isCorrect: true,
-          explanation: 'Le Jour J, opération Overlord.',
         },
         {
           answerText: '7 juin 1944',
           isCorrect: false,
-          explanation: "C'était le lendemain du débarquement.",
         },
         {
           answerText: '8 mai 1945',
           isCorrect: false,
-          explanation: "C'était le jour de la victoire en Europe.",
         },
       ],
     },
@@ -435,26 +458,23 @@ async function seedQuestions(quizzes: Quiz[]) {
       quizId: quizzes[1].id,
       questionText:
         'Combien de plages principales composaient le secteur de débarquement ?',
-      questionType: 'multiple_choice',
+      correctAnswer: '5',
       points: 10,
-      orderIndex: 2,
+      questionOrder: 2,
       answers: [
         {
           answerText: '3',
           isCorrect: false,
-          explanation: 'Il y en avait plus.',
         },
         {
           answerText: '5',
           isCorrect: true,
-          explanation: 'Utah, Omaha, Gold, Juno et Sword.',
         },
         {
           answerText: '7',
           isCorrect: false,
-          explanation: 'Il y en avait moins.',
         },
-        { answerText: '10', isCorrect: false, explanation: 'Beaucoup trop.' },
+        { answerText: '10', isCorrect: false },
       ],
     },
 
@@ -462,29 +482,25 @@ async function seedQuestions(quizzes: Quiz[]) {
     {
       quizId: quizzes[2].id,
       questionText: 'En quelle année Napoléon est-il devenu Empereur ?',
-      questionType: 'multiple_choice',
+      correctAnswer: '1804',
       points: 15,
-      orderIndex: 1,
+      questionOrder: 1,
       answers: [
         {
           answerText: '1799',
           isCorrect: false,
-          explanation: "Année du coup d'État du 18 Brumaire.",
         },
         {
           answerText: '1804',
           isCorrect: true,
-          explanation: 'Sacre de Napoléon Ier à Notre-Dame de Paris.',
         },
         {
           answerText: '1805',
           isCorrect: false,
-          explanation: "Année de la bataille d'Austerlitz.",
         },
         {
           answerText: '1800',
           isCorrect: false,
-          explanation: 'Année de la bataille de Marengo.',
         },
       ],
     },
@@ -510,59 +526,47 @@ async function seedChallenges() {
 
   const challenges = [
     {
-      title: 'Premier Pas',
-      description: 'Complétez votre premier parcours historique',
-      type: 'parcours_completion',
-      targetValue: 1,
-      points: 100,
-      badgeId: null,
+      name: 'Défi du Sac Lesté',
+      description:
+        "Complétez un parcours avec un sac à dos lesté pour simuler l'équipement militaire",
+      challengeType: 'weighted_backpack',
+      pointsReward: 100,
+      difficultyMultiplier: 1.5,
       isActive: true,
-      startDate: new Date('2024-01-01'),
-      endDate: null,
     },
     {
-      title: 'Explorateur Assidu',
-      description: "Visitez 10 points d'intérêt",
-      type: 'poi_visits',
-      targetValue: 10,
-      points: 150,
-      badgeId: null,
+      name: "Marche en Tenue d'Époque",
+      description:
+        "Effectuez un parcours en portant une tenue d'époque historique",
+      challengeType: 'period_clothing',
+      pointsReward: 150,
+      difficultyMultiplier: 1.3,
       isActive: true,
-      startDate: new Date('2024-01-01'),
-      endDate: null,
     },
     {
-      title: 'Expert en Histoire',
-      description: 'Réussissez 5 quiz avec un score supérieur à 80%',
-      type: 'quiz_completion',
-      targetValue: 5,
-      points: 200,
-      badgeId: null,
+      name: 'Marathon Historique',
+      description: 'Parcourez 50 km au total sur tous vos parcours',
+      challengeType: 'distance',
+      pointsReward: 200,
+      difficultyMultiplier: 2.0,
       isActive: true,
-      startDate: new Date('2024-01-01'),
-      endDate: null,
     },
     {
-      title: 'Marathon Historique',
-      description: 'Parcourez 50 km au total',
-      type: 'distance_walked',
-      targetValue: 50,
-      points: 250,
-      badgeId: null,
+      name: 'Course Contre la Montre',
+      description:
+        'Complétez un parcours en moins de temps que la durée estimée',
+      challengeType: 'time',
+      pointsReward: 250,
+      difficultyMultiplier: 1.8,
       isActive: true,
-      startDate: new Date('2024-01-01'),
-      endDate: null,
     },
     {
-      title: 'Chasseur de Trésors',
-      description: 'Trouvez votre premier trésor caché',
-      type: 'treasure_found',
-      targetValue: 1,
-      points: 100,
-      badgeId: null,
+      name: 'Ultra Endurant',
+      description: 'Marchez pendant 4 heures consécutives sur les parcours',
+      challengeType: 'time',
+      pointsReward: 300,
+      difficultyMultiplier: 2.5,
       isActive: true,
-      startDate: new Date('2024-01-01'),
-      endDate: null,
     },
   ];
 
@@ -634,47 +638,111 @@ async function seedRewards() {
     {
       name: 'Guide Historique Premium',
       description: 'Accès illimité aux guides audio premium pendant 1 mois',
-      category: 'digital',
+      rewardType: 'premium_content',
       pointsCost: 500,
       stockQuantity: 999,
       imageUrl: 'https://example.com/reward-premium.png',
-      isActive: true,
+      isAvailable: true,
     },
     {
       name: 'T-Shirt HistoRando',
       description: 'T-shirt officiel HistoRando avec logo brodé',
-      category: 'merchandise',
+      rewardType: 'gift',
       pointsCost: 800,
       stockQuantity: 50,
       imageUrl: 'https://example.com/reward-tshirt.png',
-      isActive: true,
+      isAvailable: true,
+    },
+    {
+      name: 'Casquette HistoRando',
+      description: 'Casquette officielle avec broderie logo HistoRando',
+      rewardType: 'gift',
+      pointsCost: 600,
+      stockQuantity: 75,
+      imageUrl: 'https://example.com/reward-cap.png',
+      isAvailable: true,
     },
     {
       name: 'Livre "Grandes Batailles"',
       description: "Ouvrage illustré sur les grandes batailles de l'histoire",
-      category: 'physical',
+      rewardType: 'gift',
       pointsCost: 1200,
       stockQuantity: 20,
       imageUrl: 'https://example.com/reward-livre.png',
-      isActive: true,
+      isAvailable: true,
+    },
+    {
+      name: 'Carte Historique Ancienne',
+      description:
+        "Reproduction authentique d'une carte historique du 18ème siècle",
+      rewardType: 'gift',
+      pointsCost: 900,
+      stockQuantity: 30,
+      imageUrl: 'https://example.com/reward-map.png',
+      isAvailable: true,
     },
     {
       name: 'Visite Guidée VIP',
       description: "Visite guidée privée d'un site historique au choix",
-      category: 'experience',
+      rewardType: 'discount',
       pointsCost: 2000,
       stockQuantity: 10,
       imageUrl: 'https://example.com/reward-vip.png',
-      isActive: true,
+      isAvailable: true,
     },
     {
-      name: 'Badge Exclusif',
-      description: 'Badge numérique ultra-rare',
-      category: 'digital',
+      name: 'Atelier Histoire Vivante',
+      description: 'Participation à un atelier de reconstitution historique',
+      rewardType: 'discount',
+      pointsCost: 1500,
+      stockQuantity: 15,
+      imageUrl: 'https://example.com/reward-workshop.png',
+      isAvailable: true,
+    },
+    {
+      name: 'Badge Exclusif "Explorateur"',
+      description: 'Badge numérique ultra-rare pour les vrais explorateurs',
+      rewardType: 'badge',
       pointsCost: 300,
       stockQuantity: 999,
       imageUrl: 'https://example.com/reward-badge.png',
-      isActive: true,
+      isAvailable: true,
+    },
+    {
+      name: 'Pack Stickers Historiques',
+      description: 'Collection de 20 stickers sur des événements historiques',
+      rewardType: 'gift',
+      pointsCost: 400,
+      stockQuantity: 100,
+      imageUrl: 'https://example.com/reward-stickers.png',
+      isAvailable: true,
+    },
+    {
+      name: 'Accès Musée Premium',
+      description: "Pass annuel pour l'accès illimité aux musées partenaires",
+      rewardType: 'premium_content',
+      pointsCost: 2500,
+      stockQuantity: 5,
+      imageUrl: 'https://example.com/reward-museum.png',
+      isAvailable: true,
+    },
+    {
+      name: 'Livre Audio "Épopées Guerrières"',
+      description: 'Collection de 10 livres audio sur les grandes épopées',
+      rewardType: 'premium_content',
+      pointsCost: 700,
+      stockQuantity: 999,
+      imageUrl: 'https://example.com/reward-audiobook.png',
+      isAvailable: true,
+    },
+    {
+      name: 'Gourde HistoRando',
+      description: 'Gourde isotherme en acier inoxydable avec logo gravé',
+      rewardType: 'gift',
+      pointsCost: 550,
+      stockQuantity: 60,
+      imageUrl: 'https://example.com/reward-bottle.png',
+      isAvailable: true,
     },
   ];
 
@@ -690,32 +758,40 @@ async function seedTreasureHunts(parcoursList: Parcours[]) {
     {
       name: 'Casque de Poilu',
       description:
-        'Un authentique casque Adrian de la Première Guerre mondiale (réplique)',
+        "Près du monument où reposent les braves, cherchez l'arbre centenaire qui a survécu aux combats.",
+      targetObject: 'Casque Adrian WWI',
       latitude: 49.1678,
       longitude: 5.3945,
       parcoursId: parcoursList[0].id,
-      clue: "Près du monument où reposent les braves, cherchez l'arbre centenaire qui a survécu aux combats.",
-      points: 150,
+      scanRadiusMeters: 50,
+      pointsReward: 150,
+      qrCode: null,
       isActive: true,
     },
     {
       name: 'Médaille du Débarquement',
-      description: "Réplique d'une médaille commémorative du Jour J",
+      description:
+        'Là où les vagues rencontrent le sable, sous la falaise qui a vu tant de courage.',
+      targetObject: 'Médaille commémorative D-Day',
       latitude: 49.3689,
-      longitude: 5.8621,
+      longitude: -0.8621,
       parcoursId: parcoursList[1].id,
-      clue: 'Là où les vagues rencontrent le sable, sous la falaise qui a vu tant de courage.',
-      points: 150,
+      scanRadiusMeters: 50,
+      pointsReward: 150,
+      qrCode: null,
       isActive: true,
     },
     {
       name: 'Pièce Napoléonienne',
-      description: "Reproduction d'un napoléon d'or frappé en 1805",
+      description:
+        "Au sommet de la colline où l'aigle a triomphé, cherchez près de la pierre gravée.",
+      targetObject: "Napoléon d'or 1805",
       latitude: 49.1401,
       longitude: 16.7756,
       parcoursId: parcoursList[2].id,
-      clue: "Au sommet de la colline où l'aigle a triomphé, cherchez près de la pierre gravée.",
-      points: 200,
+      scanRadiusMeters: 50,
+      pointsReward: 200,
+      qrCode: null,
       isActive: true,
     },
   ];
@@ -723,6 +799,187 @@ async function seedTreasureHunts(parcoursList: Parcours[]) {
   const createdTreasures = await TreasureHunt.bulkCreate(treasures);
   console.log(`Created ${createdTreasures.length} treasure hunts`);
   return createdTreasures;
+}
+
+async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
+  console.log('Seeding treasure items...');
+
+  const items = [
+    // Items for Casque de Poilu treasure
+    {
+      treasureHuntId: treasureHunts[0].id,
+      itemName: 'Insigne du 137e RI',
+      description: "Insigne de col du 137e Régiment d'Infanterie",
+      imageUrl: 'https://example.com/insigne-137.jpg',
+      pointsReward: 30,
+      qrCode: uuidv4(),
+    },
+    {
+      treasureHuntId: treasureHunts[0].id,
+      itemName: "Bouton d'uniforme",
+      description: "Bouton en laiton d'un uniforme de Poilu",
+      imageUrl: 'https://example.com/bouton.jpg',
+      pointsReward: 25,
+      qrCode: uuidv4(),
+    },
+    {
+      treasureHuntId: treasureHunts[0].id,
+      itemName: 'Fragment de casque',
+      description: 'Fragment du célèbre casque Adrian',
+      imageUrl: 'https://example.com/casque-fragment.jpg',
+      pointsReward: 40,
+      qrCode: uuidv4(),
+    },
+    {
+      treasureHuntId: treasureHunts[0].id,
+      itemName: "Plaque d'identité",
+      description: "Plaque d'identité militaire de 1916",
+      imageUrl: 'https://example.com/plaque-identite.jpg',
+      pointsReward: 35,
+      qrCode: uuidv4(),
+    },
+
+    // Items for Médaille du Débarquement treasure
+    {
+      treasureHuntId: treasureHunts[1].id,
+      itemName: 'Étoile de Bronze',
+      description: 'Étoile de Bronze commémorative',
+      imageUrl: 'https://example.com/etoile-bronze.jpg',
+      pointsReward: 35,
+      qrCode: uuidv4(),
+    },
+    {
+      treasureHuntId: treasureHunts[1].id,
+      itemName: 'Médaillon du Jour J',
+      description: 'Médaillon gravé "D-Day 6 June 1944"',
+      imageUrl: 'https://example.com/medaillon-dday.jpg',
+      pointsReward: 40,
+      qrCode: uuidv4(),
+    },
+    {
+      treasureHuntId: treasureHunts[1].id,
+      itemName: 'Insigne Airborne',
+      description: 'Insigne de la 101st Airborne Division',
+      imageUrl: 'https://example.com/airborne.jpg',
+      pointsReward: 45,
+      qrCode: uuidv4(),
+    },
+
+    // Items for Pièce Napoléonienne treasure
+    {
+      treasureHuntId: treasureHunts[2].id,
+      itemName: "Napoléon d'Or",
+      description: "Pièce napoléon d'or 20 francs de 1805",
+      imageUrl: 'https://example.com/napoleon-or.jpg',
+      pointsReward: 50,
+      qrCode: uuidv4(),
+    },
+    {
+      treasureHuntId: treasureHunts[2].id,
+      itemName: 'Bouton de la Grande Armée',
+      description: "Bouton d'uniforme de la Grande Armée",
+      imageUrl: 'https://example.com/bouton-armee.jpg',
+      pointsReward: 40,
+      qrCode: uuidv4(),
+    },
+    {
+      treasureHuntId: treasureHunts[2].id,
+      itemName: "Médaille d'Austerlitz",
+      description: 'Médaille commémorative de la bataille',
+      imageUrl: 'https://example.com/medaille-austerlitz.jpg',
+      pointsReward: 55,
+      qrCode: uuidv4(),
+    },
+    {
+      treasureHuntId: treasureHunts[2].id,
+      itemName: 'Aigle Impériale',
+      description: 'Petite aigle en bronze de régiment',
+      imageUrl: 'https://example.com/aigle.jpg',
+      pointsReward: 60,
+      qrCode: uuidv4(),
+    },
+  ];
+
+  const createdItems = await TreasureItem.bulkCreate(items);
+  console.log(`Created ${createdItems.length} treasure items with QR codes`);
+  return createdItems;
+}
+
+async function seedPodcasts(parcoursList: Parcours[]) {
+  console.log('Seeding podcasts...');
+
+  const podcasts = [
+    {
+      title: 'Les Voix de Verdun',
+      description: 'Témoignages de soldats et récits de la bataille de Verdun',
+      audioFileUrl: 'https://example.com/audio/verdun.mp3',
+      durationSeconds: 1200,
+      narrator: 'Jean-Pierre Durand',
+      language: 'fr',
+      thumbnailUrl: null,
+    },
+    {
+      title: 'Le Jour le Plus Long',
+      description: 'Récit heure par heure du Débarquement en Normandie',
+      audioFileUrl: 'https://example.com/audio/dday.mp3',
+      durationSeconds: 1800,
+      narrator: 'Marie Leclerc',
+      language: 'fr',
+      thumbnailUrl: null,
+    },
+    {
+      title: 'Napoléon à Austerlitz',
+      description: 'La stratégie du génie militaire à Austerlitz',
+      audioFileUrl: 'https://example.com/audio/austerlitz.mp3',
+      durationSeconds: 1500,
+      narrator: 'François Martin',
+      language: 'fr',
+      thumbnailUrl: null,
+    },
+  ];
+
+  const createdPodcasts = await Podcast.bulkCreate(podcasts);
+  console.log(`Created ${createdPodcasts.length} podcasts`);
+  return createdPodcasts;
+}
+
+async function updatePOIsWithContent(
+  pois: PointOfInterest[],
+  quizzes: Quiz[],
+  podcasts: Podcast[],
+) {
+  console.log('Linking POIs with quizzes and podcasts...');
+
+  // Link some POIs with quizzes
+  if (pois[0]) {
+    await pois[0].update({ quizId: quizzes[0]?.id, qrCode: uuidv4() });
+  }
+  if (pois[3]) {
+    await pois[3].update({ quizId: quizzes[1]?.id, qrCode: uuidv4() });
+  }
+  if (pois[6]) {
+    await pois[6].update({ quizId: quizzes[2]?.id, qrCode: uuidv4() });
+  }
+
+  // Link some POIs with podcasts
+  if (pois[1]) {
+    await pois[1].update({ podcastId: podcasts[0]?.id, qrCode: uuidv4() });
+  }
+  if (pois[4]) {
+    await pois[4].update({ podcastId: podcasts[1]?.id, qrCode: uuidv4() });
+  }
+  if (pois[7]) {
+    await pois[7].update({ podcastId: podcasts[2]?.id, qrCode: uuidv4() });
+  }
+
+  // Add QR codes to remaining POIs
+  for (let i = 0; i < pois.length; i++) {
+    if (pois[i] && !pois[i].qrCode) {
+      await pois[i].update({ qrCode: uuidv4() });
+    }
+  }
+
+  console.log('POIs updated with content and QR codes');
 }
 
 async function seedBattalions() {
@@ -811,28 +1068,40 @@ async function bootstrap() {
     const pois = await seedPOIs(parcoursList);
     const quizzes = await seedQuizzes();
     await seedQuestions(quizzes);
+    const podcasts = await seedPodcasts(parcoursList);
+    await updatePOIsWithContent(pois, quizzes, podcasts);
     const challenges = await seedChallenges();
     const badges = await seedBadges();
     const rewards = await seedRewards();
     const treasures = await seedTreasureHunts(parcoursList);
+    const treasureItems = await seedTreasureItems(treasures);
     const battalions = await seedBattalions();
     await seedBattalionRoutes(battalions, parcoursList);
 
     console.log('\n✅ Database seeding completed successfully!');
     console.log('\n📊 Summary:');
     console.log(`  - ${users.length} users (password: password123 for all)`);
-    console.log(`  - ${parcoursList.length} parcours`);
-    console.log(`  - ${pois.length} points of interest`);
+    console.log(`  - ${parcoursList.length} parcours with GeoJSON paths`);
+    console.log(`  - ${pois.length} points of interest with QR codes`);
     console.log(`  - ${quizzes.length} quizzes with questions and answers`);
+    console.log(`  - ${podcasts.length} podcasts`);
     console.log(`  - ${challenges.length} challenges`);
     console.log(`  - ${badges.length} badges`);
     console.log(`  - ${rewards.length} rewards`);
     console.log(`  - ${treasures.length} treasure hunts`);
+    console.log(
+      `  - ${treasureItems.length} treasure items with unique QR codes`,
+    );
     console.log(`  - ${battalions.length} battalions`);
 
     console.log('\n🔐 Admin credentials:');
     console.log('  Email: admin@historando.com');
     console.log('  Password: password123');
+
+    console.log('\n📱 Sample QR Codes Generated:');
+    console.log('  - All POIs have unique QR codes for scanning');
+    console.log('  - All treasure items have UUID-based QR codes');
+    console.log('  - Use the admin dashboard to view/print QR codes');
   } catch (error) {
     console.error('❌ Error during seeding:', error);
     process.exit(1);
