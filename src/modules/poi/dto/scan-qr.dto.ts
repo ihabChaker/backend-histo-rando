@@ -24,10 +24,16 @@ export class ScanQrResponseDto {
   @ApiProperty({ description: 'POI details' })
   poi: any;
 
-  @ApiProperty({ description: 'Quiz triggered by this POI, if any', required: false })
+  @ApiProperty({
+    description: 'Quiz triggered by this POI, if any',
+    required: false,
+  })
   quiz?: any;
 
-  @ApiProperty({ description: 'Podcast triggered by this POI, if any', required: false })
+  @ApiProperty({
+    description: 'Podcast triggered by this POI, if any',
+    required: false,
+  })
   podcast?: any;
 
   @ApiProperty({ description: 'Points earned from visit' })

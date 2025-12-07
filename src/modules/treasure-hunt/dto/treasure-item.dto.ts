@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTreasureItemDto {
@@ -12,7 +18,10 @@ export class CreateTreasureItemDto {
   @IsNotEmpty()
   itemName: string;
 
-  @ApiProperty({ description: 'Item description', example: 'Médaille commémorative de la bataille' })
+  @ApiProperty({
+    description: 'Item description',
+    example: 'Médaille commémorative de la bataille',
+  })
   @IsString()
   @IsOptional()
   description?: string;
@@ -81,6 +90,9 @@ export class ScanTreasureItemResponseDto {
   @ApiProperty({ description: 'Whether the entire hunt is now complete' })
   huntComplete: boolean;
 
-  @ApiProperty({ description: 'Bonus points if hunt just completed', required: false })
+  @ApiProperty({
+    description: 'Bonus points if hunt just completed',
+    required: false,
+  })
   completionBonus?: number;
 }

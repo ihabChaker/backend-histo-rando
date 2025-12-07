@@ -905,7 +905,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
   return createdItems;
 }
 
-async function seedPodcasts(parcoursList: Parcours[]) {
+async function seedPodcasts(_parcoursList: Parcours[]) {
   console.log('Seeding podcasts...');
 
   const podcasts = [

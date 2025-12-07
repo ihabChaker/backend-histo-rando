@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { PointOfInterest } from './entities/point-of-interest.entity';
 import { CreatePOIDto, UpdatePOIDto } from './dto/poi.dto';
