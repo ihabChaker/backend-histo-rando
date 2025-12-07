@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ConflictException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import {
   PaginationDto,
@@ -20,7 +14,6 @@ import { User } from '@/modules/users/entities/user.entity';
 import {
   CreateTreasureHuntDto,
   UpdateTreasureHuntDto,
-  RecordTreasureFoundDto,
 } from './dto/treasure-hunt.dto';
 import {
   CreateTreasureItemDto,
@@ -82,7 +75,7 @@ export class TreasureHuntService {
   ): Promise<PaginatedResponse<TreasureHunt>> {
     const { rows, count } = await this.treasureHuntModel.findAndCountAll({
       include: [Parcours],
-      order: [['pointsReward', 'DESC']],
+      order: [['createdAt', 'DESC']],
       limit: pagination.take,
       offset: pagination.skip,
     });
@@ -104,7 +97,7 @@ export class TreasureHuntService {
 
   async findOneTreasureHunt(id: number): Promise<TreasureHunt> {
     const treasure = await this.treasureHuntModel.findByPk(id, {
-      include: [Parcours],
+      include: [Parcours, TreasureItem],
     });
     if (!treasure) {
       throw new NotFoundException(`Treasure hunt with ID ${id} not found`);
@@ -126,82 +119,7 @@ export class TreasureHuntService {
     await treasure.destroy();
   }
 
-  async recordTreasureFound(
-    userId: number,
-    dto: RecordTreasureFoundDto,
-  ): Promise<any> {
-    let treasure: TreasureHunt | null = null;
-
-    if (dto.qrCode) {
-      // Find by QR Code
-      treasure = await this.treasureHuntModel.findOne({
-        where: { qrCode: dto.qrCode },
-      });
-
-      if (!treasure) {
-        throw new NotFoundException('Invalid QR Code');
-      }
-
-      if (dto.treasureId && treasure.id !== dto.treasureId) {
-        throw new BadRequestException(
-          'QR Code does not match the specified treasure',
-        );
-      }
-    } else if (dto.treasureId) {
-      // Find by ID
-      treasure = await this.findOneTreasureHunt(dto.treasureId);
-
-      // Verify user is within scan radius ONLY if not using QR code (or we could enforce both)
-      // For now, let's assume QR code proves presence, but if no QR code, we need location.
-      const distance = this.calculateDistance(
-        dto.latitude,
-        dto.longitude,
-        treasure.latitude,
-        treasure.longitude,
-      );
-
-      if (distance > treasure.scanRadiusMeters) {
-        throw new BadRequestException(
-          `You are too far from the treasure (${Math.round(distance)}m away, need to be within ${treasure.scanRadiusMeters}m)`,
-        );
-      }
-    } else {
-      throw new BadRequestException(
-        'Either treasureId or qrCode must be provided',
-      );
-    }
-
-    // Check if already found by this user
-    const existing = await this.treasureFoundModel.findOne({
-      where: { userId, treasureId: treasure.id },
-    });
-
-    if (existing) {
-      throw new ConflictException('You have already found this treasure');
-    }
-
-    // Record the find
-    const found = await this.treasureFoundModel.create({
-      userId,
-      treasureId: treasure.id,
-      foundDatetime: new Date(),
-      pointsEarned: treasure.pointsReward,
-    } as any);
-
-    // Update user points
-    const user = await this.userModel.findByPk(userId);
-    if (user) {
-      await user.update({
-        totalPoints: user.totalPoints + treasure.pointsReward,
-      });
-    }
-
-    return {
-      found,
-      message: 'Félicitations ! Vous avez trouvé le trésor !',
-      pointsEarned: treasure.pointsReward,
-    };
-  }
+  // REMOVED: recordTreasureFound method - points are now awarded at item level only via scanTreasureItem
 
   async getUserTreasuresFound(
     userId: number,
@@ -238,6 +156,28 @@ export class TreasureHuntService {
       where: { treasureHuntId },
       order: [['id', 'ASC']],
     });
+  }
+
+  async getUserFoundItemsForHunt(
+    userId: number,
+    treasureHuntId: number,
+  ): Promise<number[]> {
+    // Get all items for this hunt
+    const allItems = await this.treasureItemModel.findAll({
+      where: { treasureHuntId },
+      attributes: ['id'],
+    });
+
+    // Get found items
+    const foundRecords = await this.userTreasureItemFoundModel.findAll({
+      where: {
+        userId,
+        treasureItemId: allItems.map((item) => item.id),
+      },
+      attributes: ['treasureItemId'],
+    });
+
+    return foundRecords.map((record) => record.treasureItemId);
   }
 
   async findOneItem(id: number): Promise<TreasureItem> {
@@ -291,7 +231,7 @@ export class TreasureHuntService {
     });
 
     const isNewFind = !existingFind;
-    const pointsEarned = isNewFind ? item.pointsReward || 0 : 0;
+    const pointsEarned = isNewFind ? item.pointsValue || 0 : 0;
 
     this.logger.log(
       `Find status - isNew: ${isNewFind}, points: ${pointsEarned}`,
@@ -341,41 +281,8 @@ export class TreasureHuntService {
       `Progress: ${totalItemsFound}/${totalItemsInHunt} items found, complete: ${huntComplete}`,
     );
 
-    let completionBonus = 0;
-    if (huntComplete && isNewFind) {
-      // Check if we already recorded completion
-      const existingCompletion = await this.treasureFoundModel.findOne({
-        where: { userId, treasureId: item.treasureHuntId },
-      });
-
-      if (!existingCompletion) {
-        completionBonus = item.treasureHunt.pointsReward || 0;
-        this.logger.log(
-          `Hunt complete! Awarding completion bonus: ${completionBonus} points`,
-        );
-
-        // Record hunt completion
-        await this.treasureFoundModel.create({
-          userId,
-          treasureId: item.treasureHuntId,
-          foundDatetime: new Date(),
-          pointsEarned: completionBonus,
-        } as any);
-
-        // Award completion bonus
-        if (completionBonus > 0) {
-          const user = await this.userModel.findByPk(userId);
-          if (user) {
-            await user.update({
-              totalPoints: (user.totalPoints || 0) + completionBonus,
-            });
-            this.logger.log(
-              `Completion bonus ${completionBonus} awarded to user ${userId}`,
-            );
-          }
-        }
-      }
-    }
+    // No completion bonus since we removed it from the hunt entity
+    const completionBonus = 0;
 
     return {
       item: item.toJSON(),

@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -102,12 +103,17 @@ export class MediaController {
     },
   })
   @ApiResponse({ status: 400, description: 'Invalid file format' })
-  async uploadAudio(@UploadedFile() file: Express.Multer.File) {
+  async uploadAudio(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: any,
+  ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
 
-    const baseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+    // Use request host or environment variable
+    const baseUrl =
+      process.env.API_BASE_URL || `${req.protocol}://${req.get('host')}`;
     const audioFileUrl = this.fileUploadService.getAudioUrl(
       file.filename,
       baseUrl,

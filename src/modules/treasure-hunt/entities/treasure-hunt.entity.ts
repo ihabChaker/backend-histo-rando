@@ -27,9 +27,6 @@ export class TreasureHunt extends Model {
   @Column({ type: DataType.TEXT, allowNull: true })
   description: string;
 
-  @Column({ type: DataType.STRING(200), allowNull: false })
-  targetObject: string;
-
   @Column({ type: DataType.DECIMAL(10, 8), allowNull: false })
   latitude: number;
 
@@ -38,9 +35,6 @@ export class TreasureHunt extends Model {
 
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 50 })
   scanRadiusMeters: number;
-
-  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 20 })
-  pointsReward: number;
 
   @Column({ type: DataType.STRING(255), allowNull: true })
   qrCode: string;

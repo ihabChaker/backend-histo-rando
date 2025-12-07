@@ -8,7 +8,9 @@ import { Question } from '../modules/quiz/entities/question.entity';
 import { Answer } from '../modules/quiz/entities/answer.entity';
 import { Challenge } from '../modules/challenge/entities/challenge.entity';
 import { Badge } from '../modules/badge/entities/badge.entity';
+import { UserBadge } from '../modules/badge/entities/user-badge.entity';
 import { Reward } from '../modules/reward/entities/reward.entity';
+import { UserRewardRedeemed } from '../modules/reward/entities/user-reward-redeemed.entity';
 import { TreasureHunt } from '../modules/treasure-hunt/entities/treasure-hunt.entity';
 import { TreasureItem } from '../modules/treasure-hunt/entities/treasure-item.entity';
 import { HistoricalBattalion } from '../modules/historical/entities/historical-battalion.entity';
@@ -21,6 +23,8 @@ async function clearDatabase() {
   console.log('Clearing existing data...');
 
   // Clear in correct order (child tables first due to foreign keys)
+  await UserBadge.destroy({ where: {}, force: true });
+  await UserRewardRedeemed.destroy({ where: {}, force: true });
   await Answer.destroy({ where: {}, force: true });
   await Question.destroy({ where: {}, force: true });
   await Quiz.destroy({ where: {}, force: true });
@@ -53,7 +57,7 @@ async function seedUsers() {
       lastName: 'HistoRando',
       role: 'admin',
       isPmr: false,
-      points: 0,
+      totalPoints: 0,
     },
     {
       email: 'jean.dupont@example.com',
@@ -63,7 +67,7 @@ async function seedUsers() {
       lastName: 'Dupont',
       role: 'user',
       isPmr: false,
-      points: 350,
+      totalPoints: 350,
     },
     {
       email: 'marie.martin@example.com',
@@ -73,7 +77,7 @@ async function seedUsers() {
       lastName: 'Martin',
       role: 'user',
       isPmr: true,
-      points: 520,
+      totalPoints: 520,
     },
     {
       email: 'pierre.bernard@example.com',
@@ -83,7 +87,7 @@ async function seedUsers() {
       lastName: 'Bernard',
       role: 'user',
       isPmr: false,
-      points: 180,
+      totalPoints: 180,
     },
     {
       email: 'sophie.durand@example.com',
@@ -93,7 +97,7 @@ async function seedUsers() {
       lastName: 'Durand',
       role: 'user',
       isPmr: false,
-      points: 720,
+      totalPoints: 720,
     },
   ];
 
@@ -119,15 +123,7 @@ async function seedParcours() {
       endPointLat: 49.1623,
       endPointLon: 5.4012,
       historicalTheme: 'World War I',
-      geoJsonPath: JSON.stringify({
-        type: 'LineString',
-        coordinates: [
-          [5.3878, 49.1594],
-          [5.3912, 49.1601],
-          [5.3956, 49.1608],
-          [5.4012, 49.1623],
-        ],
-      }),
+      geoJsonPath: null,
       imageUrl: 'https://example.com/verdun.jpg',
       isActive: true,
     },
@@ -144,15 +140,7 @@ async function seedParcours() {
       endPointLat: 49.3751,
       endPointLon: -0.8512,
       historicalTheme: 'World War II',
-      geoJsonPath: JSON.stringify({
-        type: 'LineString',
-        coordinates: [
-          [-0.8649, 49.3708],
-          [-0.8612, 49.372],
-          [-0.8567, 49.3735],
-          [-0.8512, 49.3751],
-        ],
-      }),
+      geoJsonPath: null,
       imageUrl: 'https://example.com/normandie.jpg',
       isActive: true,
     },
@@ -169,6 +157,7 @@ async function seedParcours() {
       endPointLat: 49.1456,
       endPointLon: 16.7892,
       historicalTheme: 'Napoleonic Wars',
+      geoJsonPath: null,
       imageUrl: 'https://example.com/austerlitz.jpg',
       isActive: true,
     },
@@ -185,6 +174,7 @@ async function seedParcours() {
       endPointLat: 48.5891,
       endPointLon: 7.7834,
       historicalTheme: 'World War II',
+      geoJsonPath: null,
       imageUrl: 'https://example.com/alsace.jpg',
       isActive: true,
     },
@@ -347,14 +337,12 @@ async function seedQuizzes() {
       description:
         "Testez vos connaissances sur l'une des batailles les plus meurtrières de la Première Guerre mondiale.",
       difficulty: 'medium',
-      pointsReward: 50,
       isActive: true,
     },
     {
       title: 'Le Débarquement de Normandie',
       description: "Que savez-vous du Jour J et de l'opération Overlord ?",
       difficulty: 'easy',
-      pointsReward: 30,
       isActive: true,
     },
     {
@@ -362,7 +350,6 @@ async function seedQuizzes() {
       description:
         "Quiz sur la vie et les campagnes de l'Empereur des Français.",
       difficulty: 'hard',
-      pointsReward: 75,
       isActive: true,
     },
   ];
@@ -380,7 +367,6 @@ async function seedQuestions(quizzes: Quiz[]) {
     {
       quizId: quizzes[0].id,
       questionText: 'En quelle année a eu lieu la bataille de Verdun ?',
-      correctAnswer: '1916',
       points: 10,
       questionOrder: 1,
       answers: [
@@ -405,7 +391,6 @@ async function seedQuestions(quizzes: Quiz[]) {
     {
       quizId: quizzes[0].id,
       questionText: "Quel était le mot d'ordre français à Verdun ?",
-      correctAnswer: 'Ils ne passeront pas',
       points: 10,
       questionOrder: 2,
       answers: [
@@ -432,7 +417,6 @@ async function seedQuestions(quizzes: Quiz[]) {
     {
       quizId: quizzes[1].id,
       questionText: 'Quelle était la date du Débarquement de Normandie ?',
-      correctAnswer: '6 juin 1944',
       points: 10,
       questionOrder: 1,
       answers: [
@@ -458,7 +442,6 @@ async function seedQuestions(quizzes: Quiz[]) {
       quizId: quizzes[1].id,
       questionText:
         'Combien de plages principales composaient le secteur de débarquement ?',
-      correctAnswer: '5',
       points: 10,
       questionOrder: 2,
       answers: [
@@ -482,7 +465,6 @@ async function seedQuestions(quizzes: Quiz[]) {
     {
       quizId: quizzes[2].id,
       questionText: 'En quelle année Napoléon est-il devenu Empereur ?',
-      correctAnswer: '1804',
       points: 15,
       questionOrder: 1,
       answers: [
@@ -582,7 +564,7 @@ async function seedBadges() {
     {
       name: 'Débutant',
       description: 'Complétez votre premier parcours',
-      iconUrl: 'https://example.com/badge-debutant.png',
+      iconUrl: '/badges/1.png',
       requirement: 'Terminer 1 parcours',
       points: 50,
       rarity: 'commun',
@@ -591,7 +573,7 @@ async function seedBadges() {
     {
       name: 'Explorateur',
       description: "Visitez 20 points d'intérêt",
-      iconUrl: 'https://example.com/badge-explorateur.png',
+      iconUrl: '/badges/2.png',
       requirement: 'Visiter 20 POI',
       points: 100,
       rarity: 'rare',
@@ -600,7 +582,7 @@ async function seedBadges() {
     {
       name: 'Historien',
       description: 'Réussissez tous les quiz disponibles',
-      iconUrl: 'https://example.com/badge-historien.png',
+      iconUrl: '/badges/3.png',
       requirement: 'Réussir tous les quiz',
       points: 150,
       rarity: 'épique',
@@ -609,7 +591,7 @@ async function seedBadges() {
     {
       name: 'Légende',
       description: 'Complétez tous les défis disponibles',
-      iconUrl: 'https://example.com/badge-legende.png',
+      iconUrl: '/badges/4.png',
       requirement: 'Compléter tous les défis',
       points: 300,
       rarity: 'légendaire',
@@ -618,7 +600,7 @@ async function seedBadges() {
     {
       name: 'Marathon',
       description: 'Parcourez 100 km au total',
-      iconUrl: 'https://example.com/badge-marathon.png',
+      iconUrl: '/badges/5.png',
       requirement: 'Marcher 100 km',
       points: 200,
       rarity: 'épique',
@@ -631,44 +613,129 @@ async function seedBadges() {
   return createdBadges;
 }
 
+async function assignBadgesToUsers(users: User[], badges: Badge[]) {
+  console.log('Assigning badges to users...');
+
+  const userBadges = [
+    // User 1 (jean_dupont) - 2 badges
+    {
+      userId: users[1].id,
+      badgeId: badges[0].id, // Débutant
+      awardedDate: new Date('2024-11-15'),
+    },
+    {
+      userId: users[1].id,
+      badgeId: badges[1].id, // Explorateur
+      awardedDate: new Date('2024-12-01'),
+    },
+    // User 2 (marie_martin) - 3 badges
+    {
+      userId: users[2].id,
+      badgeId: badges[0].id, // Débutant
+      awardedDate: new Date('2024-10-20'),
+    },
+    {
+      userId: users[2].id,
+      badgeId: badges[1].id, // Explorateur
+      awardedDate: new Date('2024-11-10'),
+    },
+    {
+      userId: users[2].id,
+      badgeId: badges[2].id, // Historien
+      awardedDate: new Date('2024-12-05'),
+    },
+    // User 3 (pierre_b) - 1 badge
+    {
+      userId: users[3].id,
+      badgeId: badges[0].id, // Débutant
+      awardedDate: new Date('2024-11-25'),
+    },
+    // User 4 (sophie_d) - 4 badges
+    {
+      userId: users[4].id,
+      badgeId: badges[0].id, // Débutant
+      awardedDate: new Date('2024-09-15'),
+    },
+    {
+      userId: users[4].id,
+      badgeId: badges[1].id, // Explorateur
+      awardedDate: new Date('2024-10-20'),
+    },
+    {
+      userId: users[4].id,
+      badgeId: badges[2].id, // Historien
+      awardedDate: new Date('2024-11-15'),
+    },
+    {
+      userId: users[4].id,
+      badgeId: badges[4].id, // Marathon
+      awardedDate: new Date('2024-12-01'),
+    },
+  ];
+
+  const createdUserBadges = await UserBadge.bulkCreate(userBadges);
+  console.log(`Assigned ${createdUserBadges.length} badges to users`);
+  return createdUserBadges;
+}
+
 async function seedRewards() {
   console.log('Seeding rewards...');
 
   const rewards = [
     {
+      name: 'Café Offert - Café du Musée',
+      description: 'Un café offert au Café du Musée de Verdun',
+      rewardType: 'discount',
+      partnerName: 'Café du Musée',
+      pointsCost: 50,
+      stockQuantity: 100,
+      imageUrl: null,
+      isAvailable: true,
+    },
+    {
+      name: 'Entrée Gratuite - Musée de la Grande Guerre',
+      description: 'Une entrée gratuite au Musée de la Grande Guerre de Meaux',
+      rewardType: 'discount',
+      partnerName: 'Musée de la Grande Guerre',
+      pointsCost: 150,
+      stockQuantity: 50,
+      imageUrl: null,
+      isAvailable: true,
+    },
+    {
       name: 'Guide Historique Premium',
       description: 'Accès illimité aux guides audio premium pendant 1 mois',
       rewardType: 'premium_content',
-      pointsCost: 500,
+      pointsCost: 200,
       stockQuantity: 999,
-      imageUrl: 'https://example.com/reward-premium.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'T-Shirt HistoRando',
       description: 'T-shirt officiel HistoRando avec logo brodé',
       rewardType: 'gift',
-      pointsCost: 800,
+      pointsCost: 300,
       stockQuantity: 50,
-      imageUrl: 'https://example.com/reward-tshirt.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'Casquette HistoRando',
       description: 'Casquette officielle avec broderie logo HistoRando',
       rewardType: 'gift',
-      pointsCost: 600,
+      pointsCost: 250,
       stockQuantity: 75,
-      imageUrl: 'https://example.com/reward-cap.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'Livre "Grandes Batailles"',
       description: "Ouvrage illustré sur les grandes batailles de l'histoire",
       rewardType: 'gift',
-      pointsCost: 1200,
+      pointsCost: 400,
       stockQuantity: 20,
-      imageUrl: 'https://example.com/reward-livre.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
@@ -676,72 +743,85 @@ async function seedRewards() {
       description:
         "Reproduction authentique d'une carte historique du 18ème siècle",
       rewardType: 'gift',
-      pointsCost: 900,
+      pointsCost: 350,
       stockQuantity: 30,
-      imageUrl: 'https://example.com/reward-map.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'Visite Guidée VIP',
       description: "Visite guidée privée d'un site historique au choix",
       rewardType: 'discount',
-      pointsCost: 2000,
+      partnerName: 'Monuments Nationaux',
+      pointsCost: 600,
       stockQuantity: 10,
-      imageUrl: 'https://example.com/reward-vip.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'Atelier Histoire Vivante',
       description: 'Participation à un atelier de reconstitution historique',
       rewardType: 'discount',
-      pointsCost: 1500,
+      partnerName: 'Association Histoire Vivante',
+      pointsCost: 500,
       stockQuantity: 15,
-      imageUrl: 'https://example.com/reward-workshop.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'Badge Exclusif "Explorateur"',
       description: 'Badge numérique ultra-rare pour les vrais explorateurs',
       rewardType: 'badge',
-      pointsCost: 300,
+      pointsCost: 100,
       stockQuantity: 999,
-      imageUrl: 'https://example.com/reward-badge.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'Pack Stickers Historiques',
       description: 'Collection de 20 stickers sur des événements historiques',
       rewardType: 'gift',
-      pointsCost: 400,
+      pointsCost: 150,
       stockQuantity: 100,
-      imageUrl: 'https://example.com/reward-stickers.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'Accès Musée Premium',
       description: "Pass annuel pour l'accès illimité aux musées partenaires",
       rewardType: 'premium_content',
-      pointsCost: 2500,
+      partnerName: 'Réseau Musées de France',
+      pointsCost: 1000,
       stockQuantity: 5,
-      imageUrl: 'https://example.com/reward-museum.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'Livre Audio "Épopées Guerrières"',
       description: 'Collection de 10 livres audio sur les grandes épopées',
       rewardType: 'premium_content',
-      pointsCost: 700,
+      pointsCost: 250,
       stockQuantity: 999,
-      imageUrl: 'https://example.com/reward-audiobook.png',
+      imageUrl: null,
       isAvailable: true,
     },
     {
       name: 'Gourde HistoRando',
       description: 'Gourde isotherme en acier inoxydable avec logo gravé',
       rewardType: 'gift',
-      pointsCost: 550,
+      pointsCost: 200,
       stockQuantity: 60,
-      imageUrl: 'https://example.com/reward-bottle.png',
+      imageUrl: null,
+      isAvailable: true,
+    },
+    {
+      name: 'Réduction 20% - Boutique du Patrimoine',
+      description: 'Bénéficiez de 20% de réduction sur tous les produits',
+      rewardType: 'discount',
+      partnerName: 'Boutique du Patrimoine',
+      pointsCost: 80,
+      stockQuantity: 200,
+      imageUrl: null,
       isAvailable: true,
     },
   ];
@@ -749,6 +829,57 @@ async function seedRewards() {
   const createdRewards = await Reward.bulkCreate(rewards);
   console.log(`Created ${createdRewards.length} rewards`);
   return createdRewards;
+}
+
+async function seedRedemptions(users: User[], rewards: Reward[]) {
+  console.log('Seeding test redemptions...');
+
+  const redemptions = [
+    {
+      userId: users[1].id, // jean_dupont
+      rewardId: rewards[0].id, // Café Offert
+      redemptionDatetime: new Date('2024-11-15'),
+      pointsSpent: rewards[0].pointsCost,
+      status: 'redeemed',
+      redemptionCode: 'RWD-1731628800-ABC123',
+    },
+    {
+      userId: users[1].id, // jean_dupont
+      rewardId: rewards[9].id, // Badge Exclusif
+      redemptionDatetime: new Date('2024-11-20'),
+      pointsSpent: rewards[9].pointsCost,
+      status: 'used',
+      redemptionCode: 'RWD-1732060800-XYZ789',
+    },
+    {
+      userId: users[2].id, // marie_martin
+      rewardId: rewards[1].id, // Entrée Gratuite Musée
+      redemptionDatetime: new Date('2024-11-25'),
+      pointsSpent: rewards[1].pointsCost,
+      status: 'pending',
+      redemptionCode: 'RWD-1732492800-DEF456',
+    },
+    {
+      userId: users[2].id, // marie_martin
+      rewardId: rewards[2].id, // Guide Premium
+      redemptionDatetime: new Date('2024-12-01'),
+      pointsSpent: rewards[2].pointsCost,
+      status: 'redeemed',
+      redemptionCode: 'RWD-1733011200-GHI789',
+    },
+    {
+      userId: users[4].id, // sophie_d
+      rewardId: rewards[14].id, // Réduction Boutique
+      redemptionDatetime: new Date('2024-12-05'),
+      pointsSpent: rewards[14].pointsCost,
+      status: 'pending',
+      redemptionCode: 'RWD-1733356800-JKL012',
+    },
+  ];
+
+  const createdRedemptions = await UserRewardRedeemed.bulkCreate(redemptions);
+  console.log(`Created ${createdRedemptions.length} test redemptions`);
+  return createdRedemptions;
 }
 
 async function seedTreasureHunts(parcoursList: Parcours[]) {
@@ -764,7 +895,6 @@ async function seedTreasureHunts(parcoursList: Parcours[]) {
       longitude: 5.3945,
       parcoursId: parcoursList[0].id,
       scanRadiusMeters: 50,
-      pointsReward: 150,
       qrCode: null,
       isActive: true,
     },
@@ -777,7 +907,6 @@ async function seedTreasureHunts(parcoursList: Parcours[]) {
       longitude: -0.8621,
       parcoursId: parcoursList[1].id,
       scanRadiusMeters: 50,
-      pointsReward: 150,
       qrCode: null,
       isActive: true,
     },
@@ -790,7 +919,6 @@ async function seedTreasureHunts(parcoursList: Parcours[]) {
       longitude: 16.7756,
       parcoursId: parcoursList[2].id,
       scanRadiusMeters: 50,
-      pointsReward: 200,
       qrCode: null,
       isActive: true,
     },
@@ -811,7 +939,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: 'Insigne du 137e RI',
       description: "Insigne de col du 137e Régiment d'Infanterie",
       imageUrl: 'https://example.com/insigne-137.jpg',
-      pointsReward: 30,
+      pointsValue: 30,
       qrCode: uuidv4(),
     },
     {
@@ -819,7 +947,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: "Bouton d'uniforme",
       description: "Bouton en laiton d'un uniforme de Poilu",
       imageUrl: 'https://example.com/bouton.jpg',
-      pointsReward: 25,
+      pointsValue: 25,
       qrCode: uuidv4(),
     },
     {
@@ -827,7 +955,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: 'Fragment de casque',
       description: 'Fragment du célèbre casque Adrian',
       imageUrl: 'https://example.com/casque-fragment.jpg',
-      pointsReward: 40,
+      pointsValue: 40,
       qrCode: uuidv4(),
     },
     {
@@ -835,7 +963,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: "Plaque d'identité",
       description: "Plaque d'identité militaire de 1916",
       imageUrl: 'https://example.com/plaque-identite.jpg',
-      pointsReward: 35,
+      pointsValue: 35,
       qrCode: uuidv4(),
     },
 
@@ -845,7 +973,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: 'Étoile de Bronze',
       description: 'Étoile de Bronze commémorative',
       imageUrl: 'https://example.com/etoile-bronze.jpg',
-      pointsReward: 35,
+      pointsValue: 35,
       qrCode: uuidv4(),
     },
     {
@@ -853,7 +981,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: 'Médaillon du Jour J',
       description: 'Médaillon gravé "D-Day 6 June 1944"',
       imageUrl: 'https://example.com/medaillon-dday.jpg',
-      pointsReward: 40,
+      pointsValue: 40,
       qrCode: uuidv4(),
     },
     {
@@ -861,7 +989,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: 'Insigne Airborne',
       description: 'Insigne de la 101st Airborne Division',
       imageUrl: 'https://example.com/airborne.jpg',
-      pointsReward: 45,
+      pointsValue: 45,
       qrCode: uuidv4(),
     },
 
@@ -871,7 +999,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: "Napoléon d'Or",
       description: "Pièce napoléon d'or 20 francs de 1805",
       imageUrl: 'https://example.com/napoleon-or.jpg',
-      pointsReward: 50,
+      pointsValue: 50,
       qrCode: uuidv4(),
     },
     {
@@ -879,7 +1007,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: 'Bouton de la Grande Armée',
       description: "Bouton d'uniforme de la Grande Armée",
       imageUrl: 'https://example.com/bouton-armee.jpg',
-      pointsReward: 40,
+      pointsValue: 40,
       qrCode: uuidv4(),
     },
     {
@@ -887,7 +1015,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: "Médaille d'Austerlitz",
       description: 'Médaille commémorative de la bataille',
       imageUrl: 'https://example.com/medaille-austerlitz.jpg',
-      pointsReward: 55,
+      pointsValue: 55,
       qrCode: uuidv4(),
     },
     {
@@ -895,7 +1023,7 @@ async function seedTreasureItems(treasureHunts: TreasureHunt[]) {
       itemName: 'Aigle Impériale',
       description: 'Petite aigle en bronze de régiment',
       imageUrl: 'https://example.com/aigle.jpg',
-      pointsReward: 60,
+      pointsValue: 60,
       qrCode: uuidv4(),
     },
   ];
@@ -1072,7 +1200,9 @@ async function bootstrap() {
     await updatePOIsWithContent(pois, quizzes, podcasts);
     const challenges = await seedChallenges();
     const badges = await seedBadges();
+    await assignBadgesToUsers(users, badges);
     const rewards = await seedRewards();
+    await seedRedemptions(users, rewards);
     const treasures = await seedTreasureHunts(parcoursList);
     const treasureItems = await seedTreasureItems(treasures);
     const battalions = await seedBattalions();
@@ -1087,7 +1217,9 @@ async function bootstrap() {
     console.log(`  - ${podcasts.length} podcasts`);
     console.log(`  - ${challenges.length} challenges`);
     console.log(`  - ${badges.length} badges`);
+    console.log(`  - Badge assignments created for users`);
     console.log(`  - ${rewards.length} rewards`);
+    console.log(`  - Test redemptions created for users`);
     console.log(`  - ${treasures.length} treasure hunts`);
     console.log(
       `  - ${treasureItems.length} treasure items with unique QR codes`,

@@ -170,6 +170,8 @@ describe('AuthService', () => {
           firstName: mockUser.firstName,
           lastName: mockUser.lastName,
           role: mockUser.role,
+          totalKm: mockUser.totalKm,
+          totalPoints: mockUser.totalPoints,
         },
       });
     });

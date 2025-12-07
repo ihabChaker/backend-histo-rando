@@ -5,13 +5,11 @@ import { ApiProperty } from '@nestjs/swagger';
 export const CreateTreasureHuntSchema = z.object({
   parcoursId: z.number().int().positive(),
   name: z.string().min(1).max(200),
-  description: z.string().optional(),
-  targetObject: z.string().min(1).max(200),
+  description: z.string().optional().nullable(),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   scanRadiusMeters: z.number().int().positive().default(50),
-  pointsReward: z.number().int().positive(),
-  qrCode: z.string().max(255).optional(),
+  qrCode: z.string().max(255).optional().nullable(),
   isActive: z.boolean().default(true),
 });
 
@@ -46,12 +44,6 @@ export class CreateTreasureHuntDto extends createZodDto(
   description?: string;
 
   @ApiProperty({
-    example: 'Bunker SK15',
-    description: 'Objet cible à trouver',
-  })
-  targetObject: string;
-
-  @ApiProperty({
     example: 49.3485,
     description: 'Latitude',
     minimum: -90,
@@ -73,9 +65,6 @@ export class CreateTreasureHuntDto extends createZodDto(
     default: 50,
   })
   scanRadiusMeters: number;
-
-  @ApiProperty({ example: 75, description: 'Points de récompense' })
-  pointsReward: number;
 
   @ApiProperty({
     example: 'QR_TREASURE_001',
@@ -108,9 +97,6 @@ export class UpdateTreasureHuntDto extends createZodDto(
 
   @ApiProperty({ example: 100, required: false })
   scanRadiusMeters?: number;
-
-  @ApiProperty({ example: 100, required: false })
-  pointsReward?: number;
 
   @ApiProperty({ example: 'QR_TREASURE_002', required: false })
   qrCode?: string;

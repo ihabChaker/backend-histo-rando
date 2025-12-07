@@ -113,6 +113,12 @@ export class PointOfInterest extends Model {
   })
   podcastId: number;
 
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  treasureHuntId: number;
+
   @BelongsTo(() => Parcours)
   parcours: Parcours;
 

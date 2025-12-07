@@ -65,7 +65,6 @@ describe('Quiz E2E Tests', () => {
           title: 'Quiz D-Day',
           description: 'Test your knowledge of D-Day',
           difficulty: 'medium',
-          pointsReward: 50,
           isActive: true,
         })
         .expect(201)
@@ -73,7 +72,6 @@ describe('Quiz E2E Tests', () => {
           expect(res.body).toHaveProperty('id');
           expect(res.body.title).toBe('Quiz D-Day');
           expect(res.body.difficulty).toBe('medium');
-          expect(res.body.pointsReward).toBe(50);
         });
     });
 
@@ -84,7 +82,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Test Quiz',
           difficulty: 'invalid',
-          pointsReward: 50,
         })
         .expect(400);
     });
@@ -98,7 +95,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Quiz 1',
           difficulty: 'easy',
-          pointsReward: 25,
         });
 
       await request(app.getHttpServer())
@@ -107,7 +103,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Quiz 2',
           difficulty: 'hard',
-          pointsReward: 100,
         });
 
       return request(app.getHttpServer())
@@ -128,7 +123,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Test Quiz',
           difficulty: 'medium',
-          pointsReward: 50,
         });
 
       return request(app.getHttpServer())
@@ -156,7 +150,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Test Quiz',
           difficulty: 'medium',
-          pointsReward: 50,
         });
 
       const questionRes = await request(app.getHttpServer())
@@ -193,7 +186,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Test Quiz',
           difficulty: 'easy',
-          pointsReward: 50,
         });
 
       // Create question
@@ -246,7 +238,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Test Quiz',
           difficulty: 'easy',
-          pointsReward: 50,
         });
 
       // Create question
@@ -299,7 +290,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Test Quiz',
           difficulty: 'easy',
-          pointsReward: 50,
         });
 
       const questionRes = await request(app.getHttpServer())
@@ -350,7 +340,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Test Quiz',
           difficulty: 'medium',
-          pointsReward: 50,
         });
 
       return request(app.getHttpServer())
@@ -377,7 +366,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'Quiz 1',
           difficulty: 'easy',
-          pointsReward: 25,
         });
 
       await request(app.getHttpServer())
@@ -406,7 +394,6 @@ describe('Quiz E2E Tests', () => {
         .send({
           title: 'To Delete',
           difficulty: 'easy',
-          pointsReward: 25,
         });
 
       return request(app.getHttpServer())
@@ -426,7 +413,6 @@ describe('Quiz E2E Tests', () => {
           title: 'Cascade Delete Test Quiz',
           description: 'Test CASCADE functionality',
           difficulty: 'medium',
-          pointsReward: 30,
         });
 
       const quizId = quizRes.body.id;

@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export const CreatePOISchema = z.object({
   parcoursId: z.number().int().positive(),
   name: z.string().min(1).max(200),
-  description: z.string().optional(),
+  description: z.string().optional().nullable(),
   poiType: z.enum([
     'bunker',
     'blockhaus',
@@ -16,11 +16,14 @@ export const CreatePOISchema = z.object({
   ]),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
-  historicalPeriod: z.string().max(100).optional(),
+  historicalPeriod: z.string().max(100).optional().nullable(),
   orderInParcours: z.number().int().positive(),
-  qrCode: z.string().max(255).optional(),
-  imageUrl: z.string().url().max(255).optional(),
-  audioUrl: z.string().url().max(255).optional(),
+  qrCode: z.string().max(255).optional().nullable(),
+  imageUrl: z.string().url().max(255).optional().nullable().or(z.literal('')),
+  audioUrl: z.string().url().max(255).optional().nullable().or(z.literal('')),
+  quizId: z.number().int().positive().optional().nullable(),
+  podcastId: z.number().int().positive().optional().nullable(),
+  treasureHuntId: z.number().int().positive().optional().nullable(),
 });
 
 export class CreatePOIDto extends createZodDto(CreatePOISchema) {
@@ -99,6 +102,27 @@ export class CreatePOIDto extends createZodDto(CreatePOISchema) {
     required: false,
   })
   audioUrl?: string;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID du quiz attaché',
+    required: false,
+  })
+  quizId?: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID du podcast attaché',
+    required: false,
+  })
+  podcastId?: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID de la chasse au trésor attachée',
+    required: false,
+  })
+  treasureHuntId?: number;
 }
 
 export const UpdatePOISchema = CreatePOISchema.partial().omit({
@@ -174,4 +198,25 @@ export class UpdatePOIDto extends createZodDto(UpdatePOISchema) {
     required: false,
   })
   audioUrl?: string;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID du quiz attaché',
+    required: false,
+  })
+  quizId?: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID du podcast attaché',
+    required: false,
+  })
+  podcastId?: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID de la chasse au trésor attachée',
+    required: false,
+  })
+  treasureHuntId?: number;
 }

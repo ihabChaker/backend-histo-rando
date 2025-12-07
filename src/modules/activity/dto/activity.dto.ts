@@ -19,7 +19,7 @@ export const UpdateUserActivitySchema = z.object({
 
 export const RecordPOIVisitSchema = z.object({
   poiId: z.number().int().positive(),
-  activityId: z.number().int().positive().optional(),
+  activityId: z.number().int().positive().optional().nullable(),
   scannedQr: z.boolean().optional(),
   listenedAudio: z.boolean().optional(),
   pointsEarned: z.number().int().nonnegative().optional(),

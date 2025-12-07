@@ -7,7 +7,6 @@ export const CreateQuizSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
-  pointsReward: z.number().int().positive(),
   isActive: z.boolean().default(true),
 });
 
@@ -16,7 +15,6 @@ export const UpdateQuizSchema = CreateQuizSchema.partial();
 export const CreateQuestionSchema = z.object({
   quizId: z.number().int().positive(),
   questionText: z.string().min(1),
-  correctAnswer: z.string().min(1).max(255),
   questionOrder: z.number().int().positive(),
   points: z.number().int().positive(),
 });
@@ -71,9 +69,6 @@ export class CreateQuizDto extends createZodDto(CreateQuizSchema) {
   })
   difficulty: 'easy' | 'medium' | 'hard';
 
-  @ApiProperty({ example: 50, description: 'Points de récompense' })
-  pointsReward: number;
-
   @ApiProperty({
     example: true,
     description: 'Quiz actif',
@@ -104,9 +99,6 @@ export class UpdateQuizDto extends createZodDto(UpdateQuizSchema) {
   })
   difficulty?: 'easy' | 'medium' | 'hard';
 
-  @ApiProperty({ example: 100, required: false })
-  pointsReward?: number;
-
   @ApiProperty({ example: false, required: false })
   isActive?: boolean;
 }
@@ -121,12 +113,6 @@ export class CreateQuestionDto extends createZodDto(CreateQuestionSchema) {
   })
   questionText: string;
 
-  @ApiProperty({
-    example: '6 juin 1944',
-    description: 'Réponse correcte',
-  })
-  correctAnswer: string;
-
   @ApiProperty({ example: 1, description: 'Ordre de la question dans le quiz' })
   questionOrder: number;
 
@@ -140,9 +126,6 @@ export class UpdateQuestionDto extends createZodDto(UpdateQuestionSchema) {
     required: false,
   })
   questionText?: string;
-
-  @ApiProperty({ example: 'Nouvelle réponse', required: false })
-  correctAnswer?: string;
 
   @ApiProperty({ example: 2, required: false })
   questionOrder?: number;

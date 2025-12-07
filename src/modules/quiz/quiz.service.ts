@@ -168,7 +168,8 @@ export class QuizService {
       if (!selectedAnswer) continue;
 
       if (selectedAnswer.isCorrect) {
-        score += question.points;
+        score += 1; // Count correct answers
+        pointsEarned += question.points; // Add question points
         results.push({
           questionId: question.id,
           correct: true,
@@ -179,12 +180,8 @@ export class QuizService {
       }
     }
 
-    // Award points if score is high enough (e.g., > 50%)
-    const maxScore = quiz.questions?.reduce((sum, q) => sum + q.points, 0) || 0;
-    if (maxScore > 0 && score / maxScore >= 0.5) {
-      pointsEarned = quiz.pointsReward;
-
-      // Update user points
+    // Update user points with earned points from correct answers
+    if (pointsEarned > 0) {
       const user = await this.userModel.findByPk(userId);
       if (user) {
         await user.update({
@@ -202,13 +199,14 @@ export class QuizService {
       timeTakenSeconds: dto.timeTakenSeconds || 0,
     } as any);
 
-    const isPassing = maxScore > 0 && score / maxScore >= 0.5;
+    const totalQuestions = quiz.questions?.length || 0;
+    const isPassing = totalQuestions > 0 && score / totalQuestions >= 0.5;
 
     return {
       quizId: dto.quizId,
       attempt,
       score,
-      maxScore,
+      totalQuestions,
       pointsEarned,
       isPassing,
       results,

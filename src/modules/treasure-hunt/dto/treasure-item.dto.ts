@@ -35,7 +35,7 @@ export class CreateTreasureItemDto {
   @IsNumber()
   @Min(0)
   @IsOptional()
-  pointsReward?: number;
+  pointsValue?: number;
 }
 
 export class UpdateTreasureItemDto {
@@ -58,7 +58,7 @@ export class UpdateTreasureItemDto {
   @IsNumber()
   @Min(0)
   @IsOptional()
-  pointsReward?: number;
+  pointsValue?: number;
 }
 
 export class ScanTreasureItemDto {

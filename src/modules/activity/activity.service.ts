@@ -146,12 +146,18 @@ export class ActivityService {
     }
 
     // Check if already visited
+    const whereClause: any = {
+      userId,
+      poiId: dto.poiId,
+    };
+
+    // Only add activityId to where clause if it's provided
+    if (dto.activityId) {
+      whereClause.activityId = dto.activityId;
+    }
+
     const existingVisit = await this.userPOIVisitModel.findOne({
-      where: {
-        userId,
-        poiId: dto.poiId,
-        activityId: dto.activityId,
-      },
+      where: whereClause,
     });
 
     if (existingVisit) {
@@ -162,7 +168,7 @@ export class ActivityService {
     const visit = await this.userPOIVisitModel.create({
       userId,
       poiId: dto.poiId,
-      activityId: dto.activityId,
+      activityId: dto.activityId || null,
       visitDatetime: new Date(),
       scannedQr: dto.scannedQr || false,
       listenedAudio: dto.listenedAudio || false,

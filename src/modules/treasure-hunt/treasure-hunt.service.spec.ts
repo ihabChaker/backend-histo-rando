@@ -99,7 +99,7 @@ describe('TreasureHuntService', () => {
         treasureHuntId: 1,
         itemName: 'Test Item',
         description: 'Test Description',
-        pointsReward: 10,
+        pointsValue: 10,
       };
 
       const mockHunt = { id: 1, name: 'Test Hunt' };
@@ -146,12 +146,11 @@ describe('TreasureHuntService', () => {
       const mockItem = {
         id: 1,
         treasureHuntId: 1,
-        pointsReward: 25,
+        pointsValue: 25,
         qrCode: 'test-qr-123',
         treasureHunt: {
           id: 1,
           name: 'Test Hunt',
-          completionBonus: 50,
           toJSON: jest.fn().mockReturnValue({ id: 1, name: 'Test Hunt' }),
         },
         toJSON: jest.fn().mockReturnValue({ id: 1, name: 'Test Item' }),
@@ -200,7 +199,7 @@ describe('TreasureHuntService', () => {
       const mockItem = {
         id: 1,
         treasureHuntId: 1,
-        pointsReward: 25,
+        pointsValue: 25,
         treasureHunt: {
           toJSON: jest.fn().mockReturnValue({ id: 1 }),
         },
@@ -219,51 +218,6 @@ describe('TreasureHuntService', () => {
       expect(result.isNewFind).toBe(false);
       expect(result.pointsEarned).toBe(0);
       expect(userTreasureItemFoundModel.create).not.toHaveBeenCalled();
-    });
-
-    it('should award completion bonus when all items found', async () => {
-      const userId = 1;
-      const scanDto = { qrCode: 'test-qr-123' };
-
-      const mockItem = {
-        id: 2,
-        treasureHuntId: 1,
-        pointsReward: 25,
-        treasureHunt: {
-          id: 1,
-          pointsReward: 100,
-          toJSON: jest.fn().mockReturnValue({ id: 1, pointsReward: 100 }),
-        },
-        toJSON: jest.fn().mockReturnValue({ id: 2 }),
-      };
-
-      const mockUser = {
-        totalPoints: 100,
-        update: jest.fn(),
-      };
-
-      treasureItemModel.findOne.mockResolvedValue(mockItem);
-      userTreasureItemFoundModel.findOne.mockResolvedValue(null);
-      userTreasureItemFoundModel.create.mockResolvedValue({});
-      userModel.findByPk.mockResolvedValue(mockUser);
-
-      // Mock all items in hunt
-      treasureItemModel.findAll.mockResolvedValue([{ id: 1 }, { id: 2 }]);
-
-      // Mock found items - after this scan, both will be found
-      userTreasureItemFoundModel.findAll.mockResolvedValue([
-        { treasureItemId: 1 },
-        { treasureItemId: 2 },
-      ]);
-
-      userTreasureFoundModel.findOne.mockResolvedValue(null);
-      userTreasureFoundModel.create.mockResolvedValue({});
-
-      const result = await service.scanTreasureItem(userId, scanDto);
-
-      expect(result.huntComplete).toBe(true);
-      expect(result.completionBonus).toBe(100);
-      expect(mockUser.update).toHaveBeenCalledTimes(2); // Once for item, once for bonus
     });
   });
 });

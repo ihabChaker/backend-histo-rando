@@ -30,7 +30,7 @@ export class TreasureItem extends Model {
   imageUrl: string;
 
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 10 })
-  pointsReward: number;
+  pointsValue: number;
 
   @Column({ type: DataType.STRING(36), allowNull: false, unique: true })
   qrCode: string;

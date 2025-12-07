@@ -74,6 +74,8 @@ export class AuthService {
         lastName: user.lastName,
         isPmr: user.isPmr,
         role: user.role,
+        totalPoints: user.totalPoints,
+        totalKm: user.totalKm,
       },
     };
   }
@@ -116,6 +118,8 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
+        totalPoints: user.totalPoints,
+        totalKm: user.totalKm,
       },
     };
   }

@@ -26,9 +26,6 @@ export class Quiz extends Model {
   @Column({ type: DataType.ENUM('easy', 'medium', 'hard'), allowNull: false })
   difficulty: string;
 
-  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 10 })
-  pointsReward: number;
-
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: true })
   isActive: boolean;
 

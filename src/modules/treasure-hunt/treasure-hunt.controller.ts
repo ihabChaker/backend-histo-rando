@@ -30,7 +30,6 @@ import { TreasureHuntService } from './treasure-hunt.service';
 import {
   CreateTreasureHuntDto,
   UpdateTreasureHuntDto,
-  RecordTreasureFoundDto,
 } from './dto/treasure-hunt.dto';
 import {
   CreateTreasureItemDto,
@@ -167,36 +166,7 @@ export class TreasureHuntController {
     return { message: 'Chasse au trésor supprimée avec succès' };
   }
 
-  @Post('found')
-  @ApiOperation({
-    summary: 'Enregistrer une découverte de trésor',
-    description:
-      "Marquer un trésor comme trouvé si l'utilisateur est dans le rayon de scan",
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Trésor trouvé',
-    schema: {
-      example: {
-        found: {
-          id: 1,
-          userId: 1,
-          treasureId: 1,
-          foundDatetime: '2025-11-12T16:00:00Z',
-          pointsEarned: 75,
-        },
-        message: 'Félicitations ! Vous avez trouvé le trésor !',
-        pointsEarned: 75,
-      },
-    },
-  })
-  @ApiResponse({ status: 400, description: 'Trésor déjà trouvé ou trop loin' })
-  async recordFound(
-    @CurrentUser() user: any,
-    @Body() dto: RecordTreasureFoundDto,
-  ) {
-    return this.treasureHuntService.recordTreasureFound(user.sub, dto);
-  }
+  // REMOVED: POST /found endpoint - points are now awarded at item level only via scanTreasureItem
 
   @Get('found/me')
   @ApiOperation({ summary: 'Obtenir mes trésors trouvés' })
@@ -245,12 +215,23 @@ export class TreasureHuntController {
     return this.treasureHuntService.createTreasureItem(dto);
   }
 
-  @Public()
   @Get(':huntId/items')
   @ApiOperation({ summary: "Lister les items d'une chasse au trésor" })
   @ApiParam({ name: 'huntId', description: 'ID de la chasse au trésor' })
   async getItemsByHunt(@Param('huntId', ParseIntPipe) huntId: number) {
     return this.treasureHuntService.findItemsByHunt(huntId);
+  }
+
+  @Get(':huntId/found-items')
+  @ApiOperation({
+    summary: "Obtenir les items trouvés par l'utilisateur pour une chasse",
+  })
+  @ApiParam({ name: 'huntId', description: 'ID de la chasse au trésor' })
+  async getFoundItemsByHunt(
+    @CurrentUser() user: any,
+    @Param('huntId', ParseIntPipe) huntId: number,
+  ) {
+    return this.treasureHuntService.getUserFoundItemsForHunt(user.sub, huntId);
   }
 
   @Get('items/:id')

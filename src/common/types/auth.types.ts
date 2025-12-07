@@ -15,5 +15,7 @@ export interface AuthResponse {
     lastName?: string;
     isPmr?: boolean;
     role: 'user' | 'admin';
+    totalPoints: number;
+    totalKm: number;
   };
 }

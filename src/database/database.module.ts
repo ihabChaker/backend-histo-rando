@@ -80,7 +80,7 @@ import { ActiveParcoursSession } from '@/modules/parcours-session/entities/activ
             ActiveParcoursSession,
           ],
           autoLoadModels: true,
-          sync: { force: false }, // Sync tables without altering (prevents duplicate indexes)
+          sync: { alter: true }, // Auto-sync schema changes
           logging: configService.get('database.logging') ? console.log : false,
         };
       },

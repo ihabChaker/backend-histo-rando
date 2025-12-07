@@ -22,9 +22,6 @@ export class Question extends Model {
   @Column({ type: DataType.TEXT, allowNull: false })
   questionText: string;
 
-  @Column({ type: DataType.STRING(255), allowNull: false })
-  correctAnswer: string;
-
   @Column({ type: DataType.INTEGER, allowNull: false })
   questionOrder: number;
 

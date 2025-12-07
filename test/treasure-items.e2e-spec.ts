@@ -92,7 +92,7 @@ describe('Treasure Items (e2e)', () => {
           treasureHuntId,
           itemName: 'Test Artifact 1',
           description: 'First test artifact',
-          pointsReward: 25,
+          pointsValue: 10,
         })
         .expect(201);
 
@@ -106,7 +106,7 @@ describe('Treasure Items (e2e)', () => {
       expect(response.body.length).toBeGreaterThan(0);
       expect(response.body[0]).toHaveProperty('itemName');
       expect(response.body[0]).toHaveProperty('qrCode');
-      expect(response.body[0]).toHaveProperty('pointsReward');
+      expect(response.body[0]).toHaveProperty('pointsValue');
     });
   });
 
@@ -119,7 +119,7 @@ describe('Treasure Items (e2e)', () => {
           treasureHuntId,
           itemName: 'Test Item 2',
           description: 'A test treasure item',
-          pointsReward: 25,
+          pointsValue: 25,
         })
         .expect(201);
 
